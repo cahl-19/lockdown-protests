@@ -1,0 +1,17 @@
+{
+    "name": "ldprotest",
+    "version": "0.1",
+    "description": "",
+    "private": true,
+    "dependencies": {
+        "jquery": "3.3.1"
+    },
+    "devDependencies": {
+        "webpack": "^4.20.2",
+        "webpack-cli": "^3.1.2",
+	"terser-webpack-plugin": "^2.3.4"
+    },
+    "scripts" : {
+        "build": "build/node_modules/.bin/webpack-cli --config=webpack.config.js --mode=development --display=errors-only"
+    }
+}

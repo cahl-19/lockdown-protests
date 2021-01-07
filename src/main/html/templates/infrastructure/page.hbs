@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="{{lang}}">
+
+{{> content }}
+
+<head>
+    <meta charset="{{charset}}">
+    <title>{{title}}</title>
+
+    {{#each styleSheets as |s|}}
+        <link rel="stylesheet" href="{{s}}">
+    {{/each}}
+    {{#> inlineStyleSheets }}
+    {{/inlineStyleSheets}}
+
+    {{#each scripts as |script|}}
+        <script src="{{script}}"></script>
+    {{/each}}
+    {{#> inlineScripts }}
+    {{/inlineScripts}}
+
+</head>
+
+<body>
+    {{#> body }}
+    {{/body}}
+</body>
+
+</html>

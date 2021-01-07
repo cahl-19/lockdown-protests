@@ -1,0 +1,128 @@
+/*
+ * This File is Part of LDProtest
+ * Copyright (C) 2021 Covid Anti Hysterics League
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Lesser Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+plugins {
+    id 'java'
+    id 'application'
+    id "com.moowork.node" version "1.3.1"
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+node {
+    download = true
+}
+
+configurations.all {
+    exclude group: 'org.slf4j', module: 'slf4j-simple'
+}
+
+dependencies {
+    implementation "com.sparkjava:spark-core:2.8.0"
+    implementation "org.slf4j:slf4j-simple:1.7.25"
+    implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'ch.qos.logback:logback-core:1.2.3'
+    implementation 'com.sparkjava:spark-template-handlebars:2.7.1'
+    implementation 'com.github.jknack:handlebars:4.0.6'
+    implementation 'org.mongodb:mongo-java-driver:3.12.2'
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    testImplementation 'junit:junit:4.12'
+}
+
+node {
+    nodeModulesDir = file("${buildDir}/node_modules")
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/resources", "src/main/html", "${buildDir}/webpack"
+        }
+    }
+}
+
+compileJava {
+    dependsOn yarn_build
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
+yarn_build {
+    dependsOn yarn_install
+}
+
+yarn_install {
+    args = ['--ignore-optional']
+}
+
+application {
+    mainClassName = 'ldprotest.main.Main'
+    applicationDefaultJvmArgs = ['--add-opens java.base/java.lang.reflect=ALL-UNNAMED']
+}
+
+ext.countLeadWhitespace = { line ->
+    def count = 0
+    for(c in line) {
+        if(c == ' ' || c == '\t') {
+            count += 1
+        } else {
+            return count
+        }
+    }
+    return count;
+}
+
+ext.removeLeadWhitespace = { line, count ->
+    return line.substring(Math.min(countLeadWhitespace(line), count))
+}
+
+ext.unindent = { text ->
+    def indent = 0
+    def outText = ''
+
+    for(line in text.split('\n')) {
+        if(indent == 0) {
+            indent = countLeadWhitespace(line);
+        }
+        outText += removeLeadWhitespace(line, indent) + '\n';
+    }
+    return outText
+}
+
+task makeRunScripts {
+    dependsOn compileJava
+    doLast {
+        def cp = sourceSets.main.runtimeClasspath.asPath
+        def script = new File("${projectDir}/scripts", "run-server")
+        def jvmArgs = applicationDefaultJvmArgs.join(" ")
+
+        script.text = unindent(
+            """#!/bin/bash
+                exec java ${jvmArgs} -cp ${cp} ${mainClassName} "\${@}"
+            """
+        )
+        script.setExecutable(true);
+    }
+}
+
+
+build {
+    dependsOn makeRunScripts
+}

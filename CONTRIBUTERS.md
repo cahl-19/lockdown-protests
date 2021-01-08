@@ -15,11 +15,11 @@ This is a free and open source project and will remain so.
 * else & else if: On the same line as the preceding close brace. (i.e. `} else if (condition()) {`)
 * Class structure: copyright header -> imports -> class body -> static fields -> member fields -> constructor -> public methods -> private methods
 * In general, favour simplicity always, if in doubt see how it's done in other files (don't be afraid to make mistakes or ask questions).
-* breaing long lines:
+* breaking long lines:
 
 ```java
 public class foo
-	< MANY GENERIC PARAMETERS >
+	<MANY, GENERIC, PARAMETERS>
 	implements a, whole, lot, of, interfaces {
 
 	public static void functionWithLongName (

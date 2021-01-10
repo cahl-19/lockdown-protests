@@ -43,8 +43,7 @@ public class Server {
             ServeWebpack webpacker = new ServeWebpack(scriptBundles);
 
             webpacker.page("index").serve("/");
-
-
+            
         } catch(IOException e) {
             LOGGER.error("Error loading static pages.");
             throw e;

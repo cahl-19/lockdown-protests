@@ -22,7 +22,29 @@ import $ from 'jquery';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
+function setup_echo_test() {
+    var textInput = $("#echo-test > input");
+    
+    $("#echo-test > button").click((ev) => {
+       ev.preventDefault();
+       
+        $.ajax({
+            type: "POST",
+            url: "/api/test/echo",
+            data: JSON.stringify({ "message": textInput.val() }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(data){alert(data.message);},
+            error: function(errMsg) {
+                alert(errMsg);
+            }
+        });       
+    });
+}
+
+
 $(document).ready(function() {
+   setup_echo_test();
    alert("ready");
 });
 /**********************************************************************************************************************/

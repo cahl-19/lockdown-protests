@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import ldprotest.server.endpoints.ServerVersion;
+import ldprotest.server.endpoints.test.EchoTest;
 import ldprotest.server.infra.templates.ServeWebpack;
 
 public class Server {
@@ -58,9 +59,15 @@ public class Server {
 
     private static void serveDynamicEndpoints() {
         ServerVersion.register();
+
+        serveDynamicTestEndpoints();
     }
 
     private static void serveStaticPages(ServeWebpack webpacker) throws IOException {
         webpacker.page("index").serve("/");
+    }
+
+    private static void serveDynamicTestEndpoints() {
+        EchoTest.register();
     }
 }

@@ -4,10 +4,11 @@ This project is a simple tool for users to plan adhoc protests.
 
 # Depedencies
 
-A Java 11 jdk and Mongo 4.2 server are required to build and run this project.
-All other dependencies are downloaded by the build script. This app was
-designed to run on modern Linux. It may build and run on Windows, but this is
-not intentional and Windows support may eventually break.
+A Java 11 jdk, installation of nodejs, and Mongo 4.2 server (or docker) are
+required to build and run this project. All other dependencies are downloaded
+by the build script. This app was designed to run on modern Linux. It may build
+and run on Windows, but this is not intentional and Windows support may
+eventually break.
 
 # Building/Running
 
@@ -26,6 +27,9 @@ docker-compose.
 The default username, password and database used for Mongo are `ldprotest`,
 `ldprotest` and `ldprotest` respectivley. This will eventually be made
 configurable.
+
+At the moment, the ldprotest user must be added as a root user (this is not
+intentional and will eventually be fixed).
 
 # Contributing
 

@@ -47,6 +47,14 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
+task copyVersionInfo(type: Copy) {
+    
+    dependsOn processResources
+    
+    from file("${projectDir}/version.txt")
+    into file("${buildDir}/resources/main/info")
+}
+
 node {
     nodeModulesDir = file("${buildDir}/node_modules")
 }
@@ -57,6 +65,10 @@ sourceSets {
             srcDirs "src/main/resources", "src/main/html", "${buildDir}/webpack"
         }
     }
+}
+
+classes {
+    dependsOn copyVersionInfo
 }
 
 compileJava {
@@ -121,7 +133,6 @@ task makeRunScripts {
         script.setExecutable(true);
     }
 }
-
 
 build {
     dependsOn makeRunScripts

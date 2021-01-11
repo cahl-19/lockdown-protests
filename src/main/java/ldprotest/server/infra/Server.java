@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.infra.templates.ServeWebpack;
 
 public class Server {
@@ -42,8 +43,9 @@ public class Server {
 
             ServeWebpack webpacker = new ServeWebpack(scriptBundles);
 
-            webpacker.page("index").serve("/");
-            
+            serveDynamicEndpoints();
+            serveStaticPages(webpacker);
+
         } catch(IOException e) {
             LOGGER.error("Error loading static pages.");
             throw e;
@@ -52,5 +54,13 @@ public class Server {
 
     public static void stop() {
         spark.Spark.stop();
+    }
+
+    private static void serveDynamicEndpoints() {
+        ServerVersion.register();
+    }
+
+    private static void serveStaticPages(ServeWebpack webpacker) throws IOException {
+        webpacker.page("index").serve("/");
     }
 }

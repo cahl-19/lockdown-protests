@@ -45,8 +45,11 @@ function setup_map() {
 }
 /**********************************************************************************************************************/
 function init_map(api_token) {
+
     let mymap = L.map('mapdiv').setView([51.505, -0.09], 13);
-    let url = `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${api_token}`
+    let url = `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${api_token}`;
+
+    L.Icon.Default.imagePath = 'assets/leaflet/';
 
     L.tileLayer(url, {
         attribution: (

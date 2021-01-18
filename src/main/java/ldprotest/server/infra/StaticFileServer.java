@@ -38,9 +38,9 @@ public final class StaticFileServer {
     private static final Map<String, String> FILE_MAP = new HashMap<>();
     private static final Map<String, String> CONTENT_TYPE_MAP = new HashMap<>();
 
-    private static final LruCache<Integer, String, String> FILE_CACHE = new LruCache<>(
-        (val, size) -> size + val.length(),
-        (val, size) -> size - val.length(),
+    private static final LruCache<Integer, String, byte[]> FILE_CACHE = new LruCache<>(
+        (val, size) -> size + val.length,
+        (val, size) -> size - val.length,
         (size) -> size > CACHE_MAX_DATA_SIZE,
         0
     );
@@ -49,6 +49,8 @@ public final class StaticFileServer {
         CONTENT_TYPE_MAP.put("js", "text/javascript;charset=utf-8");
         CONTENT_TYPE_MAP.put("html", "text/html;charset=utf-8");
         CONTENT_TYPE_MAP.put("css", "text/css;charset=utf-8");
+        CONTENT_TYPE_MAP.put("png", "image/webp");
+        CONTENT_TYPE_MAP.put("jpg", "image/webp");
     }
 
     private StaticFileServer() {
@@ -81,7 +83,7 @@ public final class StaticFileServer {
 
     private static void addRoute(String url, String resourcePath) {
         get(url, (req, resp) -> {
-            String content = FILE_CACHE.get(resourcePath);
+            byte[] content = FILE_CACHE.get(resourcePath);
             String contentType = CONTENT_TYPE_MAP.get(PathUtils.extension(url));
 
             if(content == null) {
@@ -97,12 +99,11 @@ public final class StaticFileServer {
         });
     }
 
-    private static String readFile(String p) {
+    private static byte[] readFile(String p) {
 
         try (InputStream stream = classLoader().getResourceAsStream(p)){
             if(stream != null) {
-                byte[] bytes = stream.readAllBytes();
-                return new String(bytes);
+                return stream.readAllBytes();
             } else {
                 LOGGER.error("Contents of resource {}, are null", p);
                 return null;

@@ -32,6 +32,7 @@ public class Server {
     private final static Logger LOGGER = LoggerFactory.getLogger(Server.class);
     private static final String WEBPACK_BUNDLES_PREFIX = "webpack-bundles";
     private static final String CSS_PREFIX = "css";
+    private static final String ASSETS_PREFIX = "assets";
 
     public static void start() throws IOException {
         try {
@@ -41,6 +42,9 @@ public class Server {
             );
             StaticFileServer.serve(
                 CSS_PREFIX, CSS_PREFIX, ".*\\.css"
+            );
+            StaticFileServer.serve(
+                ASSETS_PREFIX, ASSETS_PREFIX, "(.*\\.png|.*\\.jpg)"
             );
 
             ServeWebpack webpacker = new ServeWebpack(scriptBundles);

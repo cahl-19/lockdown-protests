@@ -56,6 +56,20 @@ task copyVersionInfo(type: Copy) {
     into file("${buildDir}/resources/main/info")
 }
 
+task copyNpmAssets {
+    dependsOn yarn_build
+
+    copy {
+        from file("${buildDir}/node_modules/leaflet/dist/leaflet.css")
+        into file("${buildDir}/resources/main/css/leaflet/")
+    }
+
+    copy {
+        from file("${buildDir}/node_modules/leaflet/dist/images")
+        into file("${buildDir}/resources/main/assets/leaflet/")
+    }
+}
+
 node {
     nodeModulesDir = file("${buildDir}/node_modules")
 }
@@ -73,7 +87,7 @@ classes {
 }
 
 compileJava {
-    dependsOn yarn_build
+    dependsOn yarn_build, copyNpmAssets
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.test.EchoTest;
+import ldprotest.server.endpoints.test.MapApiToken;
 import ldprotest.server.infra.templates.ServeWebpack;
 
 public class Server {
@@ -69,5 +70,6 @@ public class Server {
 
     private static void serveDynamicTestEndpoints() {
         EchoTest.register();
+        MapApiToken.register();
     }
 }

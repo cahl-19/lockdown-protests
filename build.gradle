@@ -43,14 +43,15 @@ dependencies {
     implementation 'com.github.jknack:handlebars:4.0.6'
     implementation 'org.mongodb:mongo-java-driver:3.12.2'
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'info.picocli:picocli:4.6.1'
 
     testImplementation 'junit:junit:4.12'
 }
 
 task copyVersionInfo(type: Copy) {
-    
+
     dependsOn processResources
-    
+
     from file("${projectDir}/version.txt")
     into file("${buildDir}/resources/main/info")
 }

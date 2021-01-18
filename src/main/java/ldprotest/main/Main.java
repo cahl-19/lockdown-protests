@@ -29,15 +29,18 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
+import ldprotest.config.CmdLineArgs;
 import ldprotest.db.MainDatabase;
 import ldprotest.util.ErrorCode;
 
 import static ldprotest.main.AppLogging.ResourceType.ON_CLASSPATH;
+import ldprotest.util.Result;
 
 public class Main {
 
-    public static final int SERVER_SHUTDOWN_HANDLER_PRIORITY = Integer.MAX_VALUE/2;
+    private static CmdLineArgs ARGS;
 
+    public static final int SERVER_SHUTDOWN_HANDLER_PRIORITY = Integer.MAX_VALUE/2;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
@@ -88,7 +91,23 @@ public class Main {
         STOP_REQUEST_SEMAPHORE.release();
     }
 
+    public static CmdLineArgs args() {
+        return ARGS;
+    }
+
     public static void main(String[] args) {
+
+        Result<Integer, CmdLineArgs> cmdLineArgs = CmdLineArgs.parse(args);
+
+        if(cmdLineArgs.isFailure()) {
+            System.exit(cmdLineArgs.failureReason());
+        } else {
+            ARGS = cmdLineArgs.result();
+
+            if(ARGS.helpRequested) {
+                System.exit(0);
+            }
+        }
 
         try {
             AppLogging.setLogbackConfig(DEFAULT_LOGBACK_CONFIG, ON_CLASSPATH);

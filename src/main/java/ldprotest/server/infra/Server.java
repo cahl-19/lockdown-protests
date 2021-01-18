@@ -66,6 +66,7 @@ public class Server {
 
     private static void serveStaticPages(ServeWebpack webpacker) throws IOException {
         webpacker.page("index").serve("/");
+        webpacker.page("map-test").serve("/map-test");
     }
 
     private static void serveDynamicTestEndpoints() {

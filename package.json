@@ -5,7 +5,8 @@
     "private": true,
     "dependencies": {
         "jquery": "3.3.1",
-        "yarn": "^1.22.10"
+        "yarn": "^1.22.10",
+	"leaflet": "^1.7.1"
     },
     "devDependencies": {
         "webpack": "^4.20.2",

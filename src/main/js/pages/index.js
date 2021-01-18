@@ -24,10 +24,10 @@ import $ from 'jquery';
 ***********************************************************************************************************************/
 function setup_echo_test() {
     var textInput = $("#echo-test > input");
-    
+
     $("#echo-test > button").click((ev) => {
        ev.preventDefault();
-       
+
         $.ajax({
             type: "POST",
             url: "/api/test/echo",
@@ -38,13 +38,12 @@ function setup_echo_test() {
             error: function(errMsg) {
                 alert(errMsg);
             }
-        });       
+        });
     });
 }
 
 
 $(document).ready(function() {
    setup_echo_test();
-   alert("ready");
 });
 /**********************************************************************************************************************/

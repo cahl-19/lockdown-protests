@@ -16,6 +16,12 @@ Build this project by executing `./gradlew build`. On completion, a script
 will be generated and written to ./scripts which you may execute to launch
 the webserver.
 
+In order to use the test map you will need to obtain a
+[mapbox api token](https://www.mapbox.com/studio/account/tokens/) and supply
+it via the command  line when executing the run script (use -h, or --help
+to get command line doc). You can get an API token for free which should be
+good enough for development and simple tests.
+
 # Mongo Database
 
 This app requires a Mongo version 4.2 database to run. The included

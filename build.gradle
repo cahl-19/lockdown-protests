@@ -68,6 +68,11 @@ task copyNpmAssets {
         from file("${buildDir}/node_modules/leaflet/dist/images")
         into file("${buildDir}/resources/main/assets/leaflet/")
     }
+
+    copy {
+        from file("${buildDir}/node_modules/bootstrap/dist/css/bootstrap.min.css")
+        into file("${buildDir}/resources/main/css/bootstrap/")
+    }
 }
 
 node {

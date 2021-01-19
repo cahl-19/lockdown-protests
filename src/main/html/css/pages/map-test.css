@@ -1,3 +1,33 @@
- #mapdiv {
-     height: 900px;
- }
+.main {
+    height: 100vh;
+}
+
+.topbar {
+    height: 10%;
+    max-height: 60px;
+    border-bottom: solid;
+    border-width: thin;
+    border-collapse: collapse;
+}
+
+.sidebar {
+    border-style: solid;
+    border-width: thin;
+    border-collapse: collapse;
+}
+
+.map-outer-div {
+    padding: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.content-area {
+    min-height: 90%;
+    max-height: 99%;
+    height: 99%;
+}
+
+#mapdiv {
+    height: 100%;
+}

@@ -1,8 +1,17 @@
 {{#*inline "inlineStyleSheets"}}
-  <link rel="stylesheet" href="css/pages/map-test.css">
   <link rel="stylesheet" href="css/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="css/pages/map-test.css">
 {{/inline}}
 
 {{#*inline "body"}}
-    <div id="mapdiv"></div>
+    <div class="container-fluid main">
+        <div class="row topbar">
+            <div class="col-sm-12 text-center"><h1 class="h1">Lockdown Protest Planner</h1></div>
+        </div>
+        <div class="row content-area">
+            <div class="h-100 col-sm-2 sidebar"></div>
+            <div class="h-100 col-sm-10 map-outer-div"><div id="mapdiv"></div></div>
+        </div>
+    </div>
 {{/inline}}

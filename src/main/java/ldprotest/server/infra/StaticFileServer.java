@@ -49,6 +49,7 @@ public final class StaticFileServer {
         CONTENT_TYPE_MAP.put("js", "text/javascript;charset=utf-8");
         CONTENT_TYPE_MAP.put("html", "text/html;charset=utf-8");
         CONTENT_TYPE_MAP.put("css", "text/css;charset=utf-8");
+        CONTENT_TYPE_MAP.put("min.css", "text/css;charset=utf-8");
         CONTENT_TYPE_MAP.put("png", "image/webp");
         CONTENT_TYPE_MAP.put("jpg", "image/webp");
     }

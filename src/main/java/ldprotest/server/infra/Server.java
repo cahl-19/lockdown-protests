@@ -44,7 +44,7 @@ public class Server {
                 CSS_PREFIX, CSS_PREFIX, ".*\\.css"
             );
             StaticFileServer.serve(
-                ASSETS_PREFIX, ASSETS_PREFIX, "(.*\\.png|.*\\.jpg)"
+                ASSETS_PREFIX, ASSETS_PREFIX, "(.*\\.png|.*\\.jpg|.*\\.svg)"
             );
 
             ServeWebpack webpacker = new ServeWebpack(scriptBundles);

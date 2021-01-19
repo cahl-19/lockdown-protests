@@ -14,6 +14,8 @@
     border-style: solid;
     border-width: thin;
     border-collapse: collapse;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 .map-outer-div {
@@ -26,6 +28,13 @@
     min-height: 90%;
     max-height: 99%;
     height: 99%;
+}
+
+.chat-card {
+    border-style: dotted;
+    border-width: thin;
+    padding: 5px;
+    margin-bottom: 5px;
 }
 
 #mapdiv {

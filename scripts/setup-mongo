@@ -1,0 +1,12 @@
+#!/bin/bash
+
+mongo "mongodb://root:rootpassword@localhost:27017/admin"  << _EOF_
+	db.createUser({
+		user: "ldprotest",
+		pwd: "ldprotest",
+		roles: [
+			{role: "readWrite", db: "ldprotest"},
+			{role:"dbAdmin", db: "ldprotest"}
+		]
+	});
+_EOF_

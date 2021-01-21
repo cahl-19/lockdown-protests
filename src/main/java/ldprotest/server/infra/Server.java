@@ -81,10 +81,13 @@ public class Server {
 
         webpacker.page("index").serve("/");
         webpacker.page("map-test").serve("/map-test");
+        webpacker.page("login").serve("/login");
 
         SecurityFilter.add("/" + WEBPACK_BUNDLES_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
+
         SecurityFilter.add("/", SecConfig.ANONYMOUS_GET);
         SecurityFilter.add("/map-test", SecConfig.ANONYMOUS_GET);
+        SecurityFilter.add("/login", SecConfig.ANONYMOUS_GET);
     }
 
     private static void serveDynamicTestEndpoints() {

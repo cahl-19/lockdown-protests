@@ -18,6 +18,8 @@
 package ldprotest.util;
 
 import java.util.Iterator;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class IterTools {
@@ -39,5 +41,47 @@ public final class IterTools {
                 return f.apply(wrapped.next());
             }
         };
+    }
+
+    public static <T> void iterateUntilLast(Iterable<T> iter, Consumer<T> body, Consumer<T> last) {
+        Iterator<T> i = iter.iterator();
+
+        if(!i.hasNext()) {
+            return;
+        }
+
+        while(true) {
+            T item = i.next();
+
+            if(i.hasNext()) {
+                body.accept(item);
+            } else {
+                last.accept(item);
+                break;
+            }
+        }
+    }
+
+    public static <T, R> R iterateUntilLast(
+        R state, Iterable<T> iter, BiFunction<R, T, R> body, BiFunction<R, T, R> last
+    ) {
+        Iterator<T> i = iter.iterator();
+
+        if(!i.hasNext()) {
+            return state;
+        }
+
+        while(true) {
+            T item = i.next();
+
+            if(i.hasNext()) {
+                state = body.apply(state, item);
+            } else {
+                state = last.apply(state, item);
+                break;
+            }
+        }
+
+        return state;
     }
 }

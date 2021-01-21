@@ -20,17 +20,22 @@ package ldprotest.server.endpoints.test;
 import ldprotest.main.Main;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
+import ldprotest.server.auth.SecConfig;
+import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.infra.JsonEndpoint;
 
 public final class MapApiToken {
 
-    private static String PATH = "/api/test/map-api-token";
+    private static final String PATH = "/api/test/map-api-token";
 
     private MapApiToken() {
         /* do not construct */
     }
 
     public static void register() {
+
+        SecurityFilter.add(PATH, SecConfig.ANONYMOUS_GET);
+
         JsonEndpoint.get(PATH, (request, response) -> {
             return new JsonDoc(Main.args().mapApiToken);
         });

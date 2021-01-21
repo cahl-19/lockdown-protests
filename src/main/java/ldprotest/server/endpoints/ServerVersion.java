@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import ldprotest.serialization.JsonSerializable;
+import ldprotest.server.auth.SecConfig;
+import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.infra.JsonEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +32,8 @@ public final class ServerVersion {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerVersion.class);
 
-    private static String PATH = "/api/version";
-    private static String VERSION_RESOURCE_PATH = "info/version.txt";
+    private static final String PATH = "/api/version";
+    private static final String VERSION_RESOURCE_PATH = "info/version.txt";
 
     private ServerVersion() {
         /* do not construct */
@@ -39,6 +41,7 @@ public final class ServerVersion {
 
     public static void register() {
         JsonVersion version = readVersionString();
+        SecurityFilter.add(PATH, SecConfig.ANONYMOUS_GET);
         JsonEndpoint.get(PATH, (request, response) -> version);
     }
 

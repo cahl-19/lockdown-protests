@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import ldprotest.server.auth.SecConfig;
+import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.test.EchoTest;
 import ldprotest.server.endpoints.test.MapApiToken;
@@ -35,27 +37,18 @@ public class Server {
     private static final String ASSETS_PREFIX = "assets";
 
     public static void start() throws IOException {
+
+        SecurityFilter.start();
+
         try {
-
-            List<String> scriptBundles = StaticFileServer.serve(
-                WEBPACK_BUNDLES_PREFIX, WEBPACK_BUNDLES_PREFIX, "(.*\\.js|.*\\.map)"
-            );
-            StaticFileServer.serve(
-                CSS_PREFIX, CSS_PREFIX, ".*\\.css"
-            );
-            StaticFileServer.serve(
-                ASSETS_PREFIX, ASSETS_PREFIX, "(.*\\.png|.*\\.jpg|.*\\.svg)"
-            );
-
-            ServeWebpack webpacker = new ServeWebpack(scriptBundles);
-
-            serveDynamicEndpoints();
-            serveStaticPages(webpacker);
-
+            serveAssets();
+            serveStaticPages();
         } catch(IOException e) {
             LOGGER.error("Error loading static pages.");
             throw e;
         }
+
+        serveDynamicEndpoints();
     }
 
     public static void stop() {
@@ -68,9 +61,30 @@ public class Server {
         serveDynamicTestEndpoints();
     }
 
-    private static void serveStaticPages(ServeWebpack webpacker) throws IOException {
+    private static void serveAssets() throws IOException {
+        StaticFileServer.serve(
+            CSS_PREFIX, CSS_PREFIX, ".*\\.css"
+        );
+        StaticFileServer.serve(
+            ASSETS_PREFIX, ASSETS_PREFIX, "(.*\\.png|.*\\.jpg|.*\\.svg)"
+        );
+
+        SecurityFilter.add("/" + CSS_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
+        SecurityFilter.add("/" + ASSETS_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
+    }
+
+    private static void serveStaticPages() throws IOException {
+        List<String> scriptBundles = StaticFileServer.serve(
+            WEBPACK_BUNDLES_PREFIX, WEBPACK_BUNDLES_PREFIX, "(.*\\.js|.*\\.map)"
+        );
+        ServeWebpack webpacker = new ServeWebpack(scriptBundles);
+
         webpacker.page("index").serve("/");
         webpacker.page("map-test").serve("/map-test");
+
+        SecurityFilter.add("/" + WEBPACK_BUNDLES_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
+        SecurityFilter.add("/", SecConfig.ANONYMOUS_GET);
+        SecurityFilter.add("/map-test", SecConfig.ANONYMOUS_GET);
     }
 
     private static void serveDynamicTestEndpoints() {

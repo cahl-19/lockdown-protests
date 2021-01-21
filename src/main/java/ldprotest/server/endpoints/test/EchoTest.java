@@ -17,12 +17,13 @@
 */
 package ldprotest.server.endpoints.test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
+import ldprotest.server.auth.HttpVerbTypes;
+import ldprotest.server.auth.SecConfig;
+import ldprotest.server.auth.SecurityFilter;
+import ldprotest.server.auth.UserRole;
 import ldprotest.server.infra.JsonEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +31,24 @@ import org.slf4j.LoggerFactory;
 public final class EchoTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(EchoTest.class);
 
-    private static String PATH = "/api/test/echo";
-    private static String VERSION_RESOURCE_PATH = "info/version.txt";
+    private static final String PATH = "/api/test/echo";
+    private static final String VERSION_RESOURCE_PATH = "info/version.txt";
 
     private EchoTest() {
         /* do not construct */
     }
 
     public static void register() {
+
+        SecurityFilter.add(
+            PATH,
+            SecConfig.builder()
+                .add(UserRole.USER, HttpVerbTypes.POST)
+                .add(UserRole.MODERATOR, HttpVerbTypes.POST)
+                .add(UserRole.PLANNER, HttpVerbTypes.POST)
+                .add(UserRole.UNAUTHENTICATED, HttpVerbTypes.POST)
+                .build()
+        );
 
         JsonEndpoint.post(PATH, EchoClass.class, (echoRequest, request, response) -> {
             LOGGER.info("Echo request on string: {}", echoRequest.message.orElse(""));

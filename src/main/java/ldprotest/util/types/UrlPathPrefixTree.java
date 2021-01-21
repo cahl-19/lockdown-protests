@@ -71,8 +71,8 @@ public class UrlPathPrefixTree<R> {
             }
         }
 
-        if(!path.equals("/") && path.charAt(len - 1) == '/') {
-            elems.add("");
+        if(!path.equals("/")) {
+            elems.add(path.substring(startOfField));
         }
 
         return elems;

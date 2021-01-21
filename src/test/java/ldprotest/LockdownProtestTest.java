@@ -7,7 +7,7 @@ import org.junit.Test;
 import ldprotest.main.Main;
 
 public class LockdownProtestTest {
-    @Test public void testLdProtestCabnConstruct() {
+    @Test public void testLdProtestCanConstruct() {
         Main t = new Main();
     }
 }

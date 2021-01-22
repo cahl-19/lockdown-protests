@@ -20,7 +20,6 @@ package ldprotest.server.endpoints;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;

@@ -113,7 +113,12 @@ public class JsonSerialization {
 
                 try {
                     ReflectionTools.fieldAccessibleContext(f, () -> {
-                        f.set(instance, jdc.deserialize(member, f.getGenericType()));
+
+                        if(member == null && Optional.class.isAssignableFrom(f.getType())) {
+                            f.set(instance, Optional.empty());
+                        } else {
+                            f.set(instance, jdc.deserialize(member, f.getGenericType()));
+                        }
                     });
                 } catch(
                     IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
+import ldprotest.server.endpoints.Login;
 import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.test.EchoTest;
 import ldprotest.server.endpoints.test.MapApiToken;
@@ -57,6 +58,7 @@ public class Server {
 
     private static void serveDynamicEndpoints() {
         ServerVersion.register();
+        Login.register();
 
         serveDynamicTestEndpoints();
     }

@@ -26,7 +26,26 @@ import 'bootstrap';
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
 function setup_login_form() {
+    $('#submit-login').on('click', (ev) => {
+        ev.preventDefault();
 
+        let credentials = {
+          'username': $('#email-input').val(),
+          'password': $('#password-input').val()
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/api/login",
+            data: JSON.stringify(credentials),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(data){alert(data.description);},
+            error: function(errMsg) {
+                alert(errMsg);
+            }
+        });
+    });
 }
 /**********************************************************************************************************************/
 $(document).ready(function() {

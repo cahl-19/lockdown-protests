@@ -24,8 +24,10 @@ import ldprotest.util.types.CodedEnum;
 
 public class JsonError implements JsonSerializable {
 
+    private static final JsonError SUCCESS = new JsonError(ServerErrorCode.SUCCESS);
     private static final JsonError INTERNAL_ERRROR = new JsonError(ServerErrorCode.GENERIC_INTERNAL_ERROR);
     private static final JsonError CONTENT_TYPE_ERROR = new JsonError(ServerErrorCode.CONTENT_TYPE_ERROR);
+
 
     public final int code;
     public final String description;
@@ -59,6 +61,10 @@ public class JsonError implements JsonSerializable {
      public static JsonError contentTypeError() {
         return CONTENT_TYPE_ERROR;
     }
+
+     public static JsonError success() {
+         return SUCCESS;
+     }
 
     public static enum ServerErrorCode implements CodedEnum {
         SUCCESS(0, "success"),

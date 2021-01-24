@@ -53,11 +53,9 @@ public final class IndexTools {
         Class<?> clazz, String fieldPrefix, Map<Integer, List<Bson>> fields
     ) {
         for(Field f: clazz.getDeclaredFields()) {
-            DbIndex [] indexAnnotations = f.getAnnotationsByType(DbIndex.class);
 
-            if(indexAnnotations.length >= 1) {
-                    DbIndex annotation = indexAnnotations[0];
-
+            DbIndex annotation = f.getAnnotation(DbIndex.class);
+            if(annotation != null) {
                     fields.compute(annotation.groupId(), (k, v) -> {
                         List<Bson> list;
                         if(v == null) {

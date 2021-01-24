@@ -17,9 +17,7 @@
 */
 package ldprotest.util.types;
 
-import ldprotest.serialization.JsonSerializable;
-
-public interface CodedEnum extends JsonSerializable {
+public interface CodedEnum {
     int code();
     String description();
 }

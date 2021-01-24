@@ -167,7 +167,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
                     fieldEncoder.encode(writer, field, value);
                 } else {
                     writer.writeName(field.getName());
-                    encodeType(writer, (ParameterizedType)field.getGenericType(), field.getType(), field.get(value));
+                    encodeType(writer, field.getGenericType(), field.getType(), field.get(value));
                 }
             });
         }
@@ -176,19 +176,21 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
     @SuppressWarnings("unchecked")
     private static void encodeType(
-        BsonWriter writer, ParameterizedType type, Class<?> clazz, Object object
+        BsonWriter writer, Type type, Class<?> clazz, Object object
     ) throws IllegalAccessException, NoSuchMethodException, InstantiationException, InvocationTargetException {
 
         if(encodeNonGenericType(writer, clazz, object)) {
             return;
         }
 
+        ParameterizedType parmType = (ParameterizedType)type;
+
         if (Map.class.isAssignableFrom(clazz)) {
-            encodeMap(type, clazz, (Map<String, Object>)object, writer);
+            encodeMap(parmType, clazz, (Map<String, Object>)object, writer);
          } else if(Collection.class.isAssignableFrom(clazz)) {
-            encodeCollection(type, clazz, (Collection)object, writer);
+            encodeCollection(parmType, clazz, (Collection)object, writer);
         } else if (Optional.class.isAssignableFrom(clazz)) {
-            encodeOptional(type, clazz, (Optional)object, writer);
+            encodeOptional(parmType, clazz, (Optional)object, writer);
         } else if(clazz.isEnum()) {
            writer.writeString(((Enum<?>)object).name());
         } else if (BsonSerializable.class.isAssignableFrom(clazz)) {
@@ -419,7 +421,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
     @SuppressWarnings("unchecked")
     private static Object decodeType(
-        BsonReader reader, ParameterizedType type, Class<?> clazz
+        BsonReader reader, Type type, Class<?> clazz
     ) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 
         Optional nonGenericObject = decodeNonGenericType(reader, clazz);
@@ -428,14 +430,16 @@ public class BsonSerializableCodec <T> implements Codec<T> {
             return nonGenericObject.get();
         }
 
+        ParameterizedType paramType = (ParameterizedType)type;
+
         if (Map.class.isAssignableFrom(clazz)) {
-            return decodeMap(reader, type, clazz);
+            return decodeMap(reader, paramType, clazz);
         } else if(List.class.isAssignableFrom(clazz)) {
-            return decodeList(reader, type, clazz);
+            return decodeList(reader, paramType, clazz);
         } else if(Set.class.isAssignableFrom(clazz)) {
-            return decodeSet(reader, type, clazz);
+            return decodeSet(reader, paramType, clazz);
         } else if (Optional.class.isAssignableFrom(clazz)) {
-            return decodeOptional(reader, type, clazz);
+            return decodeOptional(reader, paramType, clazz);
         } else if(clazz.isEnum()) {
             return decodeEnum(reader, clazz);
         } else {

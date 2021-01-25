@@ -147,15 +147,25 @@ task makeRunScripts {
     dependsOn compileJava
     doLast {
         def cp = sourceSets.main.runtimeClasspath.asPath
-        def script = new File("${projectDir}/scripts", "run-server")
         def jvmArgs = applicationDefaultJvmArgs.join(" ")
 
-        script.text = unindent(
+        def runServer = new File("${projectDir}/scripts", "run-server")
+        def createUser = new File("${projectDir}/scripts", "make-user")
+
+        runServer.text = unindent(
             """#!/bin/bash
                 exec java ${jvmArgs} -cp ${cp} ${mainClassName} "\${@}"
             """
         )
-        script.setExecutable(true);
+        runServer.setExecutable(true);
+
+         createUser.text = unindent(
+            """#!/bin/bash
+                exec java -Dlogging.appender.STDOUT.level=ERROR \
+                    ${jvmArgs} -cp ${cp} ldprotest.server.auth.CmdLineCreateUser "\${@}"
+            """
+        )
+        createUser.setExecutable(true);
     }
 }
 

@@ -19,11 +19,9 @@ package ldprotest.db;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import java.util.Arrays;
-import java.util.List;
 import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
-import ldprotest.util.PrintTools;
+import ldprotest.server.auth.UserAccount;
 
 public final class SetupDatabase {
 
@@ -39,6 +37,8 @@ public final class SetupDatabase {
     public static DbVersionInfo setup(MongoDatabase db) {
         MongoCollection<DbVersionInfo> collection = db.getCollection(DB_VERSION_INFO_COLLECTION, DbVersionInfo.class);
 
+        setupIndexes();
+
         for(DbVersionInfo versionInfo: collection.find()) {
             return versionInfo;
         }
@@ -46,6 +46,10 @@ public final class SetupDatabase {
         DbVersionInfo info = new DbVersionInfo(CURRENT_MAJOR_VERSION, CURRENT_MINOR_VERSION);
         collection.insertOne(info);
         return info;
+    }
+
+    private static void setupIndexes() {
+        UserAccount.setupDbIndex();
     }
 
      public static final class DbVersionInfo implements BsonSerializable {

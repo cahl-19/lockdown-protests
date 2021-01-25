@@ -17,10 +17,17 @@
 */
 package ldprotest.util;
 
+import java.util.Arrays;
+
 public final class PrintTools {
 
     private PrintTools() {
         /** Do not construct **/
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> String listPrint(T ...t) {
+        return listPrint(Arrays.asList(t));
     }
 
     public static String listPrint(Iterable<?> i) {
@@ -32,4 +39,5 @@ public final class PrintTools {
 
         return sb.toString();
     }
+
 }

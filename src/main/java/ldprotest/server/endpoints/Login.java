@@ -22,9 +22,13 @@ import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.auth.HttpVerbTypes;
+import ldprotest.server.auth.UserAccount;
+import ldprotest.server.auth.UserAccount.UserLookupError;
+import ldprotest.server.auth.UserInfo;
 import ldprotest.server.auth.UserRole;
 import ldprotest.server.infra.JsonEndpoint;
 import ldprotest.server.infra.JsonError;
+import ldprotest.util.Result;
 
 public final class Login {
 
@@ -48,7 +52,13 @@ public final class Login {
         );
 
         JsonEndpoint.post(PATH, LoginJson.class, (loginData, request, response) -> {
-            return JsonError.success();
+            Result<UserLookupError, UserInfo> result = UserAccount.authenticate(loginData.username, loginData.password);
+
+            if(result.isSuccess()) {
+                return JsonError.success();
+            } else {
+                return JsonError.internalError();
+            }
         });
     }
 

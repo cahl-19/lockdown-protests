@@ -136,7 +136,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
                 if(fieldDecoder != null) {
                     fieldDecoder.decode(reader, field, decoded);
                 } else {
-                    field.set(decoded, decodeType(reader, (ParameterizedType)field.getGenericType(), field.getType()));
+                    field.set(decoded, decodeType(reader, field.getGenericType(), field.getType()));
                 }
             });
 
@@ -428,6 +428,8 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
         if(nonGenericObject.isPresent()) {
             return nonGenericObject.get();
+        } else if(clazz.isEnum()) {
+            return decodeEnum(reader, clazz);
         }
 
         ParameterizedType paramType = (ParameterizedType)type;
@@ -440,8 +442,6 @@ public class BsonSerializableCodec <T> implements Codec<T> {
             return decodeSet(reader, paramType, clazz);
         } else if (Optional.class.isAssignableFrom(clazz)) {
             return decodeOptional(reader, paramType, clazz);
-        } else if(clazz.isEnum()) {
-            return decodeEnum(reader, clazz);
         } else {
             throw new BsonSerializationException(String.format("Unable to deserialize %s.", clazz.getName()));
         }
@@ -515,7 +515,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
         map.put(ObjectId.class, (reader, clazz) -> reader.readObjectId());
 
-        map.put(byte[].class, (reader, clazz) -> reader.readBinaryData());
+        map.put(byte[].class, (reader, clazz) -> reader.readBinaryData().getData());
 
         map.put(ZonedDateTime.class, (reader, clazz) -> {
             long millisSinceEpoch = reader.readDateTime();

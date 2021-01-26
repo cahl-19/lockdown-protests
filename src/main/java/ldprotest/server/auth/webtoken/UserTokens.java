@@ -22,6 +22,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import java.util.Date;
+import ldprotest.main.ServerTime;
 import ldprotest.server.auth.UserInfo;
 import ldprotest.server.auth.UserRole;
 import ldprotest.util.Result;
@@ -32,6 +34,7 @@ public final class UserTokens {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(UserTokens.class);
 
+    private static final int ACCEPT_EXPIRES_AT = 1;
     private static final int KEY_EXPIRY_SECONDS = 3600 * 24;
     private static final VolatileTokenKeyProvider META_KEY_PROVIDER = new VolatileTokenKeyProvider(
         KEY_EXPIRY_SECONDS
@@ -43,11 +46,13 @@ public final class UserTokens {
 
     public static String sign(UserInfo info) {
         Algorithm algorithm = Algorithm.RSA512(META_KEY_PROVIDER.getKeyProvider());
+        Date expiry = Date.from(ServerTime.now().plusSeconds(KEY_EXPIRY_SECONDS).toInstant());
 
         return JWT.create()
             .withClaim("username", info.publicUsername)
             .withClaim("email", info.email)
             .withClaim("role", info.userRole.name())
+            .withExpiresAt(expiry)
             .sign(algorithm);
     }
 
@@ -56,7 +61,7 @@ public final class UserTokens {
         try {
             Algorithm algorithm = Algorithm.RSA512(META_KEY_PROVIDER.getKeyProvider());
             JWTVerifier verifier = JWT.require(algorithm)
-                .acceptExpiresAt(KEY_EXPIRY_SECONDS)
+                .acceptExpiresAt(ACCEPT_EXPIRES_AT)
                 .build();
             jwt = verifier.verify(token);
         } catch (JWTVerificationException ex){

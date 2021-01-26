@@ -17,6 +17,7 @@
 */
 package ldprotest.server.auth;
 
+import java.util.Objects;
 import ldprotest.db.DbIndex;
 import ldprotest.db.DbSortOrder;
 import ldprotest.serialization.JsonSerializable;
@@ -43,5 +44,44 @@ public class UserInfo implements JsonSerializable {
         this.publicUsername = publicUsername;
         this.email = email;
         this.userRole = userRole;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if(!(other instanceof UserInfo)) {
+            return false;
+        }
+
+        UserInfo otherInfo = (UserInfo)other;
+
+        return
+            publicUsername.equals(otherInfo.publicUsername) &&
+            email.equals(otherInfo.email) &&
+            userRole.equals(otherInfo.userRole);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(publicUsername, email, userRole);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("UserInfo(");
+
+        sb.append(" publicUsername=");
+        sb.append(publicUsername);
+
+        sb.append(", email=");
+        sb.append(email);
+
+        sb.append(" userRole=");
+        sb.append(userRole.name());
+
+        sb.append(")");
+
+        return sb.toString();
     }
 }

@@ -19,6 +19,7 @@ package ldprotest.server.auth.webtoken;
 
 import ldprotest.server.auth.UserInfo;
 import ldprotest.server.auth.UserRole;
+import ldprotest.server.auth.webtoken.UserTokens.VerificationFailure;
 import ldprotest.util.Result;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -33,8 +34,8 @@ public class UnitTestUserTokens {
 
         UserInfo info = new UserInfo("test-username-123", "test-email-456", UserRole.MODERATOR);
 
-        String token = UserTokens.sign(info);
-        Result<String, UserInfo> result = UserTokens.verify(token);
+        String token = UserTokens.sign(info, UserTokenSubject.FOR_COOKIE);
+        Result<VerificationFailure, UserInfo> result = UserTokens.verify(token, UserTokenSubject.FOR_COOKIE);
 
         assertTrue(result.isSuccess());
         assertEquals(info, result.result());
@@ -45,8 +46,8 @@ public class UnitTestUserTokens {
 
         UserInfo info = new UserInfo("test-username-123", "test-email-456", UserRole.MODERATOR);
 
-        String token = UserTokens.sign(info) + "a";
-        Result<String, UserInfo> result = UserTokens.verify(token);
+        String token = UserTokens.sign(info, UserTokenSubject.FOR_COOKIE) + "a";
+        Result<VerificationFailure, UserInfo> result = UserTokens.verify(token, UserTokenSubject.FOR_COOKIE);
 
         assertTrue(result.isFailure());
     }

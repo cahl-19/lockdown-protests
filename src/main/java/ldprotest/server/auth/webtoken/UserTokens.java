@@ -38,8 +38,9 @@ public final class UserTokens {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(UserTokens.class);
 
+    public static final int KEY_EXPIRY_SECONDS = 3600 * 24;
+
     private static final int ACCEPT_EXPIRES_AT = 1;
-    private static final int KEY_EXPIRY_SECONDS = 3600 * 24;
     private static final int KEY_DELETION_SECONDS = 3600 * 24 * 2;
 
     private static final VolatileTokenKeyProvider META_KEY_PROVIDER = new VolatileTokenKeyProvider(

@@ -27,6 +27,7 @@ public class JsonError implements JsonSerializable {
     private static final JsonError SUCCESS = new JsonError(ServerErrorCode.SUCCESS);
     private static final JsonError INTERNAL_ERRROR = new JsonError(ServerErrorCode.GENERIC_INTERNAL_ERROR);
     private static final JsonError CONTENT_TYPE_ERROR = new JsonError(ServerErrorCode.CONTENT_TYPE_ERROR);
+    private static final JsonError LOGIN_FAILURE = new JsonError(ServerErrorCode.LOGIN_FAILURE);
 
 
     public final int code;
@@ -58,8 +59,12 @@ public class JsonError implements JsonSerializable {
         return INTERNAL_ERRROR;
     }
 
-     public static JsonError contentTypeError() {
+    public static JsonError contentTypeError() {
         return CONTENT_TYPE_ERROR;
+    }
+
+    public static JsonError loginError() {
+        return LOGIN_FAILURE;
     }
 
      public static JsonError success() {
@@ -69,7 +74,8 @@ public class JsonError implements JsonSerializable {
     public static enum ServerErrorCode implements CodedEnum {
         SUCCESS(0, "success"),
         GENERIC_INTERNAL_ERROR(1, "internal error"),
-        CONTENT_TYPE_ERROR(2, "invalid content-type");
+        CONTENT_TYPE_ERROR(2, "invalid content-type"),
+        LOGIN_FAILURE(3, "Invalid user or password");
 
         private final int code;
         private final String description;

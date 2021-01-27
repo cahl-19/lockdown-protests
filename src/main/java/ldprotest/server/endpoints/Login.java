@@ -17,6 +17,7 @@
 */
 package ldprotest.server.endpoints;
 
+import ldprotest.main.Main;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.server.auth.SecConfig;
@@ -26,19 +27,32 @@ import ldprotest.server.auth.UserAccount;
 import ldprotest.server.auth.UserAccount.UserLookupError;
 import ldprotest.server.auth.UserInfo;
 import ldprotest.server.auth.UserRole;
+import ldprotest.server.auth.webtoken.UserTokenSubject;
+import ldprotest.server.auth.webtoken.UserTokens;
 import ldprotest.server.infra.JsonEndpoint;
 import ldprotest.server.infra.JsonError;
 import ldprotest.util.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Login {
 
+    public static final String LOGIN_COOKIE_NAME = "login-token";
+
     private static String PATH = "/api/login";
+    private final static Logger LOGGER = LoggerFactory.getLogger(Login.class);
 
     private Login() {
         /* do not construct */
     }
 
     public static void register() {
+
+        boolean usingHttps = Main.args().usingHttps;
+
+        if(!usingHttps) {
+            LOGGER.warn("Using HTTPS=false. Login cookies will not have the secure flag.");
+        }
 
         SecurityFilter.add(
             PATH,
@@ -54,11 +68,23 @@ public final class Login {
         JsonEndpoint.post(PATH, LoginJson.class, (loginData, request, response) -> {
             Result<UserLookupError, UserInfo> result = UserAccount.authenticate(loginData.username, loginData.password);
 
-            if(result.isSuccess()) {
-                return JsonError.success();
-            } else {
-                return JsonError.internalError();
+            if(result.isFailure()) {
+                return JsonEndpoint.responseFromError(JsonError.loginError(), response);
             }
+
+            String cookieToken = UserTokens.sign(result.result(), UserTokenSubject.FOR_COOKIE);
+            String headerToken = UserTokens.sign(result.result(), UserTokenSubject.FOR_BEARER_TOKEN);
+
+            response.cookie(
+                "/",
+                LOGIN_COOKIE_NAME,
+                cookieToken,
+                UserTokens.KEY_EXPIRY_SECONDS,
+                usingHttps,
+                true
+            );
+
+            return new Token(headerToken);
         });
     }
 
@@ -70,6 +96,14 @@ public final class Login {
         private LoginJson() {
             username = "";
             password = "";
+        }
+    }
+
+    private static final class Token implements JsonSerializable {
+        private final String token;
+
+        public Token(String token) {
+            this.token = token;
         }
     }
 }

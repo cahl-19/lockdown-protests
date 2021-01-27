@@ -40,7 +40,8 @@ public final class JsonEndpoint {
         Collections.unmodifiableMap(Map.<Integer, Integer>of(
             JsonError.ServerErrorCode.SUCCESS.code(), HttpStatus.OK_200,
             JsonError.ServerErrorCode.GENERIC_INTERNAL_ERROR.code(), HttpStatus.INTERNAL_SERVER_ERROR_500,
-            JsonError.ServerErrorCode.CONTENT_TYPE_ERROR.code(), HttpStatus.BAD_REQUEST_400
+            JsonError.ServerErrorCode.CONTENT_TYPE_ERROR.code(), HttpStatus.BAD_REQUEST_400,
+            JsonError.ServerErrorCode.LOGIN_FAILURE.code(), HttpStatus.UNAUTHORIZED_401
         ));
 
     public static void get(String url, JsonGetRoute route) {
@@ -68,18 +69,16 @@ public final class JsonEndpoint {
         });
     }
 
-    public static String responseFromError(JsonError error, Response response) {
+    public static JsonSerializable responseFromError(JsonError error, Response response) {
         int status = ERROR_TO_DEFAULT_STATUS_CODE_MAP.getOrDefault(error.code, HttpStatus.INTERNAL_SERVER_ERROR_500);
-        return setReturn(JsonSerialization.GSON.toJson(error), response, status);
+        return setReturn(error, response, status);
     }
 
-    public static String setReturn(String body, Response response) {
-         response.body(body);
+    public static JsonSerializable setReturn(JsonSerializable body, Response response) {
         return body;
     }
 
-    public static String setReturn(String body, Response response, int errorCode) {
-        response.body(body);
+    public static JsonSerializable setReturn(JsonSerializable body, Response response, int errorCode) {
         response.status(errorCode);
         return body;
     }
@@ -92,12 +91,11 @@ public final class JsonEndpoint {
             ContentType requestContentType = ContentType.parse(request);
 
             if(!CONTENT_TYPE.equals(requestContentType)) {
-                return responseFromError(JsonError.contentTypeError(), response);
-
+                return JsonSerialization.GSON.toJson(responseFromError(JsonError.contentTypeError(), response));
             }
         } catch(ContentType.ContentTypeError e) {
             LOGGER.warn("Received request with invalid content type: {}", e.getMessage());
-            return responseFromError(JsonError.contentTypeError(), response);
+            return JsonSerialization.GSON.toJson(responseFromError(JsonError.contentTypeError(), response));
         }
 
         T data = JsonSerialization.GSON.fromJson(request.body(), clazz);
@@ -110,9 +108,9 @@ public final class JsonEndpoint {
         response.header("Content-Type", CONTENT_TYPE.toString());
 
         try {
-           return setReturn(JsonSerialization.GSON.toJson(body), response);
+           return JsonSerialization.GSON.toJson(setReturn(body, response));
         } catch(JsonParseException e) {
-           return responseFromError(JsonError.internalError(), response);
+           return JsonSerialization.GSON.toJson(responseFromError(JsonError.internalError(), response));
         }
     }
 

@@ -26,6 +26,7 @@ import 'bootstrap';
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
 function setup_login_form() {
+
     $('#submit-login').on('click', (ev) => {
         ev.preventDefault();
 
@@ -40,7 +41,10 @@ function setup_login_form() {
             data: JSON.stringify(credentials),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function(data){alert(data.description);},
+            success: function(data){
+                localStorage.setItem("authorization", data.token);
+                alert("sucess");
+            },
             error: function(errMsg) {
                 alert(errMsg);
             }

@@ -26,10 +26,12 @@ public class CmdLineArgs {
 
     public final String mapApiToken;
     public final boolean helpRequested;
+    public final boolean usingHttps;
 
     private CmdLineArgs(Args args) {
         this.mapApiToken = args.mapApiToken;
         this.helpRequested = args.helpRequested;
+        this.usingHttps = args.usingHttps;
     }
 
     public static Result<Integer, CmdLineArgs> parse(String... cmdLine) {
@@ -50,6 +52,9 @@ public class CmdLineArgs {
 
         @Option(names = { "-h", "--help" }, usageHelp = true, description = "display help text")
         private boolean helpRequested = false;
+
+        @Option(names = {"--no-https"}, description = "for development purposes only: assume that https is disabled")
+        private boolean usingHttps = true;
 
         @Override
         public Integer call() throws Exception {

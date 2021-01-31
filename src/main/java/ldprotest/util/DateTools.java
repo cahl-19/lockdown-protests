@@ -15,21 +15,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package ldprotest.main;
+package ldprotest.util;
 
-import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Date;
+import ldprotest.main.ServerTime;
 
-public final class ServerTime {
-
-    public static ZoneId SERVER_TZ = ZoneId.of("UTC");
-
-    private ServerTime() {
-        /* do not construct */
+public final class DateTools {
+    private DateTools() {
+        /* Do Not Construct */
     }
 
-    public static ZonedDateTime now() {
-        return ZonedDateTime.ofInstant(Instant.now(), SERVER_TZ);
+    public static Date ZonedDateTimeToDate(ZonedDateTime time) {
+        return Date.from(time.toInstant());
+    }
+
+    public static ZonedDateTime DateToZonedDateTime(Date date) {
+        return ZonedDateTime.ofInstant(date.toInstant(), ServerTime.SERVER_TZ);
+    }
+
+    public static long millisSinceEpoch(ZonedDateTime time) {
+        return time.toEpochSecond() * 1000 + time.getNano() / 1000;
     }
 }

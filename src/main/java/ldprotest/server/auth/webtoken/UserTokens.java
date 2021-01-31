@@ -27,9 +27,9 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import java.util.Date;
 import ldprotest.main.ServerTime;
-import ldprotest.server.auth.UserInfo;
 import ldprotest.server.auth.UserRole;
-import static ldprotest.server.auth.webtoken.UserTokens.VerificationFailure.INVALID_CLAIM;
+import ldprotest.server.auth.UserSessionInfo;
+import ldprotest.util.DateTools;
 import ldprotest.util.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +38,13 @@ public final class UserTokens {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(UserTokens.class);
 
-    public static final int KEY_EXPIRY_SECONDS = 3600 * 24;
+    public static final int TOKEN_EXPIRY_SECONDS = 15 * 60;
+    public static final int KEY_EXPIRY_SECONDS = 3600 * 24 * 30;
 
-    private static final int ACCEPT_EXPIRES_AT = 1;
-    private static final int KEY_DELETION_SECONDS = 3600 * 24 * 2;
+    private static final int EXPIRE_LEEWAY_FOR_IGNORE_EXPIRY = 3600 * 24 * 365;
+    private static final int NORMAL_EXPIRE_LEEWAY = 15;
+
+    private static final int KEY_DELETION_SECONDS = KEY_EXPIRY_SECONDS * 2;
 
     private static final VolatileTokenKeyProvider META_KEY_PROVIDER = new VolatileTokenKeyProvider(
         KEY_DELETION_SECONDS
@@ -51,27 +54,41 @@ public final class UserTokens {
         /* do not construct */
     }
 
-    public static String sign(UserInfo info, UserTokenSubject subject) {
+    public static String sign(UserSessionInfo info, UserTokenSubject subject) {
         Algorithm algorithm = Algorithm.RSA512(META_KEY_PROVIDER.getKeyProvider());
-        Date expiry = Date.from(ServerTime.now().plusSeconds(KEY_EXPIRY_SECONDS).toInstant());
+        Date expiry = Date.from(ServerTime.now().plusSeconds(TOKEN_EXPIRY_SECONDS).toInstant());
 
         return JWT.create()
-            .withClaim("username", info.publicUsername)
+            .withClaim("username", info.username)
             .withClaim("email", info.email)
-            .withClaim("role", info.userRole.name())
+            .withClaim("role", info.role.name())
+            .withClaim("sessionId", info.sessionId)
+            .withClaim("sessionCreatedAt", DateTools.ZonedDateTimeToDate(info.createdAt))
             .withSubject(subject.name())
             .withExpiresAt(expiry)
             .sign(algorithm);
     }
 
-    public static Result<VerificationFailure, UserInfo> verify(String token, UserTokenSubject subject) {
+    public static Result<VerificationFailure, UserSessionInfo> verify(String token, UserTokenSubject subject) {
+        return verify(token, subject, NORMAL_EXPIRE_LEEWAY);
+    }
+
+    public static Result<VerificationFailure, UserSessionInfo> verifyWithoutExpiration(
+        String token, UserTokenSubject subject
+    ) {
+        return verify(token, subject, EXPIRE_LEEWAY_FOR_IGNORE_EXPIRY);
+    }
+
+    private static Result<VerificationFailure, UserSessionInfo> verify(
+        String token, UserTokenSubject subject, int expireLeeway
+    ) {
         DecodedJWT jwt;
         try {
             try {
                 Algorithm algorithm = Algorithm.RSA512(META_KEY_PROVIDER.getKeyProvider());
                 JWTVerifier verifier = JWT.require(algorithm)
-                    .acceptExpiresAt(ACCEPT_EXPIRES_AT)
                     .withSubject(subject.name())
+                    .acceptExpiresAt(expireLeeway)
                     .build();
                 jwt = verifier.verify(token);
             } catch (InvalidClaimException ex){
@@ -82,9 +99,11 @@ public final class UserTokens {
                     "Invalid JWT signature or unknown kid. Message: {}",
                     ex.getMessage()
                 );
-                return Result.failure(VerificationFailure.SIGNATURE_FAILED_OR_KEY_DELETED);
+                return Result.failure(VerificationFailure.SIGNATURE_FAILED);
             } catch(TokenExpiredException ex) {
                 return Result.failure(VerificationFailure.EXPIRED);
+            } catch (NoSuchKidException ex) {
+                return Result.failure(VerificationFailure.NO_KEY);
             }
         } catch(JWTVerificationException ex) {
             LOGGER.error("Unexpected Error in token verification", ex);
@@ -92,23 +111,29 @@ public final class UserTokens {
         }
 
         try {
-            return Result.success(
-                new UserInfo(
-                    jwt.getClaim("username").asString(),
-                    jwt.getClaim("email").asString(),
-                    UserRole.valueOf(jwt.getClaim("role").asString())
-                )
-            );
+            return Result.success(sessionInfoFromDecodedJWT(jwt));
         }  catch (IllegalArgumentException ex) {
             LOGGER.error("Received Token With Invalid Role: {}", jwt.getClaim("role").asString());
             return Result.failure(VerificationFailure.OTHER_ERROR);
         }
     }
 
+    private static UserSessionInfo sessionInfoFromDecodedJWT(DecodedJWT jwt) {
+        return new UserSessionInfo(
+            jwt.getClaim("sessionId").asString(),
+            jwt.getClaim("username").asString(),
+            jwt.getClaim("email").asString(),
+            UserRole.valueOf(jwt.getClaim("role").asString()),
+            DateTools.DateToZonedDateTime(jwt.getClaim("sessionCreatedAt").asDate())
+        );
+    }
+
     public static enum VerificationFailure {
         EXPIRED,
         INVALID_CLAIM,
-        SIGNATURE_FAILED_OR_KEY_DELETED,
-        OTHER_ERROR;
+        SIGNATURE_FAILED,
+        OTHER_ERROR,
+        MALFORMED_TOKEN,
+        NO_KEY;
     }
 }

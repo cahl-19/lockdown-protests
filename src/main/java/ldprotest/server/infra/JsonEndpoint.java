@@ -20,9 +20,16 @@ package ldprotest.server.infra;
 import com.google.gson.JsonParseException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.JsonSerialization;
+import ldprotest.server.auth.HttpVerbTypes;
+import ldprotest.server.auth.SecConfig;
+import ldprotest.server.auth.SecurityFilter;
+import ldprotest.server.auth.UserRole;
+import ldprotest.server.auth.UserSessionInfo;
 import ldprotest.server.infra.http.ContentType;
+import ldprotest.util.ErrorCode;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,11 +48,19 @@ public final class JsonEndpoint {
             JsonError.ServerErrorCode.SUCCESS.code(), HttpStatus.OK_200,
             JsonError.ServerErrorCode.GENERIC_INTERNAL_ERROR.code(), HttpStatus.INTERNAL_SERVER_ERROR_500,
             JsonError.ServerErrorCode.CONTENT_TYPE_ERROR.code(), HttpStatus.BAD_REQUEST_400,
-            JsonError.ServerErrorCode.LOGIN_FAILURE.code(), HttpStatus.UNAUTHORIZED_401
+            JsonError.ServerErrorCode.LOGIN_FAILURE.code(), HttpStatus.UNAUTHORIZED_401,
+            JsonError.ServerErrorCode.UNAUTHORIZED_FAILURE.code(), HttpStatus.UNAUTHORIZED_401
         ));
 
     public static void get(String url, JsonGetRoute route) {
         Spark.get(url, (request, response) -> {
+
+            ErrorCode<JsonError> secCheckResult = secCheck(request, response);
+
+            if(secCheckResult.failed()) {
+                return JsonSerialization.GSON.toJson(responseFromError(secCheckResult.reason(), response));
+            }
+
             JsonSerializable body = route.handle(request, response);
             return returnJsonResponse(body, response);
         });
@@ -98,6 +113,11 @@ public final class JsonEndpoint {
             return JsonSerialization.GSON.toJson(responseFromError(JsonError.contentTypeError(), response));
         }
 
+        ErrorCode<JsonError> secCheckResult = secCheck(request, response);
+        if(secCheckResult.failed()) {
+            return JsonSerialization.GSON.toJson(responseFromError(secCheckResult.reason(), response));
+        }
+
         T data = JsonSerialization.GSON.fromJson(request.body(), clazz);
         JsonSerializable body = route.handle(data, request, response);
 
@@ -111,6 +131,27 @@ public final class JsonEndpoint {
            return JsonSerialization.GSON.toJson(setReturn(body, response));
         } catch(JsonParseException e) {
            return JsonSerialization.GSON.toJson(responseFromError(JsonError.internalError(), response));
+        }
+    }
+
+    private static ErrorCode<JsonError> secCheck(Request request, Response response) {
+
+        SecConfig conf = SecurityFilter.secConfigAttr(request);
+        HttpVerbTypes method = SecurityFilter.httpVerbAttribute(request);
+        UserRole role = SecurityFilter.userRoleAttr(request);
+
+        if(conf.isPermitted(UserRole.UNAUTHENTICATED, method) && role.equals(UserRole.UNAUTHENTICATED)) {
+            return ErrorCode.success();
+        }
+
+        Optional<UserSessionInfo> optBearerInfo = SecurityFilter.bearerSessionInfo(request);
+        Optional<UserSessionInfo> optCookieInfo = SecurityFilter.httpSessionInfo(request);
+
+        if(optBearerInfo.isEmpty() || optCookieInfo.isEmpty()) {
+            SecurityFilter.setUnauthorizedHeader(response);
+            return ErrorCode.error(JsonError.unauthorizedError());
+        } else {
+            return ErrorCode.success();
         }
     }
 

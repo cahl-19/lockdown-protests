@@ -20,10 +20,11 @@ package ldprotest.server.auth;
 import com.mongodb.ErrorCategory;
 import com.mongodb.MongoException;
 import com.mongodb.MongoWriteException;
-import com.mongodb.WriteError;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.UpdateResult;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -34,6 +35,7 @@ import ldprotest.db.IndexTools;
 import ldprotest.db.MainDatabase;
 import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
+import ldprotest.util.ErrorCode;
 import ldprotest.util.Result;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -120,12 +122,71 @@ public final class UserAccount {
             return Result.failure(UserLookupError.INVALID_USER);
         }
 
+        if(creds.locked) {
+            return Result.failure(UserLookupError.ACCOUNT_LOCKED);
+        }
+
         byte[] hash = hashPassword(secret, creds.salt, creds.algo, creds.iterations);
 
         if(secureCompare(hash, creds.hashedSecret)) {
             return Result.success(creds.info);
         } else {
             return Result.failure(UserLookupError.INVALID_CREDENTIALS);
+        }
+    }
+
+    public static ErrorCode<UserLookupError> status(UserInfo info) {
+        return status(info.email);
+    }
+
+    public static ErrorCode<UserLookupError> status(String email) {
+        MongoCollection<UserCredentialInfo> collection = collection();
+        UserCredentialInfo creds;
+
+        try {
+            creds = collection.find(Filters.eq("info.email", email)).first();
+        } catch(MongoException ex) {
+            LOGGER.error("Database error looking up user", ex);
+            return ErrorCode.error(UserLookupError.DATABASE_ERROR);
+        }
+
+        if(creds == null) {
+            return ErrorCode.error(UserLookupError.INVALID_USER);
+        }
+
+        if(creds.locked) {
+            return ErrorCode.error(UserLookupError.ACCOUNT_LOCKED);
+        }
+
+        return ErrorCode.success();
+    }
+
+    public static ErrorCode<UserLookupError> lock(UserInfo info) {
+        return setLock(info, true);
+    }
+
+    public static ErrorCode<UserLookupError> unlock(UserInfo info) {
+        return setLock(info, false);
+    }
+
+    private static ErrorCode<UserLookupError> setLock(UserInfo info, boolean lockValue) {
+        MongoCollection<UserCredentialInfo> collection = collection();
+
+        try {
+            UpdateResult result = collection.updateOne(
+                Filters.and(Filters.eq("info.email", info.email), Filters.eq("info.publicUsername")),
+                Updates.set("locked", lockValue)
+            );
+
+            if(result.wasAcknowledged()) {
+                return ErrorCode.success();
+            } else {
+                return ErrorCode.error(UserLookupError.INVALID_USER);
+            }
+
+        } catch(MongoException ex) {
+            LOGGER.error("Database error when locking user", ex);
+            return ErrorCode.error(UserLookupError.DATABASE_ERROR);
         }
     }
 
@@ -208,6 +269,8 @@ public final class UserAccount {
         public final String algo;
         public final int iterations;
 
+        public final boolean locked;
+
        @ReflectiveConstructor
         private UserCredentialInfo() {
             info = null;
@@ -215,6 +278,7 @@ public final class UserAccount {
             salt = null;
             algo = null;
             iterations = 0;
+            locked = true;
         }
 
         public UserCredentialInfo(UserInfo info, byte[] hashedSecret, byte[] salt, String algo, int iterations) {
@@ -223,13 +287,15 @@ public final class UserAccount {
             this.salt = salt;
             this.algo = algo;
             this.iterations = iterations;
+            this.locked = false;
         }
     }
 
     public static enum UserLookupError {
         DATABASE_ERROR("Low level database error"),
         INVALID_USER("User does not exist"),
-        INVALID_CREDENTIALS("Incorrect password");
+        INVALID_CREDENTIALS("Incorrect password"),
+        ACCOUNT_LOCKED("Account is locked for logon");
 
         public final String description;
 

@@ -28,6 +28,7 @@ public class JsonError implements JsonSerializable {
     private static final JsonError INTERNAL_ERRROR = new JsonError(ServerErrorCode.GENERIC_INTERNAL_ERROR);
     private static final JsonError CONTENT_TYPE_ERROR = new JsonError(ServerErrorCode.CONTENT_TYPE_ERROR);
     private static final JsonError LOGIN_FAILURE = new JsonError(ServerErrorCode.LOGIN_FAILURE);
+    private static final JsonError UNAUTHORIZED_FAILURE = new JsonError(ServerErrorCode.UNAUTHORIZED_FAILURE);
 
 
     public final int code;
@@ -55,6 +56,10 @@ public class JsonError implements JsonSerializable {
         this.details = Optional.empty();
     }
 
+    public static JsonError unauthorizedError() {
+        return UNAUTHORIZED_FAILURE;
+    }
+
     public static JsonError internalError() {
         return INTERNAL_ERRROR;
     }
@@ -75,7 +80,8 @@ public class JsonError implements JsonSerializable {
         SUCCESS(0, "success"),
         GENERIC_INTERNAL_ERROR(1, "internal error"),
         CONTENT_TYPE_ERROR(2, "invalid content-type"),
-        LOGIN_FAILURE(3, "Invalid user or password");
+        LOGIN_FAILURE(3, "Invalid user or password"),
+        UNAUTHORIZED_FAILURE(4, "Unauthorized or auth expired");
 
         private final int code;
         private final String description;

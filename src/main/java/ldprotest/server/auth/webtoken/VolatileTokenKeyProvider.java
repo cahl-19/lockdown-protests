@@ -89,7 +89,7 @@ public class VolatileTokenKeyProvider {
 
                 if(oldKeyData == null) {
                     LOGGER.info("Request for non-existant RSA key: {}", kid);
-                    return null;
+                    throw new NoSuchKidException("KID does not exist");
                 }
 
                 return (RSAPublicKey)oldKeyData.keyPair.getPublic();

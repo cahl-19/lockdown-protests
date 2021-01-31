@@ -17,36 +17,31 @@
 */
 package ldprotest.server.endpoints;
 
+import java.util.Optional;
 import ldprotest.main.Main;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
+import ldprotest.server.auth.HttpVerbTypes;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
-import ldprotest.server.auth.HttpVerbTypes;
-import ldprotest.server.auth.UserAccount;
-import ldprotest.server.auth.UserAccount.UserLookupError;
-import ldprotest.server.auth.UserInfo;
 import ldprotest.server.auth.UserRole;
 import ldprotest.server.auth.UserSessionInfo;
-import ldprotest.server.auth.UserSessions;
-import ldprotest.server.auth.UserSessions.SessionCreationError;
 import ldprotest.server.auth.webtoken.UserTokenSubject;
 import ldprotest.server.auth.webtoken.UserTokens;
-import ldprotest.server.infra.CookieAttributes;
 import ldprotest.server.infra.JsonEndpoint;
 import ldprotest.server.infra.JsonError;
 import ldprotest.util.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Login {
+public class TokenRefresh {
 
     public static final String LOGIN_COOKIE_NAME = "login-token";
 
-    private static final String PATH = "/api/login";
-    private final static Logger LOGGER = LoggerFactory.getLogger(Login.class);
+    private static final String PATH = "/api/refresh-token";
+    private final static Logger LOGGER = LoggerFactory.getLogger(TokenRefresh.class);
 
-    private Login() {
+    private TokenRefresh() {
         /* do not construct */
     }
 
@@ -69,51 +64,49 @@ public final class Login {
                 .build()
         );
 
-        JsonEndpoint.post(PATH, LoginJson.class, (loginData, request, response) -> {
-            Result<UserLookupError, UserInfo> result = UserAccount.authenticate(loginData.username, loginData.password);
+        JsonEndpoint.post(PATH, Token.class, (body, request, response) -> {
 
-            if(result.isFailure()) {
-                return JsonEndpoint.responseFromError(JsonError.loginError(), response);
+            UserRole role = SecurityFilter.userRoleAttr(request);
+            Optional<UserSessionInfo> optHttpInfo = SecurityFilter.httpSessionInfo(request);
+
+            if(role.equals(UserRole.UNAUTHENTICATED) || optHttpInfo.isEmpty()) {
+                SecurityFilter.setUnauthorizedHeader(response);
+                return JsonEndpoint.responseFromError(JsonError.unauthorizedError(), response);
             }
 
-            Result<SessionCreationError, UserSessionInfo> sessionResult = UserSessions.createSession(result.result());
+            Result<UserTokens.VerificationFailure, UserSessionInfo> verifyResult = UserTokens.verifyWithoutExpiration(
+                body.token, UserTokenSubject.FOR_BEARER_TOKEN
+            );
 
-            if(sessionResult.isFailure()) {
-                return JsonEndpoint.responseFromError(JsonError.loginError(), response);
+            if(verifyResult.isFailure()) {
+                LOGGER.warn("Recieved invalid token for refresh request. Error is: {}", verifyResult.failureReason());
+                return JsonEndpoint.responseFromError(JsonError.unauthorizedError(), response);
             }
 
-            String cookieToken = UserTokens.sign(sessionResult.result(), UserTokenSubject.FOR_COOKIE);
-            String headerToken = UserTokens.sign(sessionResult.result(), UserTokenSubject.FOR_BEARER_TOKEN);
+            UserSessionInfo oldSession = verifyResult.result();
 
-            CookieAttributes cookieAtr = loginTokenCookie(cookieToken, usingHttps);
+            if(!oldSession.toUserInfo().equals(optHttpInfo.get().toUserInfo())) {
+                LOGGER.warn("Recieved refresh request with, cookie not matching body.");
+                return JsonEndpoint.responseFromError(JsonError.unauthorizedError(), response);
+            }
 
-            cookieAtr.setCookie(response);
+            if(!oldSession.sessionId.equals(optHttpInfo.get().sessionId)) {
+                LOGGER.warn("Recieved refresh request with, cookie session ID not matching body session ID.");
+                return JsonEndpoint.responseFromError(JsonError.unauthorizedError(), response);
+            }
 
-            return new Token(headerToken);
+            String refreshedToken = UserTokens.sign(optHttpInfo.get(), UserTokenSubject.FOR_BEARER_TOKEN);
+            return new Token(refreshedToken);
         });
     }
 
-    public static CookieAttributes loginTokenCookie(String value) {
-        return loginTokenCookie(value, Main.args().usingHttps);
-    }
-
-    public static CookieAttributes loginTokenCookie(String value, boolean usingHttps) {
-        return new CookieAttributes("/", LOGIN_COOKIE_NAME, value, UserTokens.KEY_EXPIRY_SECONDS, usingHttps, true);
-    }
-
-    private static final class LoginJson implements JsonSerializable {
-        public final String username;
-        public final String password;
+    private static final class Token implements JsonSerializable {
+        public final String token;
 
         @ReflectiveConstructor
-        private LoginJson() {
-            username = "";
-            password = "";
+        private Token() {
+            token = null;
         }
-    }
-
-    private static final class Token implements JsonSerializable {
-        private final String token;
 
         public Token(String token) {
             this.token = token;

@@ -22,6 +22,7 @@ import com.mongodb.client.MongoDatabase;
 import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.server.auth.UserAccount;
+import ldprotest.server.auth.UserSessions;
 
 public final class SetupDatabase {
 
@@ -50,6 +51,7 @@ public final class SetupDatabase {
 
     private static void setupIndexes() {
         UserAccount.setupDbIndex();
+        UserSessions.setupDbIndex();
     }
 
      public static final class DbVersionInfo implements BsonSerializable {

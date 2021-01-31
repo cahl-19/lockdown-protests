@@ -67,7 +67,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
     public BsonSerializableCodec(Class<T> clazz) {
         this.clazz = clazz;
-        this.fields = collectFields(clazz.getDeclaredFields());
+        this.fields = collectFields(ReflectionTools.instanceFields(clazz));
     }
 
     @Override
@@ -182,7 +182,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         if(encodeNonGenericType(writer, clazz, object)) {
             return;
         }
-
+        System.err.println("type: " + type);
         ParameterizedType parmType = (ParameterizedType)type;
 
         if (Map.class.isAssignableFrom(clazz)) {
@@ -194,7 +194,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         } else if(clazz.isEnum()) {
            writer.writeString(((Enum<?>)object).name());
         } else if (BsonSerializable.class.isAssignableFrom(clazz)) {
-            encodeWithoutContext(writer, Arrays.asList(clazz.getDeclaredFields()), object);
+            encodeWithoutContext(writer, ReflectionTools.instanceFields(clazz), object);
         } else {
             throw new BsonSerializationException(String.format("Unable to serialize %s", clazz.getName()));
         }
@@ -211,7 +211,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
            writer.writeString(((Enum<?>)object).name());
            return true;
         } else if (BsonSerializable.class.isAssignableFrom(clazz)) {
-            encodeWithoutContext(writer, Arrays.asList(clazz.getDeclaredFields()), object);
+            encodeWithoutContext(writer, ReflectionTools.instanceFields(clazz), object);
             return true;
         }
 
@@ -304,6 +304,10 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
         map.put(Float.TYPE, (writer, field, object) -> writer.writeDouble(field.getName(), field.getFloat(object)));
         map.put(Double.TYPE, (writer, field, object) -> writer.writeDouble(field.getName(), field.getInt(object)));
+
+        map.put(
+            Boolean.TYPE, (writer, field, object) -> writer.writeBoolean(field.getName(), field.getBoolean(object))
+        );
 
         return map;
     }
@@ -457,7 +461,9 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         if(decoder != null) {
             return Optional.of(decoder.decode(reader, clazz));
         } else if (BsonSerializable.class.isAssignableFrom(clazz)) {
-            return Optional.of(decodeWithoutContext(reader, clazz, collectFields(clazz.getDeclaredFields())));
+            return Optional.of(
+                decodeWithoutContext(reader, clazz, collectFields(ReflectionTools.instanceFields(clazz)))
+            );
         } else {
             return Optional.empty();
         }
@@ -494,6 +500,11 @@ public class BsonSerializableCodec <T> implements Codec<T> {
                 field.setDouble(object, (short)reader.readInt32());
             }
         );
+        map.put(
+            Boolean.TYPE, (reader, field, object) -> {
+                field.setBoolean(object, reader.readBoolean());
+            }
+        );
 
         return map;
     }
@@ -525,8 +536,8 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         return map;
     }
 
-    private static Map<String, Field> collectFields(Field [] fields) {
-        Map<String, Field> fieldMap = new HashMap<>(fields.length);
+    private static Map<String, Field> collectFields(Collection<Field> fields) {
+        Map<String, Field> fieldMap = new HashMap<>(fields.size());
         for(Field f: fields) {
             fieldMap.put(f.getName(), f);
         }

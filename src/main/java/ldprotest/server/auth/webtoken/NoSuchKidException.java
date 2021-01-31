@@ -15,21 +15,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package ldprotest.main;
+package ldprotest.server.auth.webtoken;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+public class NoSuchKidException extends RuntimeException {
 
-public final class ServerTime {
+    private final String description;
 
-    public static ZoneId SERVER_TZ = ZoneId.of("UTC");
+    public NoSuchKidException(String description) {
+        super(description);
 
-    private ServerTime() {
-        /* do not construct */
+        this.description = description;
     }
 
-    public static ZonedDateTime now() {
-        return ZonedDateTime.ofInstant(Instant.now(), SERVER_TZ);
+    public String toString() {
+        return "NoSuchKidException: " + description;
     }
 }

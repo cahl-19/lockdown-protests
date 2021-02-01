@@ -19,6 +19,7 @@
 *                                                       IMPORTS                                                        *
 ***********************************************************************************************************************/
 import $ from 'jquery';
+import api from 'api';
 
 import Popper from 'popper.js';
 import 'bootstrap';
@@ -30,25 +31,15 @@ function setup_login_form() {
     $('#submit-login').on('click', (ev) => {
         ev.preventDefault();
 
-        let credentials = {
-          'username': $('#email-input').val(),
-          'password': $('#password-input').val()
-        };
-
-        $.ajax({
-            type: "POST",
-            url: "/api/login",
-            data: JSON.stringify(credentials),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function(data){
-                localStorage.setItem("authorization", data.token);
-                alert("sucess");
+        api.login(
+            $('#email-input').val(), $('#password-input').val(),
+            () => {
+                alert('success');
             },
-            error: function(errMsg) {
-                alert(errMsg);
+            (status, error) => {
+                alert(`Error: ${status} - ${error.description}`);
             }
-        });
+        );
     });
 }
 /**********************************************************************************************************************/

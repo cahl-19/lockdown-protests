@@ -25,6 +25,7 @@ const process = require('process');
 *                                                      CONSTANTS                                                       *
 ***********************************************************************************************************************/
 const JS_SOURCE_ROOT = 'src/main/js/pages';
+const JS_MODULES_ROOT = 'src/main/js/modules';
 const NODE_MODULES_PATH = 'build/node_modules';
 const CACHE = path.join(NODE_MODULES_PATH, ".cache");
 const OUTPUT_DIRECTORY = 'build/webpack/webpack-bundles';
@@ -71,10 +72,10 @@ module.exports = {
         return map;
     }, {}),
     "resolve": {
-        "modules": [path.resolve(__dirname, NODE_MODULES_PATH)]
+        "modules": [path.resolve(__dirname, NODE_MODULES_PATH), path.resolve(__dirname, JS_MODULES_ROOT)]
     },
     "resolveLoader": {
-        "modules": [path.resolve(__dirname, NODE_MODULES_PATH)]
+        "modules": [path.resolve(__dirname, NODE_MODULES_PATH), path.resolve(__dirname, JS_MODULES_ROOT)]
     },
     "cache": {
         "type": "filesystem",

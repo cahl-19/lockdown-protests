@@ -70,6 +70,11 @@ function init_map(api_token) {
     let marker = L.marker([51.5, -0.09]).addTo(mymap);
 
     marker.bindPopup("<b>Lockdown Protest at 18:00:00 UTC</b><br>Be, there, dress in black.").openPopup();
+
+    mymap.on('click', (ev) => {
+        let mark = L.marker([ev.latlng.lat, ev.latlng.lng]).addTo(mymap);
+        mark.bindPopup(`<p>Lat: ${ev.latlng.lat}</p><p>Long: ${ev.latlng.lng}</p>`).openPopup();
+    });
 }
 /**********************************************************************************************************************/
 function error_map(error_message) {

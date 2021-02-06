@@ -17,6 +17,7 @@
 */
 package ldprotest.db.codec;
 
+import ldprotest.geo.Coordinate;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistry;
 import ldprotest.serialization.BsonSerializable;
@@ -38,6 +39,8 @@ public class CodecProvider implements org.bson.codecs.configuration.CodecProvide
 
         if(BsonSerializable.class.isAssignableFrom(clazz)) {
             return (Codec<T>) codecCache.computeIfAbsent(clazz, () -> new BsonSerializableCodec(clazz));
+        } else if(Coordinate.class.isAssignableFrom(clazz)) {
+            return (Codec<T>)new CoordinateCodec();
         } else {
             return null;
         }

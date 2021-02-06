@@ -31,6 +31,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import ldprotest.util.ReflectionTools;
 
@@ -43,8 +46,25 @@ public class JsonSerialization {
 
         builder.registerTypeHierarchyAdapter(JsonSerializable.class, new JsonSerializableSerializer());
         builder.registerTypeAdapter(Optional.class, new OptionalSerializer());
+        builder.registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeSerializer());
 
         return builder.create();
+    }
+
+    private static final class ZonedDateTimeSerializer
+        implements JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime> {
+
+        @Override
+        public JsonElement serialize(ZonedDateTime dt, Type type, JsonSerializationContext jsc) {
+            return jsc.serialize(1000 * dt.toEpochSecond() + dt.getNano() / 1000);
+        }
+
+        @Override
+        public ZonedDateTime deserialize(
+            JsonElement je, Type type, JsonDeserializationContext jdc
+        ) throws JsonParseException {
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(je.getAsInt()), ZoneOffset.UTC);
+        }
     }
 
     private static final class OptionalSerializer<T>
@@ -53,7 +73,6 @@ public class JsonSerialization {
         @Override
         @SuppressWarnings("unchecked")
         public JsonElement serialize(Optional<T> t, Type type, JsonSerializationContext jsc) {
-
             if(t.isEmpty()) {
                 return jsc.serialize(null);
             } else {
@@ -100,7 +119,7 @@ public class JsonSerialization {
             T instance = createInstance(type);
             JsonObject jo = je.getAsJsonObject();
 
-            for(Field f: clazz.getDeclaredFields()) {
+            for(Field f: ReflectionTools.instanceFields(clazz)) {
 
                 JsonElement member = jo.get(f.getName());
 
@@ -130,7 +149,11 @@ public class JsonSerialization {
                 }
             }
 
-            return instance;
+            if(Sanitizable.class.isAssignableFrom(clazz)) {
+                return ((Sanitizable<T>)instance).sanitize();
+            } else {
+                return instance;
+            }
         }
     }
 }

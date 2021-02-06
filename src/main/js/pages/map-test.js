@@ -20,6 +20,7 @@
 ***********************************************************************************************************************/
 import $ from 'jquery';
 import L from 'leaflet';
+import api from 'api';
 
 import Popper from 'popper.js';
 import 'bootstrap';
@@ -27,24 +28,18 @@ import 'bootstrap';
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
 function setup_map() {
-
-        $.ajax({
-            'type': "GET",
-            'url': "/api/test/map-api-token",
-            'dataType': "json",
-
-            'success': (data) => {
-                if(data.token) {
-                    init_map(data.token);
-                } else {
-                    error_map('No API token configured.');
-                }
-            },
-
-            'error': (msg) => {
-                error_map(`Error retrieving API token from server - ${msg}`);
-            }
-        });
+    api.call(
+        '/api/test/map-api-token',
+        'GET',
+        {},
+        (data) => {
+            init_map(data.token);
+        },
+        (status, err) => {
+            let description = err === undefined ? status : err.description;
+            error_map(`Error retrieving API token from server - ${description}`);
+        }
+    );
 }
 /**********************************************************************************************************************/
 function init_map(api_token) {
@@ -72,8 +67,24 @@ function init_map(api_token) {
     marker.bindPopup("<b>Lockdown Protest at 18:00:00 UTC</b><br>Be, there, dress in black.").openPopup();
 
     mymap.on('click', (ev) => {
+        let username = api.whoami();
         let mark = L.marker([ev.latlng.lat, ev.latlng.lng]).addTo(mymap);
         mark.bindPopup(`<p>Lat: ${ev.latlng.lat}</p><p>Long: ${ev.latlng.lng}</p>`).openPopup();
+
+        if(username === undefined) {
+            return;
+        }
+
+        let protest = {
+            'location': {'latitude': ev.latlng.lat, 'longitude': ev.latlng.lng},
+            'owner': username,
+            'title': 'Test-Protest',
+            'description': 'test description <script></script>',
+            'dressCode': 'Neked',
+            'date': 0
+        };
+
+        api.call('/api/pins', 'POST', protest, () => undefined, () => alert('failure'));
     });
 }
 /**********************************************************************************************************************/

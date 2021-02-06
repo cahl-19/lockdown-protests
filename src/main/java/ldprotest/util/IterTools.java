@@ -84,4 +84,12 @@ public final class IterTools {
 
         return state;
     }
+
+    public static String mapString(String s, Function<Character, String> func) {
+        return s.chars().mapToObj(
+            (c) -> func.apply((char)c)
+        ).collect(
+            StringBuilder::new, (sb, c) -> sb.append(c), (sb1, sb2) -> sb1.append(sb2.toString())
+        ).toString();
+    }
 }

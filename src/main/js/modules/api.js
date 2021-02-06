@@ -19,6 +19,7 @@
 *                                                       IMPORTS                                                        *
 ***********************************************************************************************************************/
 import $ from 'jquery';
+import jwt_decode from 'jwt-decode';
 /***********************************************************************************************************************
 *                                                      CONSTANTS                                                       *
 ***********************************************************************************************************************/
@@ -32,25 +33,49 @@ const AUTHORIZATION_STORAGE_KEY = 'authorization';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
+function is_unauthorized(status, response_body) {
+    if(response_body !== undefined) {
+        return response_body.code === UNAUTHORIZED_FAILURE;
+    } else {
+        return status === 401;
+    }
+}
+/**********************************************************************************************************************/
+function parse_error_response(response_text) {
+    try{
+        return JSON.parse(response_text);
+    } catch(e) {
+        return undefined;
+    }
+}
+/**********************************************************************************************************************/
 function refresh(success_cb, failure_cb) {
-        let refresh = {
-            'token': localStorage.getItem(AUTHORIZATION_STORAGE_KEY)
-        };
 
-        return $.ajax({
-              type: "POST",
-              url: "/api/refresh-token",
-              data: JSON.stringify(refresh),
-              contentType: "application/json; charset=utf-8",
-              dataType: "json",
-              success: function(data){
-                  localStorage.setItem("authorization", data.token);
-                  success_cb();
-              },
-              error: function(jqXHR, text_status, error_thrown) {
-                  failure_cb(jqXHR.status, JSON.parse(jqXHR.responseText), jqXHR, text_status, error_thrown);
-              }
-        });
+    if(success_cb === undefined) {
+        success_cb = () => {};
+    }
+    if(failure_cb === undefined) {
+        failure_cb = () => {};
+    }
+
+    let body = {
+        'token': localStorage.getItem(AUTHORIZATION_STORAGE_KEY)
+    };
+
+    return $.ajax({
+          type: "POST",
+          url: "/api/refresh-token",
+          data: JSON.stringify(body),
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function(data){
+              localStorage.setItem("authorization", data.token);
+              success_cb();
+          },
+          error: function(jqXHR, text_status, error_thrown) {
+              failure_cb(jqXHR.status, parse_error_response(jqXHR.responseText), jqXHR, text_status, error_thrown);
+          }
+    });
 }
 /**********************************************************************************************************************/
 function api_call(path, method, data, success_cb, failure_cb) {
@@ -75,7 +100,7 @@ function api_call(path, method, data, success_cb, failure_cb) {
                   success_cb(data);
               },
               error: function(jqXHR, text_status, error_thrown) {
-                  failure(jqXHR.status, JSON.parse(jqXHR.responseText), jqXHR, text_status, error_thrown);
+                  failure_cb(jqXHR.status, parse_error_response(jqXHR.responseText), jqXHR, text_status, error_thrown);
               }
         });
 }
@@ -106,7 +131,7 @@ export let api = {
                   success_cb();
               },
               error: function(jqXHR, text_status, error_thrown) {
-                  failure_cb(jqXHR.status, JSON.parse(jqXHR.responseText), jqXHR, text_status, error_thrown);
+                  failure_cb(jqXHR.status, parse_error_response(jqXHR.responseText), jqXHR, text_status, error_thrown);
               }
         });
     },
@@ -124,14 +149,21 @@ export let api = {
                     success_cb(data);
                 },
                 (status, data, jqXHR, text_status, error_thrown) => {
-                    if(data.code === UNAUTHORIZED_FAILURE) {
+                    if(is_unauthorized(status, data)) {
                         refresh(
-                                api_call(path, method, data, success_cb, failure_cb), failure_cb
+                            () => api_call(path, method, data, success_cb, failure_cb),
+                            () => failure_cb(status, data, jqXHR, text_status, error_thrown)
                         );
+                    } else {
+                        failure_cb(status, data, jqXHR, text_status, error_thrown);
                     }
                 }
         );
     },
+    'whoami': function() {
+        let token = localStorage.getItem(AUTHORIZATION_STORAGE_KEY);
+        return token ? jwt_decode(token).username : undefined;
+    }
 };
 /**********************************************************************************************************************/
 export default api;

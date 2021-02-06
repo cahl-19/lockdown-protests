@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import ldprotest.geo.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ldprotest.util.PrintTools;
@@ -182,7 +183,6 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         if(encodeNonGenericType(writer, clazz, object)) {
             return;
         }
-        System.err.println("type: " + type);
         ParameterizedType parmType = (ParameterizedType)type;
 
         if (Map.class.isAssignableFrom(clazz)) {
@@ -338,6 +338,10 @@ public class BsonSerializableCodec <T> implements Codec<T> {
             ZonedDateTime dt = (ZonedDateTime)object;
             long millisSinceEpoch = 1000 * dt.toEpochSecond() + dt.getNano() / 1000;
             writer.writeDateTime(millisSinceEpoch);
+        });
+
+        map.put(Coordinate.class, (writer, object) -> {
+            CoordinateCodec.encode(writer, (Coordinate)object);
         });
 
         return map;
@@ -531,6 +535,10 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         map.put(ZonedDateTime.class, (reader, clazz) -> {
             long millisSinceEpoch = reader.readDateTime();
             return ZonedDateTime.ofInstant(Instant.ofEpochMilli(millisSinceEpoch), ZoneOffset.UTC);
+        });
+
+        map.put(Coordinate.class, (reader, clazz) -> {
+            return CoordinateCodec.decode(reader);
         });
 
         return map;

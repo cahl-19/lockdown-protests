@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
+import ldprotest.server.endpoints.GeoPin;
 import ldprotest.server.endpoints.Login;
 import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.TokenRefresh;
@@ -61,6 +62,7 @@ public class Server {
         ServerVersion.register();
         Login.register();
         TokenRefresh.register();
+        GeoPin.register();
 
         serveDynamicTestEndpoints();
     }

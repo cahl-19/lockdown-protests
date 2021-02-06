@@ -225,7 +225,7 @@ public final class SecurityFilter {
 
         if(bearerToken.isPresent()) {
             Result<VerificationFailure, UserSessionInfo> result = UserTokens.verify(
-                cookieToken.get(), UserTokenSubject.FOR_BEARER_TOKEN
+                bearerToken.get(), UserTokenSubject.FOR_BEARER_TOKEN
             );
             if(result.isFailure()) {
                 processVerificationFailure(result.failureReason());

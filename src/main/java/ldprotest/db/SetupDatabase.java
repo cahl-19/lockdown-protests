@@ -19,6 +19,7 @@ package ldprotest.db;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import ldprotest.business.ProtestData;
 import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.server.auth.UserAccount;
@@ -52,6 +53,7 @@ public final class SetupDatabase {
     private static void setupIndexes() {
         UserAccount.setupDbIndex();
         UserSessions.setupDbIndex();
+        ProtestData.setupDbIndex();
     }
 
      public static final class DbVersionInfo implements BsonSerializable {

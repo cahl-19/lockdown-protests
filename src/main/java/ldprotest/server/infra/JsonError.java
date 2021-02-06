@@ -56,6 +56,10 @@ public class JsonError implements JsonSerializable {
         this.details = Optional.empty();
     }
 
+    public static JsonError invalidBody(String explanation) {
+        return new JsonError(ServerErrorCode.INVALID_REQUEST_BODY, new Explanation(explanation));
+    }
+
     public static JsonError unauthorizedError() {
         return UNAUTHORIZED_FAILURE;
     }
@@ -81,7 +85,8 @@ public class JsonError implements JsonSerializable {
         GENERIC_INTERNAL_ERROR(1, "internal error"),
         CONTENT_TYPE_ERROR(2, "invalid content-type"),
         LOGIN_FAILURE(3, "Invalid user or password"),
-        UNAUTHORIZED_FAILURE(4, "Unauthorized or auth expired");
+        UNAUTHORIZED_FAILURE(4, "Unauthorized or auth expired"),
+        INVALID_REQUEST_BODY(5, "Body of request has invalid data");
 
         private final int code;
         private final String description;
@@ -99,6 +104,14 @@ public class JsonError implements JsonSerializable {
         @Override
         public String description() {
             return description;
+        }
+    }
+
+    public static class Explanation implements JsonSerializable {
+        public static String explanation;
+
+        public Explanation(String explanation) {
+            this.explanation = explanation;
         }
     }
 }

@@ -87,15 +87,16 @@ function api_call(path, method, data, success_cb, failure_cb) {
             failure_cb = () => {};
         }
 
+        let token = localStorage.getItem(AUTHORIZATION_STORAGE_KEY);
+        let headers = token ? {"Authorization": `Bearer ${token}`} : {};
+
         return $.ajax({
               type: method,
               url: path,
-              data: JSON.stringify(data),
+              data: method === "GET" ? data : JSON.stringify(data),
               contentType: "application/json; charset=utf-8",
               dataType: "json",
-              headers: {
-                "Authorization": `Bearer ${localStorage.getItem(AUTHORIZATION_STORAGE_KEY)}`
-              },
+              headers: headers,
               success: function(data){
                   success_cb(data);
               },
@@ -135,6 +136,31 @@ export let api = {
               }
         });
     },
+    'logout': function(success_cb, failure_cb) {
+
+        if(success_cb === undefined) {
+            success_cb = () => {};
+        }
+        if(failure_cb === undefined) {
+            failure_cb = () => {};
+        }
+
+        return $.ajax({
+              type: "POST",
+              url: "/api/login",
+              data: JSON.stringify(credentials),
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              success: function(data){
+                  localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
+                  success_cb();
+              },
+              error: function(jqXHR, text_status, error_thrown) {
+                  localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
+                  failure_cb(jqXHR.status, parse_error_response(jqXHR.responseText), jqXHR, text_status, error_thrown);
+              }
+        });
+    },
     'call': function(path, method, data, success_cb, failure_cb) {
         if(success_cb === undefined) {
             success_cb = () => {};
@@ -163,6 +189,41 @@ export let api = {
     'whoami': function() {
         let token = localStorage.getItem(AUTHORIZATION_STORAGE_KEY);
         return token ? jwt_decode(token).username : undefined;
+    },
+    'current_user_role': function() {
+        let token = localStorage.getItem(AUTHORIZATION_STORAGE_KEY);
+        return token ? jwt_decode(token).role : undefined;
+    },
+    'clean_dead_sessions': function(cb) {
+        if(cb === undefined) {
+            cb = () => {};
+        }
+
+        return new Promise( (fufilled) => {
+            if(this.whoami() === undefined) {
+                fufilled();
+            }
+
+            this.call(
+                '/api/whoami',
+                'GET',
+                {},
+                (data) => {
+                    if(!data.apiTokenValid) {
+                        localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
+                    }
+                    cb();
+                    fufilled();
+                },
+                (status, data) => {
+                    if(is_unauthorized(status, data)) {
+                        localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
+                    }
+                    cb();
+                    fufilled();
+                }
+            );
+        });
     }
 };
 /**********************************************************************************************************************/

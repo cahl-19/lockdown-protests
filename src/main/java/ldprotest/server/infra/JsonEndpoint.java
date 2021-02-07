@@ -50,7 +50,8 @@ public final class JsonEndpoint {
             JsonError.ServerErrorCode.CONTENT_TYPE_ERROR.code(), HttpStatus.BAD_REQUEST_400,
             JsonError.ServerErrorCode.LOGIN_FAILURE.code(), HttpStatus.UNAUTHORIZED_401,
             JsonError.ServerErrorCode.UNAUTHORIZED_FAILURE.code(), HttpStatus.UNAUTHORIZED_401,
-            JsonError.ServerErrorCode.INVALID_REQUEST_BODY.code(), HttpStatus.BAD_REQUEST_400
+            JsonError.ServerErrorCode.INVALID_REQUEST_BODY.code(), HttpStatus.BAD_REQUEST_400,
+            JsonError.ServerErrorCode.INVALID_REQUEST_PARAMS.code(), HttpStatus.BAD_REQUEST_400
         ));
 
     public static void get(String url, JsonGetRoute route) {

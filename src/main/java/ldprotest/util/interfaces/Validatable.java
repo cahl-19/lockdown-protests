@@ -15,32 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package ldprotest.server.infra.http;
+package ldprotest.util.interfaces;
 
-import ldprotest.util.IterTools;
-
-public final class Sanitize {
-
-    private Sanitize() {
-        /* do not construct */
-    }
-
-    public static String encodeHtml(String s) {
-        return IterTools.mapString(s, (c) -> {
-            switch(c.charValue()) {
-                case '>':
-                    return "&gt;";
-                case '<':
-                    return "&lt;";
-                case '&':
-                    return "&amp;";
-                case '"':
-                    return "&quot;";
-                case '\'':
-                    return "&#x27;";
-                default:
-                    return c.toString();
-            }
-        });
-    }
+public interface Validatable {
+    boolean validate();
 }

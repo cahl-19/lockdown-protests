@@ -21,6 +21,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.InvalidClaimException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
@@ -104,6 +105,8 @@ public final class UserTokens {
                 return Result.failure(VerificationFailure.EXPIRED);
             } catch (NoSuchKidException ex) {
                 return Result.failure(VerificationFailure.NO_KEY);
+            } catch(JWTDecodeException ex) {
+                return Result.failure(VerificationFailure.MALFORMED_TOKEN);
             }
         } catch(JWTVerificationException ex) {
             LOGGER.error("Unexpected Error in token verification", ex);

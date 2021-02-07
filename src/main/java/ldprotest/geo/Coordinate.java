@@ -19,8 +19,9 @@ package ldprotest.geo;
 
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
+import ldprotest.util.interfaces.Validatable;
 
-public class Coordinate implements JsonSerializable {
+public class Coordinate implements JsonSerializable, Validatable {
     public final double latitude;
     public final double longitude;
 
@@ -33,5 +34,14 @@ public class Coordinate implements JsonSerializable {
     public Coordinate(double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    @Override
+    public boolean validate() {
+        return
+            longitude < 180 &&
+            longitude > -180 &&
+            latitude < 90 &&
+            latitude > -90;
     }
 }

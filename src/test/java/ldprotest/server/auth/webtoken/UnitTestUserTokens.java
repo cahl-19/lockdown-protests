@@ -22,15 +22,15 @@ import ldprotest.server.auth.UserRole;
 import ldprotest.server.auth.UserSessionInfo;
 import ldprotest.server.auth.webtoken.UserTokens.VerificationFailure;
 import ldprotest.util.Result;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore
 public class UnitTestUserTokens {
 
     @Test
+    @Disabled
     public void testRoundTripToken() {
 
         UserSessionInfo info = UserSessionInfo.generateSession(
@@ -45,6 +45,7 @@ public class UnitTestUserTokens {
     }
 
     @Test
+    @Disabled
     public void testCorruption() {
 
         UserSessionInfo info = UserSessionInfo.generateSession(

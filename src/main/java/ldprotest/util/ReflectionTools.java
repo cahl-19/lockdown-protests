@@ -41,7 +41,6 @@ public final class ReflectionTools {
         /* do not construct */
     }
 
-
     public static <T> T construct(Class<T> clazz)
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
     {
@@ -66,6 +65,15 @@ public final class ReflectionTools {
 
     public static List<Type> getGenericTypeParameters(ParameterizedType type) {
         return Arrays.asList(type.getActualTypeArguments());
+    }
+
+    public static int setAccessible(Field f) throws IllegalArgumentException, IllegalAccessException {
+
+        int modifiers = f.getModifiers();
+        f.setAccessible(true);
+
+        MODIFIER_FIELD.setInt(f, (modifiers & ~ACCESSIBILITY_BIT_MASK));
+        return modifiers;
     }
 
     public static void fieldAccessibleContext(
@@ -108,7 +116,7 @@ public final class ReflectionTools {
         return !modifiersAccessible(modifiers);
     }
 
-    private static Field getExistingField(Class<?> clazz, String name) {
+    public static Field getExistingField(Class<?> clazz, String name) {
         try {
             return clazz.getDeclaredField(name);
         } catch (NoSuchFieldException e) {

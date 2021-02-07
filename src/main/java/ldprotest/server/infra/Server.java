@@ -26,8 +26,10 @@ import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.endpoints.GeoPin;
 import ldprotest.server.endpoints.Login;
+import ldprotest.server.endpoints.Logout;
 import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.TokenRefresh;
+import ldprotest.server.endpoints.WhoAmI;
 import ldprotest.server.endpoints.test.EchoTest;
 import ldprotest.server.endpoints.test.MapApiToken;
 import ldprotest.server.infra.templates.ServeWebpack;
@@ -61,6 +63,8 @@ public class Server {
     private static void serveDynamicEndpoints() {
         ServerVersion.register();
         Login.register();
+        Logout.register();
+        WhoAmI.register();
         TokenRefresh.register();
         GeoPin.register();
 

@@ -3,11 +3,13 @@
  */
 package ldprotest;
 
-import org.junit.Test;
 import ldprotest.main.Main;
+import org.junit.jupiter.api.Test;
 
 public class LockdownProtestTest {
-    @Test public void testLdProtestCanConstruct() {
+
+    @Test
+    public void testLdProtestCanConstruct() {
         Main t = new Main();
     }
 }

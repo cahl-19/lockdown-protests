@@ -18,8 +18,16 @@
 package ldprotest.server.endpoints;
 
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoCollection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import ldprotest.business.ProtestData;
+import ldprotest.geo.Coordinate;
+import ldprotest.geo.GeoRectangle;
+import ldprotest.serialization.JsonSerializable;
 import ldprotest.server.auth.HttpVerbTypes;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
@@ -27,6 +35,7 @@ import ldprotest.server.auth.UserRole;
 import ldprotest.server.auth.UserSessionInfo;
 import ldprotest.server.infra.JsonEndpoint;
 import ldprotest.server.infra.JsonError;
+import ldprotest.util.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +43,15 @@ public class GeoPin {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(GeoPin.class);
     private static final String PATH = "/api/pins";
+
+    private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile(
+        "^(-?[0-9]+\\.?[0-9]*),(-?[0-9]+\\.?[0-9]*)$"
+    );
+
+    private static final String SOUTH_WEST_QUERY_PARAM = "SW";
+    private static final String NORTH_EAST_QUERY_PARAM = "NE";
+
+    private static final int MAX_PROTESTS_PER_REQUEST = 128;
 
     private GeoPin() {
         /* GeoPin */
@@ -44,9 +62,13 @@ public class GeoPin {
         SecurityFilter.add(
             PATH,
             SecConfig.builder()
-                .add(UserRole.MODERATOR, HttpVerbTypes.POST)
-                .add(UserRole.PLANNER, HttpVerbTypes.POST)
-                .add(UserRole.ADMIN, HttpVerbTypes.POST)
+                .add(UserRole.MODERATOR, HttpVerbTypes.POST, HttpVerbTypes.GET)
+                .add(UserRole.PLANNER, HttpVerbTypes.POST, HttpVerbTypes.GET)
+                .add(UserRole.ADMIN, HttpVerbTypes.POST, HttpVerbTypes.GET)
+
+                .add(UserRole.UNAUTHENTICATED, HttpVerbTypes.GET)
+                .add(UserRole.USER, HttpVerbTypes.GET)
+
                 .build()
         );
 
@@ -83,5 +105,69 @@ public class GeoPin {
 
             return JsonError.success();
         });
+
+        JsonEndpoint.get(PATH, (request, response) -> {
+
+            String swParam = request.queryParams(SOUTH_WEST_QUERY_PARAM);
+            String neParam = request.queryParams(NORTH_EAST_QUERY_PARAM);
+
+            if(swParam == null || neParam == null) {
+                return JsonEndpoint.responseFromError(
+                    JsonError.invalidParams("Missing required query param"), response
+                );
+            }
+
+            Result<String, Coordinate> swResult = parseCoordinateQueryParam(swParam);
+            Result<String, Coordinate> neResult = parseCoordinateQueryParam(neParam);
+
+            if(swResult.isFailure() || neResult.isFailure()) {
+                return JsonEndpoint.responseFromError(
+                    JsonError.invalidParams("Coordinate param is invalid"), response
+                );
+            }
+
+            try {
+                return searchProtests(new GeoRectangle(swResult.result(), neResult.result()));
+            } catch(MongoException ex) {
+                LOGGER.error("Database error when querying protests.", ex);
+                return JsonEndpoint.responseFromError(JsonError.internalError(), response);
+            }
+        });
+    }
+
+    private static Result<String, Coordinate> parseCoordinateQueryParam(String param) {
+
+        Matcher matcher = QUERY_PARAM_PATTERN.matcher(param);
+
+        if(!matcher.matches()) {
+            Result.failure("Parameter doesn't match pattern");
+        }
+
+        String latString = matcher.group(1);
+        String longString = matcher.group(2);
+
+        double lat = Double.parseDouble(latString);
+        double lng = Double.parseDouble(longString);
+
+        return Result.success(new Coordinate(lat, lng));
+    }
+
+    private static Protests searchProtests(GeoRectangle area) {
+        MongoCollection<ProtestData> collection = ProtestData.collection();
+        List<ProtestData> protests = new ArrayList<>();
+
+        for(ProtestData data: collection.find(area.bsonFilter("location")).limit(MAX_PROTESTS_PER_REQUEST)) {
+            protests.add(data);
+        }
+
+        return new Protests(protests);
+    }
+
+    private static final class Protests implements JsonSerializable {
+        List<ProtestData> protests;
+
+        public Protests(List<ProtestData> protests) {
+            this.protests = protests;
+        }
     }
 }

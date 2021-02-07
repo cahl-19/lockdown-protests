@@ -68,7 +68,15 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
     public BsonSerializableCodec(Class<T> clazz) {
         this.clazz = clazz;
-        this.fields = collectFields(ReflectionTools.instanceFields(clazz));
+
+        try {
+            this.fields = collectFields(ReflectionTools.instanceFields(clazz));
+        } catch (IllegalAccessException e) {
+            LOGGER.error("Illlegal access error in enumerating instance fields", e);
+            throw new BsonSerializationException(
+                "Unable to create Bson codec for" + clazz.getName() + " because " + e.getMessage()
+            );
+        }
     }
 
     @Override
@@ -81,6 +89,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
                 getEncoderClass().getName(), e.getMessage()
             ));
         } catch (IllegalAccessException e) {
+            LOGGER.error("Illlegal access error in deserialization", e);
             throw new BsonSerializationException(
                 String.format("Unable to construct class %s: %s.",
                     getEncoderClass().getName(), e.getMessage()
@@ -132,14 +141,12 @@ public class BsonSerializableCodec <T> implements Codec<T> {
                 ));
             }
 
-            ReflectionTools.fieldAccessibleContext(field, () -> {
-                FieldDecoder fieldDecoder = FIELD_DECODERS.get(field.getType());
-                if(fieldDecoder != null) {
-                    fieldDecoder.decode(reader, field, decoded);
-                } else {
-                    field.set(decoded, decodeType(reader, field.getGenericType(), field.getType()));
-                }
-            });
+            FieldDecoder fieldDecoder = FIELD_DECODERS.get(field.getType());
+            if(fieldDecoder != null) {
+                fieldDecoder.decode(reader, field, decoded);
+            } else {
+                field.set(decoded, decodeType(reader, field.getGenericType(), field.getType()));
+            }
 
             unsetFields.remove(field);
         }
@@ -162,15 +169,13 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
         writer.writeStartDocument();
         for (Field field : fields) {
-            ReflectionTools.fieldAccessibleContext(field, () -> {
-                FieldEncoder fieldEncoder = FIELD_ENCODERS.get(field.getType());
-                if (fieldEncoder != null) {
-                    fieldEncoder.encode(writer, field, value);
-                } else {
-                    writer.writeName(field.getName());
-                    encodeType(writer, field.getGenericType(), field.getType(), field.get(value));
-                }
-            });
+            FieldEncoder fieldEncoder = FIELD_ENCODERS.get(field.getType());
+            if (fieldEncoder != null) {
+                fieldEncoder.encode(writer, field, value);
+            } else {
+                writer.writeName(field.getName());
+                encodeType(writer, field.getGenericType(), field.getType(), field.get(value));
+            }
         }
         writer.writeEndDocument();
     }
@@ -544,9 +549,12 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         return map;
     }
 
-    private static Map<String, Field> collectFields(Collection<Field> fields) {
+    private static Map<String, Field> collectFields(Collection<Field> fields)
+        throws IllegalArgumentException, IllegalAccessException
+    {
         Map<String, Field> fieldMap = new HashMap<>(fields.size());
         for(Field f: fields) {
+            ReflectionTools.setAccessible(f);
             fieldMap.put(f.getName(), f);
         }
         return fieldMap;

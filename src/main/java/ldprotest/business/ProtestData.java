@@ -27,8 +27,9 @@ import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.serialization.Sanitizable;
 import ldprotest.server.infra.http.Sanitize;
+import ldprotest.util.interfaces.Validatable;
 
-public class ProtestData implements JsonSerializable, Sanitizable<ProtestData> {
+public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, Validatable {
 
     private static final String COLLECTION_NAME = "protests";
 
@@ -83,12 +84,15 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData> {
         this(location, Optional.of(owner), title, description, date, Optional.empty());
     }
 
+    @Override
     public boolean validate() {
         if(title.length() > MAX_TITLE_LENGTH) {
             return false;
         } else if(description.length() > MAX_DESCRIPTION_LENGTH) {
             return false;
         } else if(dressCode.isPresent() && dressCode.get().length() > MAX_DRESS_CODE_LENGTH) {
+            return false;
+        } else if(!location.validate()) {
             return false;
         } else {
             return true;

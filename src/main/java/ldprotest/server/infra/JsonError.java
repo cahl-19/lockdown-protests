@@ -56,6 +56,10 @@ public class JsonError implements JsonSerializable {
         this.details = Optional.empty();
     }
 
+    public static JsonError invalidParams(String explanation) {
+        return new JsonError(ServerErrorCode.INVALID_REQUEST_PARAMS, new Explanation(explanation));
+    }
+
     public static JsonError invalidBody(String explanation) {
         return new JsonError(ServerErrorCode.INVALID_REQUEST_BODY, new Explanation(explanation));
     }
@@ -86,7 +90,8 @@ public class JsonError implements JsonSerializable {
         CONTENT_TYPE_ERROR(2, "invalid content-type"),
         LOGIN_FAILURE(3, "Invalid user or password"),
         UNAUTHORIZED_FAILURE(4, "Unauthorized or auth expired"),
-        INVALID_REQUEST_BODY(5, "Body of request has invalid data");
+        INVALID_REQUEST_BODY(5, "Body of request has invalid data"),
+        INVALID_REQUEST_PARAMS(6, "Invalid query parameters");
 
         private final int code;
         private final String description;

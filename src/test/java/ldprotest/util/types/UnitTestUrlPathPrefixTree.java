@@ -19,8 +19,8 @@ package ldprotest.util.types;
 
 import java.util.Arrays;
 import java.util.Optional;
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 public class UnitTestUrlPathPrefixTree {
 

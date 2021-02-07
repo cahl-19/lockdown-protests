@@ -118,7 +118,7 @@ public final class SecurityFilter {
 
             HttpVerbTypes method = HttpVerbTypes.fromString(request.requestMethod());
 
-            Optional<String> cookieToken = Optional.ofNullable(request.cookie(Login.LOGIN_COOKIE_NAME));
+            Optional<String> cookieToken = optCookieValue(request.cookie(Login.LOGIN_COOKIE_NAME));
             Optional<String> bearerToken = extractBearer(request);
 
             setupUserAuth(cookieToken, bearerToken);
@@ -331,6 +331,14 @@ public final class SecurityFilter {
 
             LOGGER.warn("Request for unconfigured subdirectory. Full request path: {}", path);
             throw halt(HttpStatus.UNAUTHORIZED_401, "Unauthorized");
+    }
+
+    private static Optional<String> optCookieValue(String value) {
+        if(value == null || value.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(value);
+        }
     }
 
     private static String prefix(String path) {

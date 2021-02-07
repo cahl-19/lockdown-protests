@@ -106,7 +106,7 @@ public final class Login {
     }
 
     public static CookieAttributes deleteTokenCookie(boolean usingUttps) {
-        return new CookieAttributes("/", LOGIN_COOKIE_NAME, "", 0, usingUttps, true);
+        return new CookieAttributes("/", LOGIN_COOKIE_NAME, "", -1, usingUttps, true);
     }
 
     private static final class LoginJson implements JsonSerializable {

@@ -21,12 +21,88 @@
 import $ from 'jquery';
 import L from 'leaflet';
 import api from 'api';
+import sanitize from 'sanitize'
 
 import Popper from 'popper.js';
 import 'bootstrap';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
+function normalize_longitude(lng) {
+    while(lng < -180) {
+        lng += 360;
+    }
+    while(lng > 180) {
+        lng -= 360;
+    }
+    return lng;
+}
+/**********************************************************************************************************************/
+function denormalize_longitude(lng, lngCenter) {
+    while(Math.abs(lngCenter - lng) > 180.0) {
+        if(lng < lngCenter) {
+            lng += 360.0;
+        } else {
+            lng -= 360.0;
+        }
+    }
+
+    return lng;
+}
+/**********************************************************************************************************************/
+function load_protests(map) {
+
+    let bounds = map.getBounds();
+
+    let north = bounds._northEast.lat;
+    let west = normalize_longitude(bounds._southWest.lng);
+    let south = bounds._southWest.lat;
+    let east = normalize_longitude(bounds._northEast.lng);
+
+    api.call(
+        `/api/pins`,
+        'GET',
+        {'SW': `${south},${west}`, 'NE': `${north},${east}`},
+        (data) => {
+            data.protests.forEach((protest) => {
+
+                let lat = protest.location.latitude;
+                let lng = denormalize_longitude(
+                    protest.location.longitude, map.getCenter().lng
+                );
+
+                let title = sanitize.encode_api_html(protest.title);
+                let owner = sanitize.encode_api_html(protest.owner);
+                let description = sanitize.encode_api_html(protest.description);
+
+                let mark = L.marker([lat, lng]).addTo(map);
+                mark.bindPopup(
+                    `<p><strong>${title}</strong> - by ${owner}</p>` +
+                    `<p><strong>Description: </strong></br>${description}</p>`
+                );
+            });
+        },
+        () => {
+            alert('error loading protests');
+        }
+    );
+}
+/**********************************************************************************************************************/
+function display_map_bounds(map) {
+    let bounds = map.getBounds();
+
+    let north = bounds._northEast.lat;
+    let west = normalize_longitude(bounds._southWest.lng);
+    let south = bounds._southWest.lat;
+    let east = normalize_longitude(bounds._northEast.lng);
+
+    $('#map-info').html(
+        `<p><strong>Map Bounds:</strong></p>` +
+        `<p>South West: ${south.toFixed(2)}, ${west.toFixed(2)}</br>` +
+        `North East: ${north.toFixed(2)}, ${east.toFixed(2)}</p>`
+    );
+}
+/**********************************************************************************************************************/
 function setup_map() {
     api.call(
         '/api/test/map-api-token',
@@ -49,6 +125,8 @@ function init_map(api_token) {
 
     L.Icon.Default.imagePath = 'assets/leaflet/';
 
+    mymap.setMinZoom(1);
+
     L.tileLayer(url, {
         attribution: (
             'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
@@ -62,24 +140,33 @@ function init_map(api_token) {
         }
     ).addTo(mymap);
 
-    let marker = L.marker([51.5, -0.09]).addTo(mymap);
+    display_map_bounds(mymap);
+    load_protests(mymap);
 
-    marker.bindPopup("<b>Lockdown Protest at 18:00:00 UTC</b><br>Be, there, dress in black.").openPopup();
+    mymap.on('zoomend', () => {
+        display_map_bounds(mymap);
+        load_protests(mymap);
+    });
+    mymap.on('moveend', () => {
+        display_map_bounds(mymap);
+        load_protests(mymap);
+    });
 
     mymap.on('click', (ev) => {
         let username = api.whoami();
-        let mark = L.marker([ev.latlng.lat, ev.latlng.lng]).addTo(mymap);
-        mark.bindPopup(`<p>Lat: ${ev.latlng.lat}</p><p>Long: ${ev.latlng.lng}</p>`).openPopup();
 
         if(username === undefined) {
             return;
         }
 
+        let mark = L.marker([ev.latlng.lat, ev.latlng.lng]).addTo(mymap);
+        mark.bindPopup(`<p>Lat: ${ev.latlng.lat}</p><p>Long: ${ev.latlng.lng}</p>`).openPopup();
+
         let protest = {
             'location': {'latitude': ev.latlng.lat, 'longitude': ev.latlng.lng},
             'owner': username,
             'title': 'Test-Protest',
-            'description': 'test description <script></script>',
+            'description': 'test description <strong>Test</strong><script>alert("xss");</script>',
             'dressCode': 'Neked',
             'date': 0
         };
@@ -93,6 +180,6 @@ function error_map(error_message) {
 }
 /**********************************************************************************************************************/
 $(document).ready(function() {
-   setup_map();
+    api.clean_dead_sessions().then(setup_map);
 });
 /**********************************************************************************************************************/

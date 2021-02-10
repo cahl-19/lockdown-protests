@@ -63,7 +63,7 @@ public class JsonSerialization {
         public ZonedDateTime deserialize(
             JsonElement je, Type type, JsonDeserializationContext jdc
         ) throws JsonParseException {
-            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(je.getAsInt()), ZoneOffset.UTC);
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(je.getAsLong()), ZoneOffset.UTC);
         }
     }
 

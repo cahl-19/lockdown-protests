@@ -188,10 +188,16 @@ function load_protests(map) {
                 let title = sanitize.encode_api_html(protest.title);
                 let owner = sanitize.encode_api_html(protest.owner);
                 let description = sanitize.encode_api_html(protest.description);
+                let dress_code = sanitize.encode_api_html(protest.dressCode);
+                let date = new Date(protest.date);
+
+                let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(date);
 
                 let mark = L.marker([lat, lng]).addTo(map);
                 mark.bindPopup(
-                    `<p><strong>${title}</strong> - by ${owner}</p>` +
+                    `<p><strong>${title}</strong> - by ${owner}}</p>` +
+                    `<p><strong>Scheduled for:</strong> ${dt}</p>` +
+                    `<p><strong>Dresss Code:</strong> ${dress_code} </p>` +
                     `<p><strong>Description: </strong></br>${description}</p>`
                 );
             });

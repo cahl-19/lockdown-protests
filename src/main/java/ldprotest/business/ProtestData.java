@@ -33,6 +33,7 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
 
     private static final String COLLECTION_NAME = "protests";
 
+    private static final int MIN_TITLE_LENGTH = 4;
     private static final int MAX_TITLE_LENGTH = 256;
     private static final int MAX_DESCRIPTION_LENGTH = 768;
     private static final int MAX_DRESS_CODE_LENGTH = 128;
@@ -87,6 +88,8 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
     @Override
     public boolean validate() {
         if(title.length() > MAX_TITLE_LENGTH) {
+            return false;
+        } else if(title.length() < MIN_TITLE_LENGTH) {
             return false;
         } else if(description.length() > MAX_DESCRIPTION_LENGTH) {
             return false;

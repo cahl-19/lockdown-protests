@@ -14,8 +14,7 @@ body, html {
 }
 
 .topbar {
-    height: 10%;
-    max-height: 60px;
+    height: 60px;
     border-bottom: solid;
     border-width: thin;
     border-collapse: collapse;
@@ -27,6 +26,7 @@ body, html {
     border-collapse: collapse;
     padding-left: 0px;
     padding-right: 0px;
+    height: 100%;
 }
 
 .map-outer-div {
@@ -36,9 +36,7 @@ body, html {
 }
 
 .content-area {
-    min-height: 90%;
-    max-height: 99%;
-    height: 99%;
+    height: calc(100% - 60px);
 }
 
 .chat-card {
@@ -46,6 +44,44 @@ body, html {
     border-width: thin;
     padding: 5px;
     margin-bottom: 5px;
+}
+
+.pin-card {
+    border-style: solid;
+    border-width: thin;
+    padding: 5px;
+    height: 80px;
+}
+
+.sidebar-spacer {
+   margin: 0;
+   padding: 0;
+   height: 0px;
+}
+
+.select_disable {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+}
+
+.protest-location {
+    margin-bottom: 10px;
+}
+
+#droppable-pin {
+    /*cursor: grab;*/
+}
+
+#map-info {
+    height: 116px;
 }
 
 #mapdiv {

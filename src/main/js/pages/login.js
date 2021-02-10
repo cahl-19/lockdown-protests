@@ -21,6 +21,8 @@
 import $ from 'jquery';
 import api from 'api';
 
+import '!style-loader!css-loader!bootstrap/dist/css/bootstrap.min.css';
+
 import Popper from 'popper.js';
 import 'bootstrap';
 /***********************************************************************************************************************
@@ -44,6 +46,6 @@ function setup_login_form() {
 }
 /**********************************************************************************************************************/
 $(document).ready(function() {
-   setup_login_form();
+   api.clean_dead_sessions().then(setup_login_form);
 });
 /**********************************************************************************************************************/

@@ -81,15 +81,24 @@ module.exports = {
         "type": "filesystem",
         "cacheDirectory": path.resolve(__dirname, CACHE)
     },
-    optimization: {
+    "optimization": {
         "minimize": true,
         "minimizer": [new TerserPlugin({cache: path.resolve(__dirname, CACHE)})],
         "splitChunks": {
             "chunks": "all"
         }
     },
-    output: {
+    "output": {
         "path": path.resolve(__dirname, OUTPUT_DIRECTORY)
+    },
+    "module": {
+        rules: [
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader'],
+                include: [path.resolve(__dirname, NODE_MODULES_PATH)]
+            }
+        ]
     }
 };
 /**********************************************************************************************************************/

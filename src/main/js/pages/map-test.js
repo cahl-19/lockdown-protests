@@ -195,7 +195,7 @@ function load_protests(map) {
 
                 let mark = L.marker([lat, lng]).addTo(map);
                 mark.bindPopup(
-                    `<p><strong>${title}</strong> - by ${owner}}</p>` +
+                    `<p><strong>${title}</strong> - by ${owner}</p>` +
                     `<p><strong>Scheduled for:</strong> ${dt}</p>` +
                     `<p><strong>Dresss Code:</strong> ${dress_code} </p>` +
                     `<p><strong>Description: </strong></br>${description}</p>`

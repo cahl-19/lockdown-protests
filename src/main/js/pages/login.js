@@ -36,7 +36,7 @@ function setup_login_form() {
         api.login(
             $('#email-input').val(), $('#password-input').val(),
             () => {
-                alert('success');
+                window.location.replace('/');
             },
             (status, error) => {
                 alert(`Error: ${status} - ${error.description}`);

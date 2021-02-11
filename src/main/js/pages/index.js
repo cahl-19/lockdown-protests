@@ -392,7 +392,7 @@ function setup_protest_form() {
         };
 
         api.call(
-            '/api/pins', 'POST', protest, () => modal.modal('hide'), () => alert('failure')
+            '/api/pins', 'POST', protest, () => window.location.reload(true), () => alert('failure')
         );
 
     });

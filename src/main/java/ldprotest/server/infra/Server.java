@@ -30,7 +30,6 @@ import ldprotest.server.endpoints.Logout;
 import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.TokenRefresh;
 import ldprotest.server.endpoints.WhoAmI;
-import ldprotest.server.endpoints.test.EchoTest;
 import ldprotest.server.endpoints.test.MapApiToken;
 import ldprotest.server.infra.templates.ServeWebpack;
 
@@ -90,7 +89,6 @@ public class Server {
         ServeWebpack webpacker = new ServeWebpack(scriptBundles);
 
         webpacker.page("index").serve("/");
-        webpacker.page("map-test").serve("/map-test");
         webpacker.page("login").serve("/login");
 
         SecurityFilter.add("/" + WEBPACK_BUNDLES_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
@@ -101,7 +99,6 @@ public class Server {
     }
 
     private static void serveDynamicTestEndpoints() {
-        EchoTest.register();
         MapApiToken.register();
     }
 }

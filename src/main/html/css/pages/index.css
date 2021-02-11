@@ -84,10 +84,6 @@ body, html {
     /*cursor: grab;*/
 }
 
-#map-info {
-    height: 116px;
-}
-
-#mapdiv {
+#map-div {
     height: 100%;
 }

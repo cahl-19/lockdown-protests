@@ -280,6 +280,12 @@ function setup_sidebar() {
     $('.sidebar > .chat-card').each(function() {
         chat_height += $(this).outerHeight();
     });
+
+
+    if(api.whoami() !== undefined) {
+        $('#pin-card').removeClass('hidden');
+    }
+
     let pin_card_height = $('.pin-card').outerHeight();
     let pad = $('.sidebar').outerHeight() - $('.sidebar').innerHeight();
 

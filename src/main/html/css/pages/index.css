@@ -4,6 +4,10 @@ body, html {
     margin: 0;
 }
 
+.hidden {
+    display: none;
+}
+
 .main {
     width: 100vw;
     height: 100%;

@@ -30,6 +30,8 @@ body, html {
     border-collapse: collapse;
     padding-left: 0px;
     padding-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 10px;
     height: 100%;
 }
 
@@ -43,18 +45,40 @@ body, html {
     height: calc(100% - 60px);
 }
 
-.chat-card {
+.login-card {
     border-style: dotted;
     border-width: thin;
-    padding: 5px;
-    margin-bottom: 5px;
+    padding: 15px;
+    margin: 5px;
+    height: 100%;
+}
+
+.layout-table {
+    margin: 0px;
+    padding: 0px;
+    border-style: none;
+    height: 100%;
+    width: 100%;
+}
+
+.login-button {
+    width: 100%;
 }
 
 .pin-card {
-    border-style: solid;
+    border-style: dotted;
     border-width: thin;
-    padding: 5px;
-    height: 80px;
+    padding: 15px;
+    margin: 5px;
+    height: 100px;
+}
+
+.notification-card {
+    border-style: dotted;
+    border-width: thin;
+    padding: 15px;
+    margin: 5px;
+    height: calc(100% - 105px);
 }
 
 .sidebar-spacer {

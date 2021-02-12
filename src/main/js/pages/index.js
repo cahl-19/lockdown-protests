@@ -147,20 +147,12 @@ function setup_click_drag_pin(map) {
 /**********************************************************************************************************************/
 function setup_sidebar() {
 
-    let chat_height = 0;
-    $('.sidebar > .chat-card').each(function() {
-        chat_height += $(this).outerHeight();
-    });
-
-
-    if(api.whoami() !== undefined) {
-        $('#pin-card').removeClass('hidden');
+    if(api.whoami() === undefined) {
+        return;
     }
 
-    let pin_card_height = $('.pin-card').outerHeight();
-    let pad = $('.sidebar').outerHeight() - $('.sidebar').innerHeight();
-
-    $('.sidebar-spacer').css('height', `calc(100% - ${chat_height + pin_card_height  + pad + 15}px`);
+    $('#pin-card').removeClass('hidden');
+    $('#notification-card').removeClass('hidden');
 }
 /**********************************************************************************************************************/
 function setup_protest_form() {
@@ -252,9 +244,37 @@ function setup_protest_form() {
     });
 }
 /**********************************************************************************************************************/
+function setup_login() {
+
+    if(api.whoami() !== undefined) {
+        return;
+    }
+
+    $('#login-card').removeClass('hidden');
+
+    $('#login-button').on('click', () => {
+        $('#login-modal').modal('show');
+    });
+
+    $('#submit-login').on('click', (ev) => {
+        ev.preventDefault();
+
+        api.login(
+            $('#email-input').val(), $('#password-input').val(),
+            () => {
+                window.location.reload(true);
+            },
+            (status, error) => {
+                alert(`Error: ${status} - ${error.description}`);
+            }
+        );
+    });
+}
+/**********************************************************************************************************************/
 function setup() {
 
     setup_sidebar();
+    setup_login();
     setup_protest_form();
 
     protest_map.init_map($('#map-div')).then((map) => {

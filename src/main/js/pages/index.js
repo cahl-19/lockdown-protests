@@ -145,6 +145,11 @@ function setup_click_drag_pin(map) {
     });
 }
 /**********************************************************************************************************************/
+function setup_window_pane() {
+    let topbar = $('.topbar');
+    let content = $('.content-area');
+}
+/**********************************************************************************************************************/
 function setup_sidebar() {
 
     if(api.whoami() === undefined) {
@@ -272,7 +277,7 @@ function setup_login() {
 }
 /**********************************************************************************************************************/
 function setup() {
-
+    setup_window_pane();
     setup_sidebar();
     setup_login();
     setup_protest_form();

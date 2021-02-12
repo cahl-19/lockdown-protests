@@ -3,49 +3,57 @@
 {{/inline}}
 
 {{#*inline "body"}}
-    <div class="container-fluid main">
-        <div class="row topbar">
-            <div class="col-sm-12 text-center"><h1 class="h1">Lockdown Protest Planner</h1></div>
-        </div>
-        <div class="row content-area">
-            <div class="d-none d-md-block col-md-2 sidebar">
-
-                <div class="login-card text-center hidden" id="login-card">
-                    <table class="layout-table"><tbody><tr>
-                        <td class="align-middle">
-                            <div>
-                                <button type="button" class="btn btn-primary login-button" id="login-button">
-                                    Login
-                                </button>
-                            </div>
-                            <div><strong>Or</strong></div>
-                            <div>
-                                <button type="button" class="btn btn-primary login-button" id="register-button">
-                                    Register
-                                </button>
-                            </div>
-                            <small class="text-muted">To Create and Sign-Up For Protests</small>
-                        </td>
-                    </tr></tbody></table>
-                </div>
-
-                <div class="notification-card text-center hidden" id="notification-card">
-                    <table class="layout-table"><tbody><tr>
-                        <td class="align-middle">
-                            <span class="text-muted">No New Notifications.</span>
-                        </td>
-                    </tr></tbody></table>
-                </div>
-
-                <div class="pin-card text-center hidden" id="pin-card">
-                    <div>Drop a Pin</div>
-                    <img
-                        id='droppable-pin' class='select_disable' ondragstart="return false;"
-                        draggable="false" src="/assets/leaflet/marker-icon.png" alt='no-image'
-                    >
+    <div class="main">
+        <div class="topbar">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-12 text-center"><h1 class="h1">Lockdown Protest Planner</h1></div>
                 </div>
             </div>
-            <div class="h-100 col-sm-12 col-md-10 map-outer-div"><div id="map-div"></div></div>
+        </div>
+        <div class="content-area">
+            <div class="containuer-fluid">
+                <div class="row">
+                    <div class="d-none d-md-block col-md-2 sidebar">
+
+                        <div class="login-card text-center hidden" id="login-card">
+                            <table class="layout-table"><tbody><tr>
+                                <td class="align-middle">
+                                    <div>
+                                        <button type="button" class="btn btn-primary login-button" id="login-button">
+                                            Login
+                                        </button>
+                                    </div>
+                                    <div><strong>Or</strong></div>
+                                    <div>
+                                        <button type="button" class="btn btn-primary login-button" id="register-button">
+                                            Register
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">To Create and Sign-Up For Protests</small>
+                                </td>
+                            </tr></tbody></table>
+                        </div>
+
+                        <div class="notification-card text-center hidden" id="notification-card">
+                            <table class="layout-table"><tbody><tr>
+                                <td class="align-middle">
+                                    <span class="text-muted">No New Notifications.</span>
+                                </td>
+                            </tr></tbody></table>
+                        </div>
+
+                        <div class="pin-card text-center hidden" id="pin-card">
+                            <div>Drop a Pin</div>
+                            <img
+                                id='droppable-pin' class='select_disable' ondragstart="return false;"
+                                draggable="false" src="/assets/leaflet/marker-icon.png" alt='no-image'
+                            >
+                        </div>
+                    </div>
+                    <div class="h-100 col-sm-12 col-md-10 map-outer-div"><div id="map-div"></div></div>
+                </div>
+            </div>
         </div>
     </div>
 

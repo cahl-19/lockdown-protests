@@ -78,6 +78,9 @@ function load_protests(map) {
                 let dress_code = sanitize.encode_api_html(protest.dressCode);
                 let date = new Date(protest.date);
 
+                console.log(protest.description);
+                console.log(description);
+
                 let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(date);
 
                 let mark = L.marker([lat, lng]).addTo(map);

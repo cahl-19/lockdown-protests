@@ -191,7 +191,7 @@ function setup_protest_form() {
 
     function validate_date() {
 
-        let dt = date_from_inputs(date, time);f
+        let dt = date_from_inputs(date, time);
 
         if(dt === undefined) {
             let msg = 'Date & time are required';

@@ -23,7 +23,7 @@ const ENTITY_MAP = {
   '<': '&lt;',
   '>': '&gt;',
   '"': '&quot;',
-  "'": '&#39;',
+  "'": '&#x27;',
   '/': '&#x2F;',
   '`': '&#x60;',
   '=': '&#x3D;'
@@ -34,7 +34,7 @@ const REV_ENTITY_MAP = {
   '&lt;': '<',
   '&gt;': '>',
   '&quot;': '"',
-  '&#39;': "'",
+  '&#x27;': "'",
   '&#x2F;': '/',
   '&#x60;': '`',
   '&#x3D;': '='
@@ -49,7 +49,7 @@ function __encode_html(text) {
 }
 /**********************************************************************************************************************/
 function __decode_html(text) {
-  return String(text).replace(/&(amp;|lt;|gt;|quot;|#39;|#x2F;|#x60;|#x3D;)/g, (s) => {
+  return String(text).replace(/&(amp;|lt;|gt;|quot;|#x27;|#x2F;|#x60;|#x3D;)/g, (s) => {
     return REV_ENTITY_MAP[s];
   });
 }

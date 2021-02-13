@@ -158,6 +158,8 @@ function setup_sidebar() {
 
     $('#pin-card').removeClass('hidden');
     $('#notification-card').removeClass('hidden');
+
+    $('#drop-pin-menu-item').removeClass('hidden');
 }
 /**********************************************************************************************************************/
 function setup_protest_form() {
@@ -256,8 +258,10 @@ function setup_login() {
     }
 
     $('#login-card').removeClass('hidden');
+    $('#login-menu-item').removeClass('hidden');
+    $('#register-menu-item').removeClass('hidden');
 
-    $('#login-button').on('click', () => {
+    $('#login-button,#login-menu-item').on('click', () => {
         $('#login-modal').modal('show');
     });
 

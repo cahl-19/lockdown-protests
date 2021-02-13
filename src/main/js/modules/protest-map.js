@@ -96,7 +96,15 @@ function load_protests(map) {
 }
 /**********************************************************************************************************************/
 function config_map(map_div, api_token) {
-    let map = L.map(map_div.attr('id')).setView([51.505, -0.09], 13);
+
+    let map = L.map(
+        map_div.attr('id'),
+        {
+            tap: false
+        }
+    ).setView([51.505, -0.09], 13);
+
+
     let url = `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${api_token}`;
 
     L.Icon.Default.imagePath = 'assets/leaflet/';
@@ -112,7 +120,7 @@ function config_map(map_div, api_token) {
         id: 'mapbox/streets-v11',
         tileSize: 512,
         zoomOffset: -1,
-        accessToken: 'your.mapbox.access.token'
+        accessToken: 'your.mapbox.access.token',
         }
     ).addTo(map);
 

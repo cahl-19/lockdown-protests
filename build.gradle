@@ -58,19 +58,20 @@ task copyVersionInfo(type: Copy) {
     into file("${buildDir}/resources/main/info")
 }
 
-task copyNpmAssets {
-    dependsOn yarn_build
-
-    copy {
+task copyLeafletAssets(type: Copy) {
         from file("${buildDir}/node_modules/leaflet/dist/images")
         into file("${buildDir}/resources/main/assets/leaflet/")
-    }
+}
 
-    copy {
+task copyBootsrapAssets(type: Copy) {
         from file("${buildDir}/node_modules/bootstrap-icons/bootstrap-icons.svg")
         into file("${buildDir}/resources/main/assets/bootstrap/")
-    }
 }
+
+task copyNpmAssets {
+    dependsOn copyLeafletAssets, copyBootsrapAssets
+}
+
 
 node {
     nodeModulesDir = file("${buildDir}/node_modules")
@@ -89,8 +90,12 @@ classes {
 }
 
 compileJava {
-    dependsOn yarn_build, copyNpmAssets
+    dependsOn yarn_build
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
+jar {
+    dependsOn copyNpmAssets
 }
 
 test {

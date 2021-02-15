@@ -41,7 +41,8 @@ function event_client_xy(ev) {
 /**********************************************************************************************************************/
 function event_offset_xy(ev) {
     if (ev.touches !== undefined) {
-        return {'x': ev.touches[0].offsetX, 'y': ev.touches[0].offsetY};
+        let rect = ev.target.getBoundingClientRect();
+        return {'x': ev.targetTouches[0].pageX - rect.left, 'y': ev.targetTouches[0].pageY - rect.top};
     } else {
         return {'x': ev.offsetX, 'y': ev.offsetY};
     }
@@ -123,6 +124,9 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
     };
 
     pin.on('mousedown touchstart', (mousedown_ev) => {
+
+        mousedown_ev.preventDefault();
+
         if(state.modal_open || !state.pin_reset) {
             return;
         }
@@ -149,6 +153,7 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
             pin.css('top', event_client_xy(mousemove_ev).y - offsetY);
         });
         $(document.body).on('mouseup.pindrag touchend.pindrag', (mouseup_ev) => {
+            try{
             mouseup_ev.preventDefault();
 
             $(document.body).off('mousemove.pindrag touchmove.pindrag');
@@ -182,6 +187,9 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
 
             state.modal_open = true;
             protest_form_modal.modal('show');
+            } catch(error) {
+                alert(error);
+            }
         });
         $(document.body).on('touchcancel.pindrag', () => {
 

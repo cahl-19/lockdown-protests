@@ -245,7 +245,7 @@ public final class SecurityFilter {
                         "malicious activity"
                 ));
                 cookies.put(Login.LOGIN_COOKIE_NAME, Login.deleteTokenCookie());
-                throw halt(HttpStatus.UNAUTHORIZED_401, "Unauthorized");
+                return new AuthInfo(UserRole.UNAUTHENTICATED, attributes, cookies);
             }
             if(!cookieSession.get().sessionId.equals(bearerSession.get().sessionId)) {
                 LOGGER.warn((
@@ -253,7 +253,7 @@ public final class SecurityFilter {
                         "malicious activity"
                 ));
                 cookies.put(Login.LOGIN_COOKIE_NAME, Login.deleteTokenCookie());
-                throw halt(HttpStatus.UNAUTHORIZED_401, "Unauthorized");
+                return new AuthInfo(UserRole.UNAUTHENTICATED, attributes, cookies);
             }
         }
 

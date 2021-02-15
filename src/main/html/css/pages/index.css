@@ -116,14 +116,15 @@ body, html {
     -moz-user-drag: none;
     -o-user-drag: none;
     user-drag: none;
+    -webkit-touch-callout: none;
 }
 
 .protest-location {
     margin-bottom: 10px;
 }
 
-#droppable-pin {
-    /*cursor: grab;*/
+.grabbable {
+    cursor: grab;
 }
 
 #map-div {

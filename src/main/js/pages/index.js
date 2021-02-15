@@ -31,16 +31,20 @@ import 'bootstrap';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
-function reposition_mouse_event(ev, x_adjust, y_adjust) {
-    ev.pageX -= x_adjust;
-    ev.offsetX -= x_adjust;
-    ev.clientX -= x_adjust;
-    ev.screenX -= x_adjust;
-
-    ev.pageY -= y_adjust;
-    ev.offsetY -= y_adjust;
-    ev.clientY -= y_adjust;
-    ev.screenY -= y_adjust;
+function event_client_xy(ev) {
+    if (ev.touches !== undefined) {
+        return {'x': ev.touches[0].clientX, 'y': ev.touches[0].clientY};
+    } else {
+        return {'x': ev.clientX, 'y': ev.clientY};
+    }
+}
+/**********************************************************************************************************************/
+function event_offset_xy(ev) {
+    if (ev.touches !== undefined) {
+        return {'x': ev.touches[0].offsetX, 'y': ev.touches[0].offsetY};
+    } else {
+        return {'x': ev.offsetX, 'y': ev.offsetY};
+    }
 }
 /**********************************************************************************************************************/
 function date_from_inputs(date, time) {
@@ -59,10 +63,39 @@ function date_from_inputs(date, time) {
         );
 }
 /**********************************************************************************************************************/
-function setup_click_drag_pin(map) {
+function setup_click_drag_pins(map) {
+    let desktop_pin = $('#droppable-pin');
+    let mobile_pin  = $('#mobile-droppable-pin');
 
-    let pin = $('#droppable-pin');
-    let modal = $('#protest-form-modal');
+    let mobile_pin_parent = mobile_pin.parent();
+
+    let protest_form_modal = $('#protest-form-modal');
+    let mobile_pin_modal = $('#pin-drop-modal');
+
+    activate_drop_pin(map, desktop_pin, protest_form_modal);
+
+    activate_drop_pin(
+        map, mobile_pin, protest_form_modal,
+        (pin) => {
+            pin.detach();
+            $(document.body).append(mobile_pin);
+            mobile_pin_modal.modal('hide');
+        },
+        (pin) => {
+            pin.detach();
+            mobile_pin_parent.append(mobile_pin);
+        }
+    );
+}
+/**********************************************************************************************************************/
+function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
+
+    if(on_grab === undefined) {
+        on_grab = () => {};
+    }
+    if(on_reset === undefined) {
+        on_reset = () => {};
+    }
 
     let pin_orig = pin.offset();
 
@@ -80,10 +113,11 @@ function setup_click_drag_pin(map) {
                 pin.css('position', 'static');
                 pin.css('left', '');
                 pin.css('top', '');
-                pin.css('z-index', 0);
+                pin.css('z-index', 'auto');
                 pin.css('cursor', 'grab');
 
                 state.pin_reset = true;
+                on_reset(pin);
             }
         );
     };
@@ -96,37 +130,49 @@ function setup_click_drag_pin(map) {
         state.pin_reset = false;
         state.over_map = false;
 
+        let offsetX = event_offset_xy(mousedown_ev).x;
+        let offsetY = event_offset_xy(mousedown_ev).y;
+
         pin.css('position', 'fixed');
         pin.css('z-index', 1040);
-
-        let offsetX = mousedown_ev.offsetX;
-        let offsetY = mousedown_ev.offsetY;
+        pin.css('left', event_client_xy(mousedown_ev).x - offsetX);
+        pin.css('top', event_client_xy(mousedown_ev).y - offsetY);
 
         pin.css('cursor', 'grabbing');
 
-        $(document).on('mousemove.pindrag touchmove.pindrag', (mousemove_ev) => {
+        on_grab(pin);
 
-            let x = mousemove_ev.pageX - offsetX;
-            let y = mousemove_ev.pageY - offsetY;
+        $(document.body).on('mousemove.pindrag touchmove.pindrag', (mousemove_ev) => {
+            mousemove_ev.preventDefault();
 
-            pin.css('left', x);
-            pin.css('top', y);
+            pin.css('left', event_client_xy(mousemove_ev).x - offsetX);
+            pin.css('top', event_client_xy(mousemove_ev).y - offsetY);
         });
-        $(document).on('mouseup.pindrag touchend.pindrag', (mouseup_ev) => {
+        $(document.body).on('mouseup.pindrag touchend.pindrag', (mouseup_ev) => {
+            mouseup_ev.preventDefault();
 
-            $(document).off('mousemove.pindrag touchmove.pindrag');
-            $(document).off('mouseup.pindrag touchend.pindrag');
+            $(document.body).off('mousemove.pindrag touchmove.pindrag');
+            $(document.body).off('mouseup.pindrag touchend.pindrag');
+            $(document.body).off('touchcancel.pindrag');
+
+            if(mouseup_ev.type === 'mouseup') {
+                pin.css('left', event_client_xy(mouseup_ev).x);
+                pin.css('top', event_client_xy(mouseup_ev).y);
+            }
+
+            let x = pin.position().left;
+            let y = pin.position().top;
 
             pin.css('cursor', 'auto');
 
-            reposition_mouse_event(mouseup_ev, offsetX - pin.width() / 2, offsetY - pin.height());
-
-            if(protest_map.mouse_event_outside_map(map, $('#map-div'), mouseup_ev)) {
+            if(protest_map.xy_outside_map(map, $('#map-div'), x, y)) {
                 restore_pin();
                 return;
             }
 
-            let position = map.mouseEventToLatLng(mouseup_ev);
+            let position = protest_map.xy_to_latlng(
+                    map, x - (offsetX - pin.width() / 2), y - (offsetY - pin.height())
+            );
 
             $('#display-protest-plan-location').text(
                 `Lat: ${position.lat.toFixed(3)}, Long: ${protest_map.normalize_longitude(position.lng.toFixed(3))}`
@@ -135,11 +181,19 @@ function setup_click_drag_pin(map) {
             $('#protest-longitude').val(position.lng);
 
             state.modal_open = true;
-            modal.modal('show');
+            protest_form_modal.modal('show');
+        });
+        $(document.body).on('touchcancel.pindrag', () => {
+
+            $(document).off('mousemove.pindrag touchmove.pindrag');
+            $(document).off('mouseup.pindrag touchend.pindrag');
+            $(document).off('touchcancel.pindrag');
+
+            restore_pin();
         });
     });
 
-    modal.on('hidden.bs.modal', () => {
+    protest_form_modal.on('hidden.bs.modal', () => {
         state.modal_open = false;
         restore_pin();
     });
@@ -158,8 +212,18 @@ function setup_sidebar() {
 
     $('#pin-card').removeClass('hidden');
     $('#notification-card').removeClass('hidden');
+}
+/**********************************************************************************************************************/
+function setup_menu() {
+    if(api.whoami() === undefined) {
+        $('#login-menu-item').removeClass('hidden');
+        $('#register-menu-item').removeClass('hidden');
+    } else {
+        let pin_drop_menu_item = $('#drop-pin-menu-item');
 
-    $('#drop-pin-menu-item').removeClass('hidden');
+        pin_drop_menu_item.removeClass('hidden');
+        pin_drop_menu_item.on('click', () => $('#pin-drop-modal').modal('show'));
+    }
 }
 /**********************************************************************************************************************/
 function setup_protest_form() {
@@ -258,8 +322,6 @@ function setup_login() {
     }
 
     $('#login-card').removeClass('hidden');
-    $('#login-menu-item').removeClass('hidden');
-    $('#register-menu-item').removeClass('hidden');
 
     $('#login-button,#login-menu-item').on('click', () => {
         $('#login-modal').modal('show');
@@ -283,11 +345,12 @@ function setup_login() {
 function setup() {
     setup_window_pane();
     setup_sidebar();
+    setup_menu();
     setup_login();
     setup_protest_form();
 
     protest_map.init_map($('#map-div')).then((map) => {
-        setup_click_drag_pin(map);
+        setup_click_drag_pins(map);
     });
 }
 /**********************************************************************************************************************/

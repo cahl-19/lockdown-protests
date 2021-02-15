@@ -142,8 +142,11 @@ export let protest_map = {
     'denormalize_longitude': denormalize_longitude,
     'normalize_longitude': normalize_longitude,
 
-    'mouse_event_outside_map': function(map, map_div, ev) {
-        let point = map.mouseEventToContainerPoint(ev);
+    'xy_to_latlng': function(map, x, y) {
+        return map.mouseEventToLatLng({'clientX': x, 'clientY': y});
+    },
+    'xy_outside_map': function(map, map_div, x, y) {
+        let point = map.mouseEventToContainerPoint({'clientX': x, 'clientY': y});
 
         if(point.x < 0 || point.y < 0) {
             return true;

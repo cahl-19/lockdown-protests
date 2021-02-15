@@ -67,7 +67,8 @@
                         <div class="pin-card text-center hidden" id="pin-card">
                             <div>Drop a Pin</div>
                             <img
-                                id='droppable-pin' class='select_disable' ondragstart="return false;"
+                                id='droppable-pin' class='grabbable select_disable'
+                                ondragstart="return false;" oncontextmenu="return false;"
                                 draggable="false" src="/assets/leaflet/marker-icon.png" alt='no-image'
                             >
                         </div>
@@ -155,7 +156,7 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h3 class="modal-title text-center">Enter Your Login Details</h3>
+            <h3 class="modal-title">Enter Your Login Details</h3>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -175,6 +176,28 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" id="submit-login">Login</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="pin-drop-modal">
+      <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+          <div class="modal-header d-block">
+            <h3 class="modal-title  text-center">Drop Me</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+                <div class="text-center">
+                    <img
+                        id='mobile-droppable-pin' class='grabbable select_disable'
+                        ondragstart="return false;" draggable="false" oncontextmenu="return false;"
+                        src="/assets/leaflet/marker-icon.png" alt='no-image'
+                    >
+                </div>
           </div>
         </div>
       </div>

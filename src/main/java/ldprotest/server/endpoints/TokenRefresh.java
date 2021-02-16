@@ -61,6 +61,7 @@ public class TokenRefresh {
                 .add(UserRole.ADMIN, HttpVerbTypes.POST)
                 .add(UserRole.MODERATOR, HttpVerbTypes.POST)
                 .add(UserRole.PLANNER, HttpVerbTypes.POST)
+                .setAuthEndpoint()
                 .build()
         );
 

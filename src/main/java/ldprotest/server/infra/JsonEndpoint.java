@@ -142,7 +142,12 @@ public final class JsonEndpoint {
         HttpVerbTypes method = SecurityFilter.httpVerbAttribute(request);
         UserRole role = SecurityFilter.userRoleAttr(request);
 
-        if(conf.isPermitted(UserRole.UNAUTHENTICATED, method) && role.equals(UserRole.UNAUTHENTICATED)) {
+        boolean unauthenticated_permitted = conf.isPermitted(UserRole.UNAUTHENTICATED, method);
+
+        if(unauthenticated_permitted && role.equals(UserRole.UNAUTHENTICATED)) {
+            return ErrorCode.success();
+        }
+        if(unauthenticated_permitted && conf.isAuthEndpoint()) {
             return ErrorCode.success();
         }
 

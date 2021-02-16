@@ -74,7 +74,7 @@ public class UserSessionInfo implements JsonSerializable {
     }
 
     public boolean expired() {
-        return createdAt.plusSeconds(SESSION_EXPIRES_SECONDS).isAfter(ServerTime.now());
+        return ServerTime.now().isAfter(createdAt.plusSeconds(SESSION_EXPIRES_SECONDS));
     }
 
     public UserInfo toUserInfo() {

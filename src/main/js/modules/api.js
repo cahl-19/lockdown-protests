@@ -204,23 +204,28 @@ export let api = {
                 fufilled();
             }
 
-            this.call(
-                '/api/whoami',
-                'GET',
-                {},
-                (data) => {
-                    if(!data.apiTokenValid) {
-                        localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
-                    }
-                    cb();
-                    fufilled();
-                },
-                (status, data) => {
-                    if(is_unauthorized(status, data)) {
-                        localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
-                    }
-                    cb();
-                    fufilled();
+            refresh(
+                fufilled,
+                () => {
+                    this.call(
+                        '/api/whoami',
+                        'GET',
+                        {},
+                        (data) => {
+                            if(!data.apiTokenValid) {
+                                localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
+                            }
+                            cb();
+                            fufilled();
+                        },
+                        (status, data) => {
+                            if(is_unauthorized(status, data)) {
+                                localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
+                            }
+                            cb();
+                            fufilled();
+                        }
+                    );
                 }
             );
         });

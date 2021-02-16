@@ -34,15 +34,35 @@ public class SecConfig {
     private static final EnumSet<HttpVerbTypes> NO_PERMS = EnumSet.noneOf(HttpVerbTypes.class);
 
     private final Map<UserRole, EnumSet<HttpVerbTypes>> conf;
+    private final boolean authEndpoint;
 
-    private SecConfig(Map<UserRole, EnumSet<HttpVerbTypes>> conf) {
+    private SecConfig(Map<UserRole, EnumSet<HttpVerbTypes>> conf, boolean authEndpoint) {
         this.conf = conf;
+        this.authEndpoint = authEndpoint;
     }
 
     public boolean isPermitted(UserRole role, HttpVerbTypes perm) {
         EnumSet<HttpVerbTypes> permissionSet = conf.getOrDefault(role, NO_PERMS);
 
         return permissionSet.contains(perm) || permissionSet.contains(HttpVerbTypes.ANY);
+    }
+
+    /**
+     * Is this endpoint involved in user authentication or session maintenance?
+     *
+     * Endpoints which are involved in authenticating or modifying the session state of users require special
+     * privileges in the user/session security model. In particular, they must be accessible both by clients in the
+     * authenticated and unauthenticated states as well as by users with expired tokens.
+     *
+     * This does not mean that requests to these endpoints should never be blocked under any conditions, however and
+     * in some cases (such as in the case of a malformed token) the security infrastructure may block the request.
+     *
+     * This value **must** not be set true for any endpoint which is not **directly** involved in
+     *
+     * @return true if this is an auth endpoint
+     */
+    public boolean isAuthEndpoint() {
+        return authEndpoint;
     }
 
     public static Builder builder() {
@@ -52,9 +72,11 @@ public class SecConfig {
     public static final class Builder {
 
         private final Map<UserRole, EnumSet<HttpVerbTypes>> conf;
+        private boolean authEndpoint;
 
         private Builder() {
             this.conf = new HashMap<>();
+            this.authEndpoint = false;
         }
 
         public Builder add(UserRole role, HttpVerbTypes... perms) {
@@ -67,8 +89,14 @@ public class SecConfig {
             return this;
         }
 
+        public Builder setAuthEndpoint() {
+            authEndpoint = true;
+
+            return this;
+        }
+
         public SecConfig build() {
-            return new SecConfig(conf);
+            return new SecConfig(conf, authEndpoint);
         }
     }
 }

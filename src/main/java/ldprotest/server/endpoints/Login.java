@@ -66,6 +66,7 @@ public final class Login {
                 .add(UserRole.ADMIN, HttpVerbTypes.POST)
                 .add(UserRole.MODERATOR, HttpVerbTypes.POST)
                 .add(UserRole.PLANNER, HttpVerbTypes.POST)
+                .setAuthEndpoint()
                 .build()
         );
 

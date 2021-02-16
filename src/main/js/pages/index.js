@@ -98,16 +98,15 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
         on_reset = () => {};
     }
 
-    let pin_orig = pin.offset();
-
     let state = {
         'modal_open': false,
         'pin_reset': true,
+        'pin_orig': pin.offset()
     };
 
     function restore_pin() {
         pin.animate(
-            {'top': pin_orig.top, 'left': pin_orig.left},
+            {'top': state.pin_orig.top, 'left': state.pin_orig.left},
             400,
             "swing",
             () => {
@@ -133,6 +132,7 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
 
         state.pin_reset = false;
         state.over_map = false;
+        state.pin_orig = pin.offset();
 
         let offsetX = event_offset_xy(mousedown_ev).x;
         let offsetY = event_offset_xy(mousedown_ev).y;
@@ -161,8 +161,8 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
             $(document.body).off('touchcancel.pindrag');
 
             if(mouseup_ev.type === 'mouseup') {
-                pin.css('left', event_client_xy(mouseup_ev).x);
-                pin.css('top', event_client_xy(mouseup_ev).y);
+                pin.css('left', event_client_xy(mouseup_ev).x - offsetX);
+                pin.css('top', event_client_xy(mouseup_ev).y - offsetY);
             }
 
             let x = pin.position().left;
@@ -176,7 +176,7 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
             }
 
             let position = protest_map.xy_to_latlng(
-                    map, x - (offsetX - pin.width() / 2), y - (offsetY - pin.height())
+                    map, x - pin.width() / 2, y - pin.height()
             );
 
             $('#display-protest-plan-location').text(

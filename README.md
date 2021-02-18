@@ -30,7 +30,11 @@ This app requires a Mongo version 4.2 database to run. The included
 docker-compose.yml can be used to download and start a containerized mongo
 server for testing and development using `docker-compose up`. It is up to
 you to download and configure a compatible version of docker and
-docker-compose.
+docker-compose. Note that the system package version of docker is usually
+out of date, and you will have to download manually from the internet.
+
+Note that the application has been tested with docker-compose version 1.25.x
+and Docker version 20.10.x (other versions may or may not work).
 
 The default username, password and database used for Mongo are `ldprotest`,
 `ldprotest` and `ldprotest` respectivley. This will eventually be made

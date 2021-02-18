@@ -23,6 +23,6 @@
         "css-loader": "^5.0.2"
     },
     "scripts": {
-        "build": "build/node_modules/.bin/webpack-cli --config=webpack.config.js --mode=development --display=errors-only"
+        "build": "build/node_modules/.bin/webpack-cli --config=webpack.config.js --display=errors-only"
     }
 }

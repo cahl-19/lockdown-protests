@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+
 plugins {
     id 'java'
     id 'application'
@@ -171,6 +172,19 @@ task makeRunScripts {
     }
 }
 
+
 build {
     dependsOn makeRunScripts
+}
+
+task release {
+    dependsOn build
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(release)) {
+        yarn_build.args = ["--mode=production"]
+    } else {
+        yarn_build.args = ["--mode=development"]
+    }
 }

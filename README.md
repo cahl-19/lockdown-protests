@@ -16,6 +16,8 @@ Build this project by executing `./gradlew build`. On completion, a script
 will be generated and written to ./scripts which you may execute to launch
 the webserver on [http://localhost:4567](http://localhost:4567).
 
+To produce an optomized/minified built, use `./gradlew release`.
+
 In order to use the test map you will need to obtain a
 [mapbox api token](https://www.mapbox.com/studio/account/tokens/) and supply
 it via the command  line when executing the run script (use -h, or --help

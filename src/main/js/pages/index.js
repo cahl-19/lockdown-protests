@@ -207,11 +207,6 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
     });
 }
 /**********************************************************************************************************************/
-function setup_window_pane() {
-    let topbar = $('.topbar');
-    let content = $('.content-area');
-}
-/**********************************************************************************************************************/
 function setup_sidebar() {
 
     if(api.whoami() === undefined) {
@@ -350,23 +345,23 @@ function setup_login() {
     });
 }
 /**********************************************************************************************************************/
-function setup() {
-    setup_window_pane();
-    setup_sidebar();
-    setup_menu();
-    setup_login();
-    setup_protest_form();
+function setup_auth_page() {
 
     protest_map.init_map($('#map-div')).then((map) => {
         setup_click_drag_pins(map);
     });
+
+    setup_sidebar();
+    setup_menu();
+    setup_login();
 }
 /**********************************************************************************************************************/
-function error_map(error_message) {
-    $('#map-div').html(`<p>Error initializing map: ${error_message}</p>`);
+function setup_unauth_page() {
+    setup_protest_form();
 }
 /**********************************************************************************************************************/
 $(document).ready(function() {
-    api.clean_dead_sessions().then(setup);
+    setup_unauth_page();
+    api.clean_dead_sessions().then(setup_auth_page);
 });
 /**********************************************************************************************************************/

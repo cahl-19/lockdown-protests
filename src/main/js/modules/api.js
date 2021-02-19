@@ -73,8 +73,12 @@ function refresh(success_cb, failure_cb) {
               success_cb();
           },
           error: function(jqXHR, text_status, error_thrown) {
-              failure_cb(jqXHR.status, parse_error_response(jqXHR.responseText), jqXHR, text_status, error_thrown);
-          }
+                let data = parse_error_response(jqXHR.responseText);
+                if(is_unauthorized(jqXHR.status, data)) {
+                    localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
+                }
+                failure_cb(jqXHR.status, data, jqXHR, text_status, error_thrown);
+            }
     });
 }
 /**********************************************************************************************************************/
@@ -104,6 +108,11 @@ function api_call(path, method, data, success_cb, failure_cb) {
                   failure_cb(jqXHR.status, parse_error_response(jqXHR.responseText), jqXHR, text_status, error_thrown);
               }
         });
+}
+/**********************************************************************************************************************/
+function decode_token() {
+    let token = localStorage.getItem(AUTHORIZATION_STORAGE_KEY);
+    return token ? jwt_decode(token) : undefined;
 }
 /**********************************************************************************************************************/
 export let api = {
@@ -194,40 +203,38 @@ export let api = {
         let token = localStorage.getItem(AUTHORIZATION_STORAGE_KEY);
         return token ? jwt_decode(token).role : undefined;
     },
-    'clean_dead_sessions': function(cb) {
-        if(cb === undefined) {
-            cb = () => {};
-        }
+    'clean_dead_sessions': function() {
+
+        let token = decode_token();
+        let now = Date.now();
 
         return new Promise( (fufilled) => {
-            if(this.whoami() === undefined) {
+
+            if(token === undefined) {
                 fufilled();
             }
 
-            refresh(
-                fufilled,
-                () => {
-                    this.call(
-                        '/api/whoami',
-                        'GET',
-                        {},
-                        (data) => {
-                            if(!data.apiTokenValid) {
-                                localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
-                            }
-                            cb();
-                            fufilled();
-                        },
-                        (status, data) => {
-                            if(is_unauthorized(status, data)) {
-                                localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
-                            }
-                            cb();
-                            fufilled();
+            if(now > token.exp) {
+                refresh(fufilled, fufilled);
+            } else {
+                this.call(
+                    '/api/whoami',
+                    'GET',
+                    {},
+                    (data) => {
+                        if(!data.apiTokenValid) {
+                            localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
                         }
-                    );
-                }
-            );
+                        fufilled();
+                    },
+                    (status, data) => {
+                        if(is_unauthorized(status, data)) {
+                            localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
+                        }
+                        fufilled();
+                    }
+                );
+            }
         });
     }
 };

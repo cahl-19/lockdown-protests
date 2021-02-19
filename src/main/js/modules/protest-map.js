@@ -167,7 +167,7 @@ export let protest_map = {
                 },
                 (status, err) => {
                     let description = err === undefined ? status : err.description;
-                    error_map(`Error retrieving API token from server - ${description}`);
+                    error_map(map_div, `Error retrieving API token from server - ${description}`);
                     fail();
                 }
             );

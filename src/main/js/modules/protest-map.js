@@ -52,13 +52,17 @@ function normalize_longitude(lng) {
         return lng;
     }
 /**********************************************************************************************************************/
-function load_protests(map) {
+function load_protests(map, display_error) {
     let bounds = map.getBounds();
 
     let north = bounds._northEast.lat;
     let west = normalize_longitude(bounds._southWest.lng);
     let south = bounds._southWest.lat;
     let east = normalize_longitude(bounds._northEast.lng);
+
+    if(display_error === undefined) {
+        display_error = (alert) => alert('error loading protests');
+    }
 
     api.call(
         `/api/pins`,
@@ -89,13 +93,13 @@ function load_protests(map) {
                 );
             });
         },
-        () => {
-            alert('error loading protests');
+        (status, error_body) => {
+            display_error(status, error_body);
         }
     );
 }
 /**********************************************************************************************************************/
-function config_map(map_div, api_token) {
+function config_map(map_div, api_token, config) {
 
     let map = L.map(
         map_div.attr('id'),
@@ -127,10 +131,10 @@ function config_map(map_div, api_token) {
     load_protests(map);
 
     map.on('zoomend', () => {
-        load_protests(map);
+        load_protests(map, config.display_error);
     });
     map.on('moveend', () => {
-        load_protests(map);
+        load_protests(map, config.display_error);
     });
 
     return map;
@@ -156,14 +160,19 @@ export let protest_map = {
             return false;
         }
     },
-    'init_map': function (map_div) {
+    'init_map': function (map_div, config) {
+
+        if(config === undefined) {
+            config = {};
+        }
+
         return new Promise((success, fail) => {
             api.call(
                 '/api/test/map-api-token',
                 'GET',
                 {},
                 (data) => {
-                    success(config_map(map_div, data.token));
+                    success(config_map(map_div, data.token, config));
                 },
                 (status, err) => {
                     let description = err === undefined ? status : err.description;

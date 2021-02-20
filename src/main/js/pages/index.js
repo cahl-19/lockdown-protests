@@ -22,6 +22,7 @@ import $ from 'jquery';
 import protest_map from 'protest-map';
 import api from 'api';
 import sanitize from 'sanitize'
+import display_error from 'display-error';
 
 import '!style-loader!css-loader!bootstrap/dist/css/bootstrap.min.css';
 import '!style-loader!css-loader?url=false!leaflet/dist/leaflet.css';
@@ -31,6 +32,18 @@ import 'bootstrap';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
+function popup_ajax_error(status, error_body) {
+    let error_popup = $('#error-popup');
+
+    if(error_body === undefined && status === 0){
+        return display_error.display(error_popup, 'Unable to complete request, lost connection to server.');
+    } else if(error_body !== undefined) {
+        return display_error.display(error_popup, `Error: ${status} - ${error.description}.`);
+    } else {
+        return display_error.display('Error completing request.');
+    }
+}
+/**********************************************************************************************************************/
 function make_spinner() {
     return $('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
 }
@@ -157,7 +170,6 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
             pin.css('top', event_client_xy(mousemove_ev).y - offsetY);
         });
         $(document.body).on('mouseup.pindrag touchend.pindrag', (mouseup_ev) => {
-            try{
             mouseup_ev.preventDefault();
 
             $(document.body).off('mousemove.pindrag touchmove.pindrag');
@@ -191,9 +203,6 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
 
             state.modal_open = true;
             protest_form_modal.modal('show');
-            } catch(error) {
-                alert(error);
-            }
         });
         $(document.body).on('touchcancel.pindrag', () => {
 
@@ -317,7 +326,11 @@ function setup_protest_form() {
         };
 
         api.call(
-            '/api/pins', 'POST', protest, () => window.location.reload(true), () => alert('failure')
+            '/api/pins',
+            'POST',
+            protest,
+            () => window.location.reload(true),
+            (status, error) => popup_ajax_error(status, error)
         );
     });
 }
@@ -362,12 +375,8 @@ function setup_login() {
                     password_input[0].setCustomValidity('Invalid username or password');
                     form[0].checkValidity();
                     form.addClass('was-validated');
-                } else if(error === undefined && status === 0){
-                    alert('Unable to complete request: Lost connection to server');
-                } else if(error !== undefined) {
-                    alert(`Error: ${status} - ${error.description}`);
                 } else {
-                    alert('Error completing request.');
+                    popup_ajax_error(status, error);
                 }
             }
         );
@@ -376,7 +385,11 @@ function setup_login() {
 /**********************************************************************************************************************/
 function setup_auth_page() {
 
-    protest_map.init_map($('#map-div')).then((map) => {
+    protest_map.init_map(
+        $('#map-div'), {
+            'display_error': (status, error) => popup_ajax_error(status, error).then(() => window.location.reload(true))
+        }
+    ).then((map) => {
         setup_click_drag_pins(map);
     });
 

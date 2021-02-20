@@ -31,6 +31,10 @@ import 'bootstrap';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
+function make_spinner() {
+    return $('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+}
+/**********************************************************************************************************************/
 function event_client_xy(ev) {
     if (ev.touches !== undefined) {
         return {'x': ev.touches[0].clientX, 'y': ev.touches[0].clientY};
@@ -320,6 +324,8 @@ function setup_protest_form() {
 /**********************************************************************************************************************/
 function setup_login() {
 
+    let submit_login = $('#submit-login');
+
     if(api.whoami() !== undefined) {
         return;
     }
@@ -330,8 +336,16 @@ function setup_login() {
         $('#login-modal').modal('show');
     });
 
-    $('#submit-login').on('click', (ev) => {
+        submit_login.on('click', (ev) => {
         ev.preventDefault();
+
+        let orig_button_content = submit_login.html();
+        let spinner = make_spinner();
+
+        submit_login.html('');
+
+        submit_login.append(spinner);
+        submit_login.append($('<span> Loading</span>'));
 
         api.login(
             $('#email-input').val(), $('#password-input').val(),
@@ -339,6 +353,8 @@ function setup_login() {
                 window.location.reload(true);
             },
             (status, error) => {
+                submit_login.html(orig_button_content);
+
                 alert(`Error: ${status} - ${error.description}`);
             }
         );

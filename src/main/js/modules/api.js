@@ -29,6 +29,14 @@ const CONTENT_TYPE_ERROR = 2;
 const LOGIN_FAILURE = 3;
 const UNAUTHORIZED_FAILURE = 4;
 
+const ERROR_CODES = {
+    'SUCCESS_CODE': SUCCESS_CODE,
+    'GENERIC_INTERNAL_ERROR': GENERIC_INTERNAL_ERROR,
+    'CONTENT_TYPE_ERROR': CONTENT_TYPE_ERROR,
+    'LOGIN_FAILURE': LOGIN_FAILURE,
+    'UNAUTHORIZED_FAILURE': UNAUTHORIZED_FAILURE
+};
+
 const AUTHORIZATION_STORAGE_KEY = 'authorization';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
@@ -116,6 +124,7 @@ function decode_token() {
 }
 /**********************************************************************************************************************/
 export let api = {
+    'error_codes': ERROR_CODES,
     'login': function(username, password, success_cb, failure_cb) {
 
         let credentials = {

@@ -325,6 +325,9 @@ function setup_protest_form() {
 function setup_login() {
 
     let submit_login = $('#submit-login');
+    let email_input = $('#email-input');
+    let password_input = $('#password-input');
+    let form = $('#login-form');
 
     if(api.whoami() !== undefined) {
         return;
@@ -348,14 +351,24 @@ function setup_login() {
         submit_login.append($('<span> Loading</span>'));
 
         api.login(
-            $('#email-input').val(), $('#password-input').val(),
+            email_input.val(), password_input.val(),
             () => {
                 window.location.reload(true);
             },
             (status, error) => {
                 submit_login.html(orig_button_content);
 
-                alert(`Error: ${status} - ${error.description}`);
+                if(error !== undefined && error.code === api.error_codes.LOGIN_FAILURE) {
+                    password_input[0].setCustomValidity('Invalid username or password');
+                    form[0].checkValidity();
+                    form.addClass('was-validated');
+                } else if(error === undefined && status === 0){
+                    alert('Unable to complete request: Lost connection to server');
+                } else if(error !== undefined) {
+                    alert(`Error: ${status} - ${error.description}`);
+                } else {
+                    alert('Error completing request.');
+                }
             }
         );
     });

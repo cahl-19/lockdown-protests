@@ -108,6 +108,9 @@ function config_map(map_div, api_token, config) {
         }
     ).setView([51.505, -0.09], 13);
 
+    map.on('locationerror', map.setView([51.505, -0.09], 13));
+    map.locate({setView: true, maxZoom: 29});
+
 
     let url = `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${api_token}`;
 

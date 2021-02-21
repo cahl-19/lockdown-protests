@@ -25,6 +25,7 @@ public final class DefaultConfig {
     static private final int DEFAULT_SESSION_EXPIRES_SECONDS = 3600 * 24 * 7;
     static private final int DEFAULT_TOKEN_KEY_ROTATE_SECONDS =  3600 * 24 * 30;
     static private final int DEFAULT_TOKEN_KEY_DELETE_SECONDS = DEFAULT_TOKEN_KEY_ROTATE_SECONDS * 2;
+    static private final int DEFAULT_TOKEN_EXPIRES_SECONDS = 15 * 60;
 
 
     private DefaultConfig() {
@@ -35,6 +36,7 @@ public final class DefaultConfig {
 
         AppConfig.Builder builder = AppConfig.builder();
 
+        builder.setTokenExpiresSeconds(DEFAULT_TOKEN_EXPIRES_SECONDS, AppConfig.PRIORITY_DEFAULT);
         builder.setTokenKeyDeletionSeconds(DEFAULT_TOKEN_KEY_DELETE_SECONDS, AppConfig.PRIORITY_DEFAULT);
         builder.setTokenKeyRotateSeconds(DEFAULT_TOKEN_KEY_ROTATE_SECONDS, AppConfig.PRIORITY_DEFAULT);
         builder.setSessionExpiresSeconds(DEFAULT_SESSION_EXPIRES_SECONDS, AppConfig.PRIORITY_DEFAULT);

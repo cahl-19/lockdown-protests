@@ -27,6 +27,7 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import java.util.Date;
+import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
 import ldprotest.server.auth.UserRole;
 import ldprotest.server.auth.UserSessionInfo;
@@ -39,8 +40,6 @@ public final class UserTokens {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(UserTokens.class);
 
-    public static final int TOKEN_EXPIRY_SECONDS = 15 * 60;
-
     private static final int EXPIRE_LEEWAY_FOR_IGNORE_EXPIRY = 3600 * 24 * 365;
     private static final int NORMAL_EXPIRE_LEEWAY = 15;
 
@@ -52,7 +51,7 @@ public final class UserTokens {
 
     public static String sign(UserSessionInfo info, UserTokenSubject subject) {
         Algorithm algorithm = Algorithm.RSA512(META_KEY_PROVIDER.getKeyProvider());
-        Date expiry = Date.from(ServerTime.now().plusSeconds(TOKEN_EXPIRY_SECONDS).toInstant());
+        Date expiry = Date.from(ServerTime.now().plusSeconds(Main.args().tokenExpiresSeconds).toInstant());
 
         return JWT.create()
             .withClaim("username", info.username)

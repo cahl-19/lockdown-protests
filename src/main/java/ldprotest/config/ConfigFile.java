@@ -55,6 +55,9 @@ public class ConfigFile {
             if(config.tokenKeyRotateSeconds != null) {
                 builder.setTokenKeyRotateSeconds(config.tokenKeyRotateSeconds, AppConfig.PRIORITY_CONFIG);
             }
+            if(config.tokenExpiresSeconds != null) {
+                builder.setTokenExpiresSeconds(config.tokenExpiresSeconds, AppConfig.PRIORITY_CONFIG);
+            }
         }
 
         return Result.success(builder);
@@ -70,5 +73,6 @@ public class ConfigFile {
         public Integer sessionExpiresSeconds;
         public Integer tokenKeyRotateSeconds;
         public Integer tokenKeyDeletionSeconds;
+        public Integer tokenExpiresSeconds;
     }
 }

@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final int tokenExpiresSeconds;
     public final int tokenKeyDeletionSeconds;
     public final int tokenKeyRotateSeconds;
     public final int sessionExpiresSeconds;
@@ -35,6 +36,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        int tokenExpirySeconds,
         int tokenKeyDeletionSeconds,
         int tokenRefreshSeconds,
         int sessionExpiresSeconds,
@@ -44,6 +46,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.tokenExpiresSeconds = tokenExpirySeconds;
         this.tokenKeyDeletionSeconds = tokenKeyDeletionSeconds;
         this.tokenKeyRotateSeconds = tokenRefreshSeconds;
         this.sessionExpiresSeconds = sessionExpiresSeconds;
@@ -59,6 +62,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<Integer> tokenExpiresSeconds;
         public final BuilderField<Integer> tokenKeyDeletionSeconds;
         public final BuilderField<Integer> tokenKeyRotateSeconds;
         public final BuilderField<Integer> sessionExpiresSeconds;
@@ -69,6 +73,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            tokenExpiresSeconds = new BuilderField<>();
             tokenKeyDeletionSeconds = new BuilderField<>();
             tokenKeyRotateSeconds =  new BuilderField<>();
             sessionExpiresSeconds = new BuilderField<>();
@@ -77,6 +82,11 @@ public class AppConfig {
             mapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setTokenExpiresSeconds(int val, int priority) {
+            tokenExpiresSeconds.set(val, priority);
+            return this;
         }
 
         public Builder setTokenKeyDeletionSeconds(int val, int priority) {
@@ -121,6 +131,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                tokenExpiresSeconds.get(),
                 tokenKeyDeletionSeconds.get(),
                 tokenKeyRotateSeconds.get(),
                 sessionExpiresSeconds.get(),

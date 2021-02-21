@@ -17,3 +17,7 @@ userSessionConfig:
     tokenKeyRotateSeconds: 2592000
     # Seconds until a generated RSA key is deleted
     tokenKeyDeletionSeconds: 5184000
+    # Seconds until JWT tokens expire. Note that this sets the limit on the time it takes for a user
+    # lockout/ban to take effect because the application won't check the database until the token expires.
+    # Setting this value too low, however, results in excessive database queries for user session data
+    tokenExpiresSeconds: 900

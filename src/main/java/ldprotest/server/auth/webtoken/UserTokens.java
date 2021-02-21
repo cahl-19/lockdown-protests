@@ -44,11 +44,7 @@ public final class UserTokens {
     private static final int EXPIRE_LEEWAY_FOR_IGNORE_EXPIRY = 3600 * 24 * 365;
     private static final int NORMAL_EXPIRE_LEEWAY = 15;
 
-    private static final int KEY_DELETION_SECONDS = 3600 * 24 * 60;
-
-    private static final VolatileTokenKeyProvider META_KEY_PROVIDER = new VolatileTokenKeyProvider(
-        KEY_DELETION_SECONDS
-    );
+    private static final VolatileTokenKeyProvider META_KEY_PROVIDER = new VolatileTokenKeyProvider();
 
     private UserTokens() {
         /* do not construct */

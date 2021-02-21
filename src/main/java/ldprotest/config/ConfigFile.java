@@ -69,5 +69,6 @@ public class ConfigFile {
     private static final class UserSessionConfig {
         public Integer sessionExpiresSeconds;
         public Integer tokenKeyRotateSeconds;
+        public Integer tokenKeyDeletionSeconds;
     }
 }

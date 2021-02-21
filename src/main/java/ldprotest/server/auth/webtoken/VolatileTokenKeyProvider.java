@@ -47,12 +47,12 @@ public class VolatileTokenKeyProvider {
 
     private final PriorityQueue<KeyData> cleanupQueue;
 
-    public VolatileTokenKeyProvider(int keyDeletionTimeoutSeconds) {
+    public VolatileTokenKeyProvider() {
 
         UUID uuid = UUID.randomUUID();
         KeyData kd = new KeyData(generateKeyPair(), uuid);
 
-        this.keyDeletionTimeoutSeconds = keyDeletionTimeoutSeconds;
+        this.keyDeletionTimeoutSeconds = Main.args().tokenKeyDeletionSeconds;
 
         this.oldKeys = new ConcurrentHashMap<>();
         this.latestKeyPair = new AtomicReference<>(kd);

@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final int tokenKeyDeletionSeconds;
     public final int tokenKeyRotateSeconds;
     public final int sessionExpiresSeconds;
     public final String mongoConnect;
@@ -34,6 +35,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        int tokenKeyDeletionSeconds,
         int tokenRefreshSeconds,
         int sessionExpiresSeconds,
         String mongoConnect,
@@ -42,6 +44,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.tokenKeyDeletionSeconds = tokenKeyDeletionSeconds;
         this.tokenKeyRotateSeconds = tokenRefreshSeconds;
         this.sessionExpiresSeconds = sessionExpiresSeconds;
         this.mongoConnect = mongoConnect;
@@ -56,7 +59,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
-
+        public final BuilderField<Integer> tokenKeyDeletionSeconds;
         public final BuilderField<Integer> tokenKeyRotateSeconds;
         public final BuilderField<Integer> sessionExpiresSeconds;
         public final BuilderField<String> mongoConnect;
@@ -66,6 +69,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            tokenKeyDeletionSeconds = new BuilderField<>();
             tokenKeyRotateSeconds =  new BuilderField<>();
             sessionExpiresSeconds = new BuilderField<>();
             mongoConnect = new BuilderField<>();
@@ -73,6 +77,11 @@ public class AppConfig {
             mapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setTokenKeyDeletionSeconds(int val, int priority) {
+            tokenKeyDeletionSeconds.set(val, priority);
+            return this;
         }
 
         public Builder setTokenKeyRotateSeconds(int val, int priority) {
@@ -112,6 +121,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                tokenKeyDeletionSeconds.get(),
                 tokenKeyRotateSeconds.get(),
                 sessionExpiresSeconds.get(),
                 mongoConnect.get(),

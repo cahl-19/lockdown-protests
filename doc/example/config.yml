@@ -15,4 +15,5 @@ userSessionConfig:
     sessionExpiresSeconds: 604800
     # Seconds between key rotations of JWT RSA Keys
     tokenKeyRotateSeconds: 2592000
-
+    # Seconds until a generated RSA key is deleted
+    tokenKeyDeletionSeconds: 5184000

@@ -42,11 +42,15 @@ public class ConfigFile {
         if(data.usingHttps != null) {
             builder.setUsingHttps(data.usingHttps, AppConfig.PRIORITY_CONFIG);
         }
+        if(data.mongoConnect != null) {
+            builder.setConfigFilePath(data.mongoConnect, AppConfig.PRIORITY_CONFIG);
+        }
 
         return Result.success(builder);
     }
 
     private static final class ConfigFileData {
         public Boolean usingHttps;
+        public String mongoConnect;
     }
 }

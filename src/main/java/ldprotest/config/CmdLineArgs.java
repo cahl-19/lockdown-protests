@@ -44,12 +44,12 @@ public class CmdLineArgs {
         private final AppConfig.Builder builder;
 
         public Args(AppConfig.Builder builder) {
-            builder.setConfigFilePath("", AppConfig.PRIORITY_DEFAULT);
-            builder.setUsingHttps(true, AppConfig.PRIORITY_DEFAULT);
-            builder.setMapApiToken("", AppConfig.PRIORITY_DEFAULT);
-            builder.setHelpRequested(false, AppConfig.PRIORITY_DEFAULT);
-
             this.builder = builder;
+        }
+
+        @Option(names = {"--mongo-connect"}, description = "Override the Mongo connect string")
+        void mongoConnectString(String val) {
+            builder.setMongoConnect(val, AppConfig.PRIORITY_OVERRIDE);
         }
 
         @Option(names = {"--map-api-token"}, description = "mapbox API token")

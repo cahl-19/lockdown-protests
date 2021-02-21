@@ -25,17 +25,20 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final String mongoConnect;
     public final String configFilePath;
     public final String mapApiToken;
     public final boolean helpRequested;
     public final boolean usingHttps;
 
     private AppConfig(
+        String mongoConnect,
         String configFilePath,
         String mapApiToken,
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.mongoConnect = mongoConnect;
         this.configFilePath = configFilePath;
         this.mapApiToken = mapApiToken;
         this.helpRequested = helpRequested;
@@ -48,16 +51,23 @@ public class AppConfig {
 
     public static final class Builder {
 
+        public final BuilderField<String> mongoConnect;
         public final BuilderField<String> configFilePath;
         public final BuilderField<String> mapApiToken;
         public final BuilderField<Boolean> helpRequested;
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            mongoConnect = new BuilderField<>();
             configFilePath = new BuilderField<>();
             mapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setMongoConnect(String val, int priority) {
+            mongoConnect.set(val, priority);
+            return this;
         }
 
         public Builder setConfigFilePath(String path, int priority) {
@@ -82,6 +92,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                mongoConnect.get(),
                 configFilePath.get(),
                 mapApiToken.get(),
                 helpRequested.get(),

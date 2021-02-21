@@ -37,6 +37,7 @@ import java.util.logging.Level;
 import ldprotest.config.AppConfig;
 import ldprotest.config.CmdLineArgs;
 import ldprotest.config.ConfigFile;
+import ldprotest.config.DefaultConfig;
 import ldprotest.db.MainDatabase;
 import ldprotest.util.ErrorCode;
 
@@ -103,7 +104,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        AppConfig.Builder configBuilder = AppConfig.builder();
+        AppConfig.Builder configBuilder = DefaultConfig.defaultBuilder();
         Result<Integer, AppConfig.Builder> cmdLineArgs = CmdLineArgs.parse(configBuilder, args);
 
         if(cmdLineArgs.isFailure()) {
@@ -178,7 +179,7 @@ public class Main {
     }
 
     private static void startComponents() throws IOException {
-        MainDatabase.connect("mongodb://ldprotest:ldprotest@localhost:27017/?serverSelectionTimeoutMS=3000");
+        MainDatabase.connect(ARGS.mongoConnect);
         waitForDatabase();
 
         LOGGER.info("Database Version {}", SetupDatabase.setup(MainDatabase.database()));

@@ -40,12 +40,11 @@ public final class UserTokens {
     private final static Logger LOGGER = LoggerFactory.getLogger(UserTokens.class);
 
     public static final int TOKEN_EXPIRY_SECONDS = 15 * 60;
-    public static final int KEY_EXPIRY_SECONDS = 3600 * 24 * 30;
 
     private static final int EXPIRE_LEEWAY_FOR_IGNORE_EXPIRY = 3600 * 24 * 365;
     private static final int NORMAL_EXPIRE_LEEWAY = 15;
 
-    private static final int KEY_DELETION_SECONDS = KEY_EXPIRY_SECONDS * 2;
+    private static final int KEY_DELETION_SECONDS = 3600 * 24 * 60;
 
     private static final VolatileTokenKeyProvider META_KEY_PROVIDER = new VolatileTokenKeyProvider(
         KEY_DELETION_SECONDS

@@ -23,6 +23,7 @@ public final class DefaultConfig {
         "mongodb://ldprotest:ldprotest@localhost:27017/?serverSelectionTimeoutMS=3000";
 
     static private final int DEFAULT_SESSION_EXPIRES_SECONDS = 3600 * 24 * 7;
+    static private final int DEFAULT_TOKEN_KEY_ROTATE_SESSIONS =  3600 * 24 * 30;
 
     private DefaultConfig() {
         /* do not construct */
@@ -32,6 +33,7 @@ public final class DefaultConfig {
 
         AppConfig.Builder builder = AppConfig.builder();
 
+        builder.setTokenKeyRotateSeconds(DEFAULT_TOKEN_KEY_ROTATE_SESSIONS, AppConfig.PRIORITY_DEFAULT);
         builder.setSessionExpiresSeconds(DEFAULT_SESSION_EXPIRES_SECONDS, AppConfig.PRIORITY_DEFAULT);
         builder.setConfigFilePath("", AppConfig.PRIORITY_DEFAULT);
         builder.setUsingHttps(true, AppConfig.PRIORITY_DEFAULT);

@@ -29,6 +29,7 @@ import java.util.PriorityQueue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,6 @@ public class VolatileTokenKeyProvider {
     private final static Logger LOGGER = LoggerFactory.getLogger(VolatileTokenKeyProvider.class);
 
     private static final int RSA_KEY_SIZE = 4096;
-    private static final int KEY_ROTATION_SECONDS = 3600;
 
     private final AtomicReference<KeyData> latestKeyPair;
     private final Map<UUID, KeyData> oldKeys;
@@ -111,7 +111,7 @@ public class VolatileTokenKeyProvider {
         KeyData keyData = latestKeyPair.get();
         ZonedDateTime now = ServerTime.now();
 
-        if(keyData.created.plusSeconds(KEY_ROTATION_SECONDS).isAfter(now)) {
+        if(keyData.created.plusSeconds(Main.args().tokenKeyRotateSeconds).isAfter(now)) {
             return;
         }
 

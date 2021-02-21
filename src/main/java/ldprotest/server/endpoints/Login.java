@@ -99,7 +99,7 @@ public final class Login {
     }
 
     public static CookieAttributes loginTokenCookie(String value, boolean usingHttps) {
-        return new CookieAttributes("/", LOGIN_COOKIE_NAME, value, UserTokens.KEY_EXPIRY_SECONDS, usingHttps, true);
+        return new CookieAttributes("/", LOGIN_COOKIE_NAME, value, Main.args().sessionExpiresSeconds, usingHttps, true);
     }
 
     public static CookieAttributes deleteTokenCookie() {

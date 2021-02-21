@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final int tokenKeyRotateSeconds;
     public final int sessionExpiresSeconds;
     public final String mongoConnect;
     public final String configFilePath;
@@ -33,6 +34,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        int tokenRefreshSeconds,
         int sessionExpiresSeconds,
         String mongoConnect,
         String configFilePath,
@@ -40,6 +42,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.tokenKeyRotateSeconds = tokenRefreshSeconds;
         this.sessionExpiresSeconds = sessionExpiresSeconds;
         this.mongoConnect = mongoConnect;
         this.configFilePath = configFilePath;
@@ -54,6 +57,7 @@ public class AppConfig {
 
     public static final class Builder {
 
+        public final BuilderField<Integer> tokenKeyRotateSeconds;
         public final BuilderField<Integer> sessionExpiresSeconds;
         public final BuilderField<String> mongoConnect;
         public final BuilderField<String> configFilePath;
@@ -62,12 +66,18 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            tokenKeyRotateSeconds =  new BuilderField<>();
             sessionExpiresSeconds = new BuilderField<>();
             mongoConnect = new BuilderField<>();
             configFilePath = new BuilderField<>();
             mapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setTokenKeyRotateSeconds(int val, int priority) {
+            tokenKeyRotateSeconds.set(val, priority);
+            return this;
         }
 
         public Builder setSessionExpiresSeconds(int  val, int priority) {
@@ -102,6 +112,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                tokenKeyRotateSeconds.get(),
                 sessionExpiresSeconds.get(),
                 mongoConnect.get(),
                 configFilePath.get(),

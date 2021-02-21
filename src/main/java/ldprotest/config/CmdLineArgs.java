@@ -24,37 +24,53 @@ import picocli.CommandLine.Option;
 
 public class CmdLineArgs {
 
-    public final String mapApiToken;
-    public final boolean helpRequested;
-    public final boolean usingHttps;
-
-    private CmdLineArgs(Args args) {
-        this.mapApiToken = args.mapApiToken;
-        this.helpRequested = args.helpRequested;
-        this.usingHttps = args.usingHttps;
+    private CmdLineArgs() {
+        /* do not construct */
     }
 
-    public static Result<Integer, CmdLineArgs> parse(String... cmdLine) {
-        Args args = new Args();
-        int exitCode = new CommandLine(args).execute(cmdLine);
+    public static Result<Integer, AppConfig.Builder> parse(AppConfig.Builder builder, String... cmdLine) {
+        Args args = new Args(builder);
+        CommandLine commandLine = new CommandLine(args);
+        int exitCode = commandLine.execute(cmdLine);
 
         if(exitCode != 0) {
             return Result.failure(exitCode);
         } else {
-            return Result.success(new CmdLineArgs(args));
+            return Result.success(builder);
         }
     }
+    private static class Args implements Callable<Integer>{
 
-    private static class Args implements Callable<Integer> {
+        private final AppConfig.Builder builder;
+
+        public Args(AppConfig.Builder builder) {
+            builder.setConfigFilePath("", AppConfig.PRIORITY_DEFAULT);
+            builder.setUsingHttps(true, AppConfig.PRIORITY_DEFAULT);
+            builder.setMapApiToken("", AppConfig.PRIORITY_DEFAULT);
+            builder.setHelpRequested(false, AppConfig.PRIORITY_DEFAULT);
+
+            this.builder = builder;
+        }
 
         @Option(names = {"--map-api-token"}, description = "mapbox API token")
-        private String mapApiToken = "";
-
-        @Option(names = { "-h", "--help" }, usageHelp = true, description = "display help text")
-        private boolean helpRequested = false;
+        void mapApiToken(String token) {
+            builder.setMapApiToken(token, AppConfig.PRIORITY_OVERRIDE);
+        }
 
         @Option(names = {"--no-https"}, description = "for development purposes only: assume that https is disabled")
-        private boolean usingHttps = true;
+        void usingHttps (boolean value) {
+            builder.setUsingHttps(value, AppConfig.PRIORITY_OVERRIDE);
+        }
+
+        @Option(names = { "-h", "--help" }, usageHelp = true, description = "display help text")
+        void helpRequested(boolean val) {
+            builder.setHelpRequested(val, AppConfig.PRIORITY_OVERRIDE);
+        }
+
+        @Option(names = { "-f", "--config-file"}, description = "Path to configuration file. No config file if not set")
+        void configFilePath(String path) {
+            builder.setConfigFilePath(path, AppConfig.PRIORITY_OVERRIDE);
+        }
 
         @Override
         public Integer call() throws Exception {

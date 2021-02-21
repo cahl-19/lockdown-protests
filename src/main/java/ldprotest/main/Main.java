@@ -18,6 +18,9 @@
 package ldprotest.main;
 
 import com.mongodb.MongoException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ldprotest.db.SetupDatabase;
@@ -26,10 +29,14 @@ import ldprotest.server.infra.Server;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+import ldprotest.config.AppConfig;
 import ldprotest.config.CmdLineArgs;
+import ldprotest.config.ConfigFile;
 import ldprotest.db.MainDatabase;
 import ldprotest.util.ErrorCode;
 
@@ -38,7 +45,7 @@ import ldprotest.util.Result;
 
 public class Main {
 
-    private static CmdLineArgs ARGS;
+    private static AppConfig ARGS;
 
     public static final int SERVER_SHUTDOWN_HANDLER_PRIORITY = Integer.MAX_VALUE/2;
 
@@ -91,22 +98,27 @@ public class Main {
         STOP_REQUEST_SEMAPHORE.release();
     }
 
-    public static CmdLineArgs args() {
+    public static AppConfig args() {
         return ARGS;
     }
 
     public static void main(String[] args) {
-
-        Result<Integer, CmdLineArgs> cmdLineArgs = CmdLineArgs.parse(args);
+        AppConfig.Builder configBuilder = AppConfig.builder();
+        Result<Integer, AppConfig.Builder> cmdLineArgs = CmdLineArgs.parse(configBuilder, args);
 
         if(cmdLineArgs.isFailure()) {
             System.exit(cmdLineArgs.failureReason());
         } else {
-            ARGS = cmdLineArgs.result();
-
-            if(ARGS.helpRequested) {
+            if(cmdLineArgs.result().helpRequested.get()) {
                 System.exit(0);
             }
+
+            Result<Integer, AppConfig.Builder> loadConfigResult = loadConfig(configBuilder);
+            if(loadConfigResult.isFailure()) {
+                System.exit(loadConfigResult.failureReason());
+            }
+
+            ARGS = cmdLineArgs.result().build();
         }
 
         try {
@@ -139,6 +151,30 @@ public class Main {
         runShutdownHandlers();
         EXIT_COMPLETE_SEMAPHORE.release();
         System.exit(Main.exitCode);
+    }
+
+    private static Result<Integer, AppConfig.Builder> loadConfig(AppConfig.Builder builder) {
+        String path = builder.configFilePath.get();
+
+        if(path.isEmpty()) {
+            return Result.success(builder);
+        }
+
+        File file = new File(path);
+
+        try(FileInputStream stream = new FileInputStream(file)) {
+            Result<String, AppConfig.Builder> configLoadResult = ConfigFile.parse(builder, stream);
+
+            if(configLoadResult.isFailure()) {
+                LOGGER.error("Error reading config file: {}", configLoadResult.failureReason());
+                return Result.failure(-1);
+            } else {
+                return Result.success(builder);
+            }
+        } catch (IOException ex) {
+            LOGGER.error("Unable to read config file: {}", ex.getMessage());
+            return Result.failure(-1);
+        }
     }
 
     private static void startComponents() throws IOException {

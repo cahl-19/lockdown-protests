@@ -21,6 +21,7 @@ import java.io.InputStream;
 import ldprotest.util.Result;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.error.YAMLException;
 
 public class ConfigFile {
 
@@ -29,9 +30,14 @@ public class ConfigFile {
     }
 
     public static Result<String, AppConfig.Builder> parse(AppConfig.Builder builder, InputStream file) {
-
+        ConfigFileData data;
         Yaml yaml = new Yaml(new Constructor(ConfigFileData.class));
-        ConfigFileData data = yaml.load(file);
+
+        try {
+            data = yaml.load(file);
+        } catch(YAMLException ex) {
+            return Result.failure(ex.getMessage());
+        }
 
         if(data.usingHttps != null) {
             builder.setUsingHttps(data.usingHttps, AppConfig.PRIORITY_CONFIG);

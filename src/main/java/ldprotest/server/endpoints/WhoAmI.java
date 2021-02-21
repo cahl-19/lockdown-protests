@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class WhoAmI {
 
     private static final String PATH = "/api/whoami";
-    private final static Logger LOGGER = LoggerFactory.getLogger(Logout.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(WhoAmI.class);
 
     private WhoAmI() {
         /* do not construct */

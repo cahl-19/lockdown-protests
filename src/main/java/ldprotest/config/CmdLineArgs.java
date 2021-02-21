@@ -59,7 +59,7 @@ public class CmdLineArgs {
 
         @Option(names = {"--no-https"}, description = "for development purposes only: assume that https is disabled")
         void usingHttps (boolean value) {
-            builder.setUsingHttps(value, AppConfig.PRIORITY_OVERRIDE);
+            builder.setUsingHttps(!value, AppConfig.PRIORITY_OVERRIDE);
         }
 
         @Option(names = { "-h", "--help" }, usageHelp = true, description = "display help text")

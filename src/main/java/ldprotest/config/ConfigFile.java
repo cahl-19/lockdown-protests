@@ -45,6 +45,9 @@ public class ConfigFile {
         if(data.mongoConnect != null) {
             builder.setConfigFilePath(data.mongoConnect, AppConfig.PRIORITY_CONFIG);
         }
+        if(data.sessionExpiresSeconds != null) {
+            builder.setSessionExpiresSeconds(data.sessionExpiresSeconds, AppConfig.PRIORITY_CONFIG);
+        }
 
         return Result.success(builder);
     }
@@ -52,5 +55,6 @@ public class ConfigFile {
     private static final class ConfigFileData {
         public Boolean usingHttps;
         public String mongoConnect;
+        public Integer sessionExpiresSeconds;
     }
 }

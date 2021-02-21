@@ -22,6 +22,7 @@ import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Objects;
 import ldprotest.db.DbIndex;
+import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
@@ -30,7 +31,6 @@ public class UserSessionInfo implements JsonSerializable {
 
     static private final int SESSION_ID_BYTE_LEN = 32;
     static private final Base64.Encoder B64_ENCODER = Base64.getEncoder();
-    static private final int SESSION_EXPIRES_SECONDS = 3600 * 24 * 7;
 
     @DbIndex
     public final String sessionId;
@@ -74,7 +74,7 @@ public class UserSessionInfo implements JsonSerializable {
     }
 
     public boolean expired() {
-        return ServerTime.now().isAfter(createdAt.plusSeconds(SESSION_EXPIRES_SECONDS));
+        return ServerTime.now().isAfter(createdAt.plusSeconds(Main.args().sessionExpiresSeconds));
     }
 
     public UserInfo toUserInfo() {

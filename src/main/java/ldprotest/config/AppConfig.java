@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final int sessionExpiresSeconds;
     public final String mongoConnect;
     public final String configFilePath;
     public final String mapApiToken;
@@ -32,12 +33,14 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        int sessionExpiresSeconds,
         String mongoConnect,
         String configFilePath,
         String mapApiToken,
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.sessionExpiresSeconds = sessionExpiresSeconds;
         this.mongoConnect = mongoConnect;
         this.configFilePath = configFilePath;
         this.mapApiToken = mapApiToken;
@@ -51,6 +54,7 @@ public class AppConfig {
 
     public static final class Builder {
 
+        public final BuilderField<Integer> sessionExpiresSeconds;
         public final BuilderField<String> mongoConnect;
         public final BuilderField<String> configFilePath;
         public final BuilderField<String> mapApiToken;
@@ -58,11 +62,17 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            sessionExpiresSeconds = new BuilderField<>();
             mongoConnect = new BuilderField<>();
             configFilePath = new BuilderField<>();
             mapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setSessionExpiresSeconds(int  val, int priority) {
+            sessionExpiresSeconds.set(val, priority);
+            return this;
         }
 
         public Builder setMongoConnect(String val, int priority) {
@@ -92,6 +102,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                sessionExpiresSeconds.get(),
                 mongoConnect.get(),
                 configFilePath.get(),
                 mapApiToken.get(),

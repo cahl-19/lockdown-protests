@@ -4,6 +4,11 @@
 # for endpoints on this server. Should be set to false for development
 # environments only
 usingHttps: true,
+
 # Database connect string. It is strongly reccomended to use a stronger
 # password in production environments.
+
 mongoConnect: 'mongodb://ldprotest:ldprotest@localhost:27017/?serverSelectionTimeoutMS=3000'
+
+# Time until a user session expires
+sessionExpiresSeconds: 604800

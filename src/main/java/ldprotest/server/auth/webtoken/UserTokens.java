@@ -43,76 +43,40 @@ public final class UserTokens {
     private static final int EXPIRE_LEEWAY_FOR_IGNORE_EXPIRY = 3600 * 24 * 365;
     private static final int NORMAL_EXPIRE_LEEWAY = 15;
 
-    private static final VolatileTokenKeyProvider META_KEY_PROVIDER = new VolatileTokenKeyProvider();
+    private static UserTokensState STATE_INSTANCE;
 
     private UserTokens() {
         /* do not construct */
     }
 
-    public static String sign(UserSessionInfo info, UserTokenSubject subject) {
-        Algorithm algorithm = Algorithm.RSA512(META_KEY_PROVIDER.getKeyProvider());
-        Date expiry = Date.from(ServerTime.now().plusSeconds(Main.args().tokenExpiresSeconds).toInstant());
+    public static void init() {
 
-        return JWT.create()
-            .withClaim("username", info.username)
-            .withClaim("email", info.email)
-            .withClaim("role", info.role.name())
-            .withClaim("sessionId", info.sessionId)
-            .withClaim("sessionCreatedAt", DateTools.ZonedDateTimeToDate(info.createdAt))
-            .withSubject(subject.name())
-            .withExpiresAt(expiry)
-            .sign(algorithm);
+        if(STATE_INSTANCE != null) {
+            LOGGER.error("Attempt to initialize UserTokens twice");
+            throw new IllegalStateException("Attempt to initialize UserTokens twice");
+        }
+
+        String fsKeyStorePath = Main.args().fsKeyStorePath;
+
+        if(fsKeyStorePath.isBlank()) {
+            STATE_INSTANCE = new UserTokensState(new VolatileTokenKeyProvider());
+        } else {
+            STATE_INSTANCE = new UserTokensState(new FsKeyProvider(fsKeyStorePath));
+        }
+    }
+
+    public static String sign(UserSessionInfo info, UserTokenSubject subject) {
+        return STATE_INSTANCE.sign(info, subject);
     }
 
     public static Result<VerificationFailure, UserSessionInfo> verify(String token, UserTokenSubject subject) {
-        return verify(token, subject, NORMAL_EXPIRE_LEEWAY);
+        return STATE_INSTANCE.verify(token, subject);
     }
 
     public static Result<VerificationFailure, UserSessionInfo> verifyWithoutExpiration(
         String token, UserTokenSubject subject
     ) {
-        return verify(token, subject, EXPIRE_LEEWAY_FOR_IGNORE_EXPIRY);
-    }
-
-    private static Result<VerificationFailure, UserSessionInfo> verify(
-        String token, UserTokenSubject subject, int expireLeeway
-    ) {
-        DecodedJWT jwt;
-        try {
-            try {
-                Algorithm algorithm = Algorithm.RSA512(META_KEY_PROVIDER.getKeyProvider());
-                JWTVerifier verifier = JWT.require(algorithm)
-                    .withSubject(subject.name())
-                    .acceptExpiresAt(expireLeeway)
-                    .build();
-                jwt = verifier.verify(token);
-            } catch (InvalidClaimException ex){
-                LOGGER.error("Invalid JWT claim: this may be an indication of attempted malicious activity");
-                return Result.failure(VerificationFailure.INVALID_CLAIM);
-            } catch(SignatureVerificationException ex) {
-                LOGGER.warn(
-                    "Invalid JWT signature or unknown kid. Message: {}",
-                    ex.getMessage()
-                );
-                return Result.failure(VerificationFailure.SIGNATURE_FAILED);
-            } catch(TokenExpiredException ex) {
-                return Result.failure(VerificationFailure.EXPIRED);
-            } catch (NoSuchKidException ex) {
-                return Result.failure(VerificationFailure.NO_KEY);
-            } catch(JWTDecodeException ex) {
-                return Result.failure(VerificationFailure.MALFORMED_TOKEN);
-            }
-        } catch(JWTVerificationException ex) {
-            LOGGER.error("Unexpected Error in token verification", ex);
-            return Result.failure(VerificationFailure.OTHER_ERROR);
-        }
-
-        try {
-            return Result.success(sessionInfoFromDecodedJWT(jwt));
-        }  catch (IllegalArgumentException ex) {
-            LOGGER.error("Received Token With Invalid Role: {}", jwt.getClaim("role").asString());
-            return Result.failure(VerificationFailure.OTHER_ERROR);
-        }
+        return STATE_INSTANCE.verifyWithoutExpiration(token, subject);
     }
 
     private static UserSessionInfo sessionInfoFromDecodedJWT(DecodedJWT jwt) {
@@ -123,6 +87,80 @@ public final class UserTokens {
             UserRole.valueOf(jwt.getClaim("role").asString()),
             DateTools.DateToZonedDateTime(jwt.getClaim("sessionCreatedAt").asDate())
         );
+    }
+
+    private static final class UserTokensState {
+        private final DeferredKeyProvider deferredKeyProvider;
+
+       private UserTokensState(DeferredKeyProvider deferredKeyProvider) {
+           this.deferredKeyProvider = deferredKeyProvider;
+       }
+
+       public String sign(UserSessionInfo info, UserTokenSubject subject) {
+           Algorithm algorithm = Algorithm.RSA512(deferredKeyProvider.getKeyProvider());
+           Date expiry = Date.from(ServerTime.now().plusSeconds(Main.args().tokenExpiresSeconds).toInstant());
+
+           return JWT.create()
+               .withClaim("username", info.username)
+               .withClaim("email", info.email)
+               .withClaim("role", info.role.name())
+               .withClaim("sessionId", info.sessionId)
+               .withClaim("sessionCreatedAt", DateTools.ZonedDateTimeToDate(info.createdAt))
+               .withSubject(subject.name())
+               .withExpiresAt(expiry)
+               .sign(algorithm);
+       }
+
+       public Result<VerificationFailure, UserSessionInfo> verify(String token, UserTokenSubject subject) {
+           return verify(token, subject, NORMAL_EXPIRE_LEEWAY);
+       }
+
+       public Result<VerificationFailure, UserSessionInfo> verifyWithoutExpiration(
+           String token, UserTokenSubject subject
+       ) {
+           return verify(token, subject, EXPIRE_LEEWAY_FOR_IGNORE_EXPIRY);
+       }
+
+       private Result<VerificationFailure, UserSessionInfo> verify(
+           String token, UserTokenSubject subject, int expireLeeway
+       ) {
+           DecodedJWT jwt;
+           try {
+               try {
+                   Algorithm algorithm = Algorithm.RSA512(deferredKeyProvider.getKeyProvider());
+                   JWTVerifier verifier = JWT.require(algorithm)
+                       .withSubject(subject.name())
+                       .acceptExpiresAt(expireLeeway)
+                       .build();
+                   jwt = verifier.verify(token);
+               } catch (InvalidClaimException ex){
+                   LOGGER.error("Invalid JWT claim: this may be an indication of attempted malicious activity");
+                   return Result.failure(VerificationFailure.INVALID_CLAIM);
+               } catch(SignatureVerificationException ex) {
+                   LOGGER.warn(
+                       "Invalid JWT signature or unknown kid. Message: {}",
+                       ex.getMessage()
+                   );
+                   return Result.failure(VerificationFailure.SIGNATURE_FAILED);
+               } catch(TokenExpiredException ex) {
+                   return Result.failure(VerificationFailure.EXPIRED);
+               } catch (NoSuchKidException ex) {
+                   return Result.failure(VerificationFailure.NO_KEY);
+               } catch(JWTDecodeException ex) {
+                   return Result.failure(VerificationFailure.MALFORMED_TOKEN);
+               }
+           } catch(JWTVerificationException ex) {
+               LOGGER.error("Unexpected Error in token verification", ex);
+               return Result.failure(VerificationFailure.OTHER_ERROR);
+           }
+
+           try {
+               return Result.success(sessionInfoFromDecodedJWT(jwt));
+           }  catch (IllegalArgumentException ex) {
+               LOGGER.error("Received Token With Invalid Role: {}", jwt.getClaim("role").asString());
+               return Result.failure(VerificationFailure.OTHER_ERROR);
+           }
+       }
     }
 
     public static enum VerificationFailure {

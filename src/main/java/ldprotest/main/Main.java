@@ -42,6 +42,7 @@ import ldprotest.db.MainDatabase;
 import ldprotest.util.ErrorCode;
 
 import static ldprotest.main.AppLogging.ResourceType.ON_CLASSPATH;
+import ldprotest.server.auth.webtoken.UserTokens;
 import ldprotest.util.Result;
 
 public class Main {
@@ -183,6 +184,8 @@ public class Main {
         waitForDatabase();
 
         LOGGER.info("Database Version {}", SetupDatabase.setup(MainDatabase.database()));
+
+        UserTokens.init();
 
         Server.start();
     }

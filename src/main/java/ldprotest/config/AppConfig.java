@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final String  fsKeyStorePath;
     public final int tokenExpiresSeconds;
     public final int tokenKeyDeletionSeconds;
     public final int tokenKeyRotateSeconds;
@@ -36,6 +37,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        String fsKeyStorePath,
         int tokenExpirySeconds,
         int tokenKeyDeletionSeconds,
         int tokenRefreshSeconds,
@@ -46,6 +48,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.fsKeyStorePath = fsKeyStorePath;
         this.tokenExpiresSeconds = tokenExpirySeconds;
         this.tokenKeyDeletionSeconds = tokenKeyDeletionSeconds;
         this.tokenKeyRotateSeconds = tokenRefreshSeconds;
@@ -62,6 +65,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<String> fsKeyStorePath;
         public final BuilderField<Integer> tokenExpiresSeconds;
         public final BuilderField<Integer> tokenKeyDeletionSeconds;
         public final BuilderField<Integer> tokenKeyRotateSeconds;
@@ -73,6 +77,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            fsKeyStorePath = new BuilderField<>();
             tokenExpiresSeconds = new BuilderField<>();
             tokenKeyDeletionSeconds = new BuilderField<>();
             tokenKeyRotateSeconds =  new BuilderField<>();
@@ -82,6 +87,11 @@ public class AppConfig {
             mapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setFsKeyStorePath(String val, int priority) {
+            fsKeyStorePath.set(val, priority);
+            return this;
         }
 
         public Builder setTokenExpiresSeconds(int val, int priority) {
@@ -131,6 +141,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                fsKeyStorePath.get(),
                 tokenExpiresSeconds.get(),
                 tokenKeyDeletionSeconds.get(),
                 tokenKeyRotateSeconds.get(),

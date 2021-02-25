@@ -18,18 +18,7 @@
 package ldprotest.server.auth.webtoken;
 
 import com.auth0.jwt.interfaces.RSAKeyProvider;
-import java.util.HashMap;
 
-public class VolatileTokenKeyProvider implements DeferredKeyProvider {
-
-    private final LocalKeyProvider delegate;
-
-    public VolatileTokenKeyProvider() {
-        delegate = new LocalKeyProvider(() -> new HashMap<>(), (kd) -> {}, (kd) -> {});
-    }
-
-    @Override
-    public RSAKeyProvider getKeyProvider() {
-        return delegate.getKeyProvider();
-    }
+public interface DeferredKeyProvider {
+    RSAKeyProvider getKeyProvider();
 }

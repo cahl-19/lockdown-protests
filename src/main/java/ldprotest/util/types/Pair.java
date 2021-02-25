@@ -15,21 +15,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package ldprotest.server.auth.webtoken;
+package ldprotest.util.types;
 
-import com.auth0.jwt.interfaces.RSAKeyProvider;
-import java.util.HashMap;
+public class Pair <X, Y> {
 
-public class VolatileTokenKeyProvider implements DeferredKeyProvider {
+    public final X first;
+    public final Y second;
 
-    private final LocalKeyProvider delegate;
-
-    public VolatileTokenKeyProvider() {
-        delegate = new LocalKeyProvider(() -> new HashMap<>(), (kd) -> {}, (kd) -> {});
-    }
-
-    @Override
-    public RSAKeyProvider getKeyProvider() {
-        return delegate.getKeyProvider();
+    public Pair(X first, Y second) {
+        this.first = first;
+        this.second = second;
     }
 }

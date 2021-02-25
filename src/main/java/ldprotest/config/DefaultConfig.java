@@ -36,6 +36,7 @@ public final class DefaultConfig {
 
         AppConfig.Builder builder = AppConfig.builder();
 
+        builder.setFsKeyStorePath("", AppConfig.PRIORITY_DEFAULT);
         builder.setTokenExpiresSeconds(DEFAULT_TOKEN_EXPIRES_SECONDS, AppConfig.PRIORITY_DEFAULT);
         builder.setTokenKeyDeletionSeconds(DEFAULT_TOKEN_KEY_DELETE_SECONDS, AppConfig.PRIORITY_DEFAULT);
         builder.setTokenKeyRotateSeconds(DEFAULT_TOKEN_KEY_ROTATE_SECONDS, AppConfig.PRIORITY_DEFAULT);

@@ -72,6 +72,11 @@ public class CmdLineArgs {
             builder.setConfigFilePath(path, AppConfig.PRIORITY_OVERRIDE);
         }
 
+        @Option(names = {"--fs-key-store-path"}, description = "directory to store JWT signing keys")
+        void fsKeyStorePath(String path) {
+            builder.setFsKeyStorePath(path, AppConfig.PRIORITY_OVERRIDE);
+        }
+
         @Override
         public Integer call() throws Exception {
             return 0;

@@ -21,3 +21,18 @@ userSessionConfig:
     # lockout/ban to take effect because the application won't check the database until the token expires.
     # Setting this value too low, however, results in excessive database queries for user session data
     tokenExpiresSeconds: 900
+
+keyStoreConfig:
+    # Path to directory to store JWT signing keys. It is *very* important that these keys are kept private and
+    # secure. Compromised keys will lead to a total breach of alll user accounts. Keys should be kept in a directory
+    # readable only by the user account which runs the ldprotest server.
+
+    # The directory must exist in the file system and be acessible by the user account which runs the ldprotest
+    # server.
+
+    # You probably do not want to store keys in tmpfs (the path below is for example purposes only) on a production
+    # system because this will result in keys being deleted on each reboot.
+
+    # If this option is set to the empty string or is left unspecified, keys will be volatile and will be lost each
+    # time the applicatioon restarts.
+    fsKeyStorePath: '/tmp/ldprotest-keys'

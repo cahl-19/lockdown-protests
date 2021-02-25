@@ -60,6 +60,14 @@ public class ConfigFile {
             }
         }
 
+        if(data.keyStoreConfig != null) {
+            KeyStoreConfig config = data.keyStoreConfig;
+
+            if(config.fsKeyStorePath != null) {
+                builder.setFsKeyStorePath(config.fsKeyStorePath, AppConfig.PRIORITY_CONFIG);
+            }
+        }
+
         return Result.success(builder);
     }
 
@@ -67,6 +75,7 @@ public class ConfigFile {
         public Boolean usingHttps;
         public String mongoConnect;
         public UserSessionConfig userSessionConfig;
+        public KeyStoreConfig keyStoreConfig;
     }
 
     private static final class UserSessionConfig {
@@ -74,5 +83,9 @@ public class ConfigFile {
         public Integer tokenKeyRotateSeconds;
         public Integer tokenKeyDeletionSeconds;
         public Integer tokenExpiresSeconds;
+    }
+
+    private static final class KeyStoreConfig {
+        public String fsKeyStorePath;
     }
 }

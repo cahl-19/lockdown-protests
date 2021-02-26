@@ -19,8 +19,10 @@ package ldprotest.config;
 
 import java.util.concurrent.Callable;
 import ldprotest.util.Result;
+import ldprotest.util.TcpPort;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.TypeConversionException;
 
 public class CmdLineArgs {
 
@@ -75,6 +77,14 @@ public class CmdLineArgs {
         @Option(names = {"--fs-key-store-path"}, description = "directory to store JWT signing keys")
         void fsKeyStorePath(String path) {
             builder.setFsKeyStorePath(path, AppConfig.PRIORITY_OVERRIDE);
+        }
+
+        @Option(names = {"--server-port"}, description = "TCP port which the HTTP server listens on")
+        void serverPort(int port) {
+            if(!TcpPort.validate(port)) {
+                throw new TypeConversionException("Invalid TCP port number");
+            }
+            builder.setServerPort(port, AppConfig.PRIORITY_OVERRIDE);
         }
 
         @Override

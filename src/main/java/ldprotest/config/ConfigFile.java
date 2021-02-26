@@ -19,6 +19,7 @@ package ldprotest.config;
 
 import java.io.InputStream;
 import ldprotest.util.Result;
+import ldprotest.util.TcpPort;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -37,6 +38,15 @@ public class ConfigFile {
             data = yaml.load(file);
         } catch(YAMLException ex) {
             return Result.failure(ex.getMessage());
+        }
+
+        if(data.serverPort != null) {
+
+            if(TcpPort.validate(data.serverPort)) {
+                builder.setServerPort(data.serverPort, AppConfig.PRIORITY_CONFIG);
+            } else {
+                return Result.failure("Invalid TCP port number: " + data.serverPort);
+            }
         }
 
         if(data.usingHttps != null) {
@@ -72,6 +82,7 @@ public class ConfigFile {
     }
 
     private static final class ConfigFileData {
+        public Integer serverPort;
         public Boolean usingHttps;
         public String mongoConnect;
         public UserSessionConfig userSessionConfig;

@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import ldprotest.main.Main;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.endpoints.GeoPin;
@@ -32,6 +33,7 @@ import ldprotest.server.endpoints.TokenRefresh;
 import ldprotest.server.endpoints.WhoAmI;
 import ldprotest.server.endpoints.test.MapApiToken;
 import ldprotest.server.infra.templates.ServeWebpack;
+import spark.Spark;
 
 public class Server {
 
@@ -41,6 +43,8 @@ public class Server {
     private static final String ASSETS_PREFIX = "assets";
 
     public static void start() throws IOException {
+
+        Spark.port(Main.args().serverPort);
 
         SecurityFilter.start();
 

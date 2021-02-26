@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final int serverPort;
     public final String  fsKeyStorePath;
     public final int tokenExpiresSeconds;
     public final int tokenKeyDeletionSeconds;
@@ -37,6 +38,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        int serverPort,
         String fsKeyStorePath,
         int tokenExpirySeconds,
         int tokenKeyDeletionSeconds,
@@ -48,6 +50,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.serverPort = serverPort;
         this.fsKeyStorePath = fsKeyStorePath;
         this.tokenExpiresSeconds = tokenExpirySeconds;
         this.tokenKeyDeletionSeconds = tokenKeyDeletionSeconds;
@@ -65,6 +68,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<Integer> serverPort;
         public final BuilderField<String> fsKeyStorePath;
         public final BuilderField<Integer> tokenExpiresSeconds;
         public final BuilderField<Integer> tokenKeyDeletionSeconds;
@@ -77,6 +81,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            serverPort = new BuilderField<>();
             fsKeyStorePath = new BuilderField<>();
             tokenExpiresSeconds = new BuilderField<>();
             tokenKeyDeletionSeconds = new BuilderField<>();
@@ -87,6 +92,11 @@ public class AppConfig {
             mapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setServerPort(int val, int priority) {
+             serverPort.set(val, priority);
+            return this;
         }
 
         public Builder setFsKeyStorePath(String val, int priority) {
@@ -141,6 +151,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                serverPort.get(),
                 fsKeyStorePath.get(),
                 tokenExpiresSeconds.get(),
                 tokenKeyDeletionSeconds.get(),

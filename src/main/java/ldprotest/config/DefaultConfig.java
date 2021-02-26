@@ -22,6 +22,7 @@ public final class DefaultConfig {
     private static final String DEFAULT_MONGO_CONNECT =
         "mongodb://ldprotest:ldprotest@localhost:27017/?serverSelectionTimeoutMS=3000";
 
+    static private final int DEFAULT_SERVER_PORT = 4567;
     static private final int DEFAULT_SESSION_EXPIRES_SECONDS = 3600 * 24 * 7;
     static private final int DEFAULT_TOKEN_KEY_ROTATE_SECONDS =  3600 * 24 * 30;
     static private final int DEFAULT_TOKEN_KEY_DELETE_SECONDS = DEFAULT_TOKEN_KEY_ROTATE_SECONDS * 2;
@@ -36,6 +37,7 @@ public final class DefaultConfig {
 
         AppConfig.Builder builder = AppConfig.builder();
 
+        builder.setServerPort(DEFAULT_SERVER_PORT, AppConfig.PRIORITY_DEFAULT);
         builder.setFsKeyStorePath("", AppConfig.PRIORITY_DEFAULT);
         builder.setTokenExpiresSeconds(DEFAULT_TOKEN_EXPIRES_SECONDS, AppConfig.PRIORITY_DEFAULT);
         builder.setTokenKeyDeletionSeconds(DEFAULT_TOKEN_KEY_DELETE_SECONDS, AppConfig.PRIORITY_DEFAULT);

@@ -10,6 +10,9 @@ usingHttps: true,
 
 mongoConnect: 'mongodb://ldprotest:ldprotest@localhost:27017/?serverSelectionTimeoutMS=3000'
 
+# TCP port which the HTTP server serves on
+serverPort: 4567
+
 userSessionConfig:
     # Seconds until a user session expires
     sessionExpiresSeconds: 604800

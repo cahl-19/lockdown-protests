@@ -24,6 +24,10 @@ it via the command  line when executing the run script (use -h, or --help
 to get command line doc). You can get an API token for free which should be
 good enough for development and simple tests.
 
+Other configuration settings can be set via the command line or by supplying
+a config file. See doc/examples/config.yml for a usable configuration file
+which also includes descriptions of each parameter as comments.
+
 # Mongo Database
 
 This app requires a Mongo version 4.2 database to run. The included

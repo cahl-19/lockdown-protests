@@ -194,8 +194,8 @@ function config_map(map_div, api_token, config) {
     L.tileLayer(url, {
         attribution: (
             'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
-            'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>')
-        ,
+            'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+        ),
         maxZoom: 18,
         id: 'mapbox/streets-v11',
         tileSize: 512,
@@ -212,6 +212,10 @@ function config_map(map_div, api_token, config) {
     map.on('moveend', () => {
         update_protests(map, state);
     });
+
+    window.setInterval(() => {
+        update_protests(map, state);
+    }, PROTEST_REFRESH_PERIOD / 2);
 
     return map;
 }

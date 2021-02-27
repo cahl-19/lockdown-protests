@@ -22,7 +22,14 @@ import $ from 'jquery';
 import L from 'leaflet';
 import api from 'api';
 import sanitize from 'sanitize'
-/**********************************************************************************************************************/
+/***********************************************************************************************************************
+*                                                      CONSTANTS                                                       *
+***********************************************************************************************************************/
+const PROTEST_LOAD_ZONE_BUFFER_FACTOR = 1.25;
+const PROTEST_REFRESH_PERIOD = 60000;
+/***********************************************************************************************************************
+*                                                         CODE                                                         *
+***********************************************************************************************************************/
 function error_map(map_div, error_message) {
     map_div.html(`<p>Error initializing map: ${error_message}</p>`);
 }
@@ -52,13 +59,74 @@ function normalize_longitude(lng) {
         return lng;
     }
 /**********************************************************************************************************************/
-function load_protests(map, display_error) {
-    let bounds = map.getBounds();
+function clamp_lattitude(lat) {
+    if(lat > 90.0) {
+        return 90.0;
+    } else if(lat < -90.0) {
+        return -90.0;
+    } else {
+        return lat;
+    }
+}
+/**********************************************************************************************************************/
+function bounds_contained(container, bounds) {
+    if(container === undefined) {
+        return false;
+    } else if(bounds.north > container.north) {
+        return false;
+    } else if(bounds.south < container.south) {
+        return false;
+    } else if(bounds.east > container.east) {
+        return false;
+    } else if(bounds.west < container.west) {
+        return false;
+    } else {
+        return true;
+    }
+}
+/**********************************************************************************************************************/
+function time_to_refresh_pins(now, last_update) {
+    return now > (last_update + PROTEST_REFRESH_PERIOD);
+}
+/**********************************************************************************************************************/
+function buffer_bounds(bounds) {
+    let span_ns = bounds.north - bounds.south;
+    let span_ew = bounds.east - bounds.west;
 
-    let north = bounds._northEast.lat;
-    let west = normalize_longitude(bounds._southWest.lng);
-    let south = bounds._southWest.lat;
-    let east = normalize_longitude(bounds._northEast.lng);
+    return {
+        'north': clamp_lattitude(bounds.north + span_ns * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2),
+        'west': normalize_longitude(bounds.west - span_ew * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2),
+        'south': clamp_lattitude(bounds.south - span_ns * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2),
+        'east': normalize_longitude(bounds.east + span_ew * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2)
+    };
+}
+/**********************************************************************************************************************/
+function update_protests(map, state) {
+    let bounds = map.getBounds();
+    let now = Date.now();
+
+    let map_bounds = {
+        'north': bounds._northEast.lat,
+        'west': normalize_longitude(bounds._southWest.lng),
+        'south': bounds._southWest.lat,
+        'east': normalize_longitude(bounds._northEast.lng)
+    };
+
+    if(bounds_contained(state.protest_zone, map_bounds) && !time_to_refresh_pins(now, state.last_protest_update)) {
+        return;
+    } else {
+        state.protest_zone = buffer_bounds(map_bounds);
+        state.last_protest_update = now;
+        load_protests(map, state.protest_zone, state.config.display_error);
+    }
+}
+/**********************************************************************************************************************/
+function load_protests(map, bounds, display_error) {
+
+    let north = bounds.north;
+    let west = bounds.west;
+    let south = bounds.south;
+    let east = bounds.east;
 
     if(display_error === undefined) {
         display_error = (alert) => alert('error loading protests');
@@ -101,6 +169,11 @@ function load_protests(map, display_error) {
 /**********************************************************************************************************************/
 function config_map(map_div, api_token, config) {
 
+    let state = {
+        'config': config,
+        'protest_zone': undefined,
+        'last_protest_update': Number.NEGATIVE_INFINITY
+    };
     let map = L.map(
         map_div.attr('id'),
         {
@@ -108,7 +181,7 @@ function config_map(map_div, api_token, config) {
         }
     ).setView([51.505, -0.09], 13);
 
-    map.on('locationerror', map.setView([51.505, -0.09], 13));
+    map.on('locationerror', ()=> map.setView([51.505, -0.09], 13));
     map.locate({setView: true, maxZoom: 29});
 
 
@@ -131,13 +204,13 @@ function config_map(map_div, api_token, config) {
         }
     ).addTo(map);
 
-    load_protests(map);
+    update_protests(map, state);
 
     map.on('zoomend', () => {
-        load_protests(map, config.display_error);
+        update_protests(map, state);
     });
     map.on('moveend', () => {
-        load_protests(map, config.display_error);
+        update_protests(map, state);
     });
 
     return map;

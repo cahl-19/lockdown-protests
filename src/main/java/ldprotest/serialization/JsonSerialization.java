@@ -35,6 +35,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.UUID;
 import ldprotest.util.ReflectionTools;
 
 public class JsonSerialization {
@@ -47,8 +48,22 @@ public class JsonSerialization {
         builder.registerTypeHierarchyAdapter(JsonSerializable.class, new JsonSerializableSerializer());
         builder.registerTypeAdapter(Optional.class, new OptionalSerializer());
         builder.registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeSerializer());
+        builder.registerTypeAdapter(UUID.class, new UUIDSerializer());
 
         return builder.create();
+    }
+
+    private static final class UUIDSerializer implements JsonSerializer<UUID>, JsonDeserializer<UUID> {
+
+        @Override
+        public JsonElement serialize(UUID uuid, Type type, JsonSerializationContext jsc) {
+            return jsc.serialize(uuid.toString());
+        }
+
+        @Override
+        public UUID deserialize(JsonElement je, Type type, JsonDeserializationContext jdc) throws JsonParseException {
+            return UUID.fromString(je.getAsString());
+        }
     }
 
     private static final class ZonedDateTimeSerializer

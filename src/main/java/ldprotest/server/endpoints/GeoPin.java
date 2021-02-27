@@ -97,7 +97,7 @@ public class GeoPin {
             }
 
             try {
-                ProtestData.collection().insertOne(protest);
+                ProtestData.collection().insertOne(ProtestData.generate(protest));
             } catch(MongoException ex) {
                 LOGGER.error("Datbase error inserting protest", ex);
                 return JsonEndpoint.responseFromError(JsonError.internalError(), response);

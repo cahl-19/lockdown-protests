@@ -18,9 +18,11 @@
 package ldprotest.business;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.UUID;
 import ldprotest.db.MainDatabase;
 import ldprotest.geo.Coordinate;
 import ldprotest.serialization.JsonSerializable;
@@ -38,7 +40,6 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
     private static final int MAX_DESCRIPTION_LENGTH = 768;
     private static final int MAX_DRESS_CODE_LENGTH = 128;
 
-
     public final Coordinate location;
     public final Optional<String> owner;
 
@@ -47,6 +48,8 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
     public final Optional<String> dressCode;
 
     public final ZonedDateTime date;
+
+    public final Optional<UUID> protestId;
 
     @ReflectiveConstructor
     private ProtestData() {
@@ -57,6 +60,7 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
         description = null;
         dressCode = null;
         date = null;
+        protestId = null;
     }
 
     private ProtestData(
@@ -65,7 +69,8 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
         String title,
         String description,
         ZonedDateTime date,
-        Optional<String> dressCode
+        Optional<String> dressCode,
+        Optional<UUID> protestId
     ) {
         this.location = location;
         this.owner = owner;
@@ -73,16 +78,46 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
         this.description = description;
         this.dressCode = dressCode;
         this.date = date;
+        this.protestId = protestId;
     }
 
-    public ProtestData(
+    public static ProtestData generate(
         Coordinate location, String owner, String title, String description, ZonedDateTime date, String dressCode
     ) {
-        this(location, Optional.of(owner), title, description, date, Optional.of(dressCode));
+        return new ProtestData(
+            location,
+            Optional.of(owner),
+            title, description,
+            date,
+            Optional.of(dressCode),
+            Optional.of(UUID.randomUUID())
+        );
     }
 
-    public ProtestData(Coordinate location, String owner, String title, String description, ZonedDateTime date) {
-        this(location, Optional.of(owner), title, description, date, Optional.empty());
+    public static ProtestData generate(
+        Coordinate location, String owner, String title, String description, ZonedDateTime date
+    ) {
+        return new ProtestData(
+            location,
+            Optional.of(owner),
+            title,
+            description,
+            date,
+            Optional.empty(),
+            Optional.of(UUID.randomUUID())
+        );
+    }
+
+    public static ProtestData generate(ProtestData data) {
+        return new ProtestData(
+            data.location,
+            Optional.of(data.owner.get()),
+            data.title,
+            data.description,
+            data.date,
+            data.dressCode,
+            Optional.of(UUID.randomUUID())
+        );
     }
 
     @Override
@@ -110,14 +145,21 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
             Sanitize.encodeHtml(title),
             Sanitize.encodeHtml(description),
             date,
-            dressCode.isEmpty() ? dressCode : Optional.of(Sanitize.encodeHtml(dressCode.get()))
+            dressCode.isEmpty() ? dressCode : Optional.of(Sanitize.encodeHtml(dressCode.get())),
+            protestId
         );
     }
 
     public static void setupDbIndex() {
         MongoCollection<ProtestData> collection = collection();
+        IndexOptions pidIndexOptions = new IndexOptions();
+
+        pidIndexOptions.unique(true);
 
         collection.createIndex(Indexes.geo2dsphere("location"));
+        collection.createIndex(
+            Indexes.ascending("protestId"), pidIndexOptions
+        );
     }
 
     public static MongoCollection<ProtestData> collection() {

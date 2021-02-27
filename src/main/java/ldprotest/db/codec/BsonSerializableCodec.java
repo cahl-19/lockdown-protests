@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import ldprotest.geo.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -349,6 +350,14 @@ public class BsonSerializableCodec <T> implements Codec<T> {
             CoordinateCodec.encode(writer, (Coordinate)object);
         });
 
+        map.put(UUID.class,(writer, object) -> {
+            UUID uuid = (UUID)object;
+            writer.writeStartArray();
+            writer.writeInt64(uuid.getMostSignificantBits());
+            writer.writeInt64(uuid.getLeastSignificantBits());
+            writer.writeEndArray();
+        });
+
         return map;
     }
 
@@ -544,6 +553,15 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
         map.put(Coordinate.class, (reader, clazz) -> {
             return CoordinateCodec.decode(reader);
+        });
+
+        map.put(UUID.class, (reader, clazz) -> {
+            reader.readStartArray();
+            long msb = reader.readInt64();
+            long lsb = reader.readInt64();
+            reader.readEndArray();
+
+            return new UUID(msb, lsb);
         });
 
         return map;

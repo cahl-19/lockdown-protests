@@ -192,7 +192,7 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
             }
 
             let position = protest_map.xy_to_latlng(
-                    map, x - pin.width() / 2, y - pin.height()
+                    map, x + pin.width() / 2, y + pin.height()
             );
 
             $('#display-protest-plan-location').text(

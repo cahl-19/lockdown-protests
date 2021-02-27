@@ -40,6 +40,14 @@ public class ConfigFile {
             return Result.failure(ex.getMessage());
         }
 
+        if(data.httpCacheMaxAge != null) {
+            if(data.httpCacheMaxAge >= 0) {
+                builder.setHttpCacheMaxAge(data.httpCacheMaxAge, AppConfig.PRIORITY_CONFIG);
+            } else {
+                return Result.failure("Invalid Age Value: " + data.httpCacheMaxAge);
+            }
+        }
+
         if(data.serverPort != null) {
 
             if(TcpPort.validate(data.serverPort)) {
@@ -84,6 +92,7 @@ public class ConfigFile {
     private static final class ConfigFileData {
         public Integer serverPort;
         public Boolean usingHttps;
+        public Long httpCacheMaxAge;
         public String mongoConnect;
         public UserSessionConfig userSessionConfig;
         public KeyStoreConfig keyStoreConfig;

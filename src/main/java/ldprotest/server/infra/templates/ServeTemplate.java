@@ -26,6 +26,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import ldprotest.main.Main;
+import ldprotest.main.ServerTime;
+import ldprotest.server.infra.HttpCaching;
 
 import static spark.Spark.get;
 import ldprotest.util.TypeTools;
@@ -92,7 +95,17 @@ public class ServeTemplate {
             Template template = handlebars.compile(MAIN_PAGE_TEMPLATE);
             ModelAndView model = new ModelAndView(modelMap, this.bodyTemplatePath);
 
-            get(url, (req, resp) -> template.apply(model.getModel()));
+            long resourceTimestamp = ServerTime.now().toEpochSecond();
+
+            get(url, (req, resp) -> {
+                if(HttpCaching.needsRefresh(req, resourceTimestamp)) {
+                    HttpCaching.setCacheHeaders(resp, resourceTimestamp, Main.args().httpCacheMaxAge);
+                    return template.apply(model.getModel());
+                } else {
+                    HttpCaching.setNotModifiedResponse(resp);
+                    return "";
+                }
+            });
         }
     }
 }

@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final long httpCacheMaxAge;
     public final int serverPort;
     public final String  fsKeyStorePath;
     public final int tokenExpiresSeconds;
@@ -38,6 +39,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        long httpCacheMaxAge,
         int serverPort,
         String fsKeyStorePath,
         int tokenExpirySeconds,
@@ -50,6 +52,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.httpCacheMaxAge = httpCacheMaxAge;
         this.serverPort = serverPort;
         this.fsKeyStorePath = fsKeyStorePath;
         this.tokenExpiresSeconds = tokenExpirySeconds;
@@ -68,6 +71,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<Long> httpCacheMaxAge;
         public final BuilderField<Integer> serverPort;
         public final BuilderField<String> fsKeyStorePath;
         public final BuilderField<Integer> tokenExpiresSeconds;
@@ -81,6 +85,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            httpCacheMaxAge = new BuilderField<>();
             serverPort = new BuilderField<>();
             fsKeyStorePath = new BuilderField<>();
             tokenExpiresSeconds = new BuilderField<>();
@@ -94,8 +99,13 @@ public class AppConfig {
             usingHttps = new BuilderField<>();
         }
 
+        public Builder setHttpCacheMaxAge(long val, int priority) {
+            httpCacheMaxAge.set(val, priority);
+            return this;
+        }
+
         public Builder setServerPort(int val, int priority) {
-             serverPort.set(val, priority);
+            serverPort.set(val, priority);
             return this;
         }
 
@@ -151,6 +161,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                httpCacheMaxAge.get(),
                 serverPort.get(),
                 fsKeyStorePath.get(),
                 tokenExpiresSeconds.get(),

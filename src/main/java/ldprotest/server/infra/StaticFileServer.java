@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 
 import static spark.Spark.get;
 import ldprotest.util.PathUtils;
+import ldprotest.main.Main;
+import ldprotest.main.ServerTime;
 
 public final class StaticFileServer {
 
@@ -84,7 +86,14 @@ public final class StaticFileServer {
     }
 
     private static void addRoute(String url, String resourcePath) {
+        long timestamp = ServerTime.now().toEpochSecond();
+
         get(url, (req, resp) -> {
+            if(!HttpCaching.needsRefresh(req, timestamp)) {
+                HttpCaching.setNotModifiedResponse(resp);
+                return "";
+            }
+
             byte[] content = FILE_CACHE.get(resourcePath);
             String contentType = CONTENT_TYPE_MAP.get(PathUtils.extension(url));
 
@@ -96,6 +105,8 @@ public final class StaticFileServer {
             if(contentType != null) {
                 resp.header("Content-Type", contentType);
             }
+
+            HttpCaching.setCacheHeaders(resp, timestamp, Main.args().httpCacheMaxAge);
 
             return content;
         });

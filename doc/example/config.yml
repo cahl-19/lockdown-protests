@@ -13,6 +13,10 @@ mongoConnect: 'mongodb://ldprotest:ldprotest@localhost:27017/?serverSelectionTim
 # TCP port which the HTTP server serves on
 serverPort: 4567
 
+# Max age Value (in seconds) to send to browsers for HTTP caching of static files (API endpoints may set their own
+# values)
+httpCacheMaxAge: 60
+
 userSessionConfig:
     # Seconds until a user session expires
     sessionExpiresSeconds: 604800

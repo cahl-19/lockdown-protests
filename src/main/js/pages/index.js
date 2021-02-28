@@ -20,6 +20,7 @@
 ***********************************************************************************************************************/
 import $ from 'jquery';
 import protest_map from 'protest-map';
+import protest_form from 'protest-form';
 import api from 'api';
 import sanitize from 'sanitize';
 import display_error from 'display-error';
@@ -29,6 +30,10 @@ import '!style-loader!css-loader?url=false!leaflet/dist/leaflet.css';
 
 import Popper from 'popper.js';
 import 'bootstrap';
+/***********************************************************************************************************************
+*                                                      CONSTANTS                                                       *
+***********************************************************************************************************************/
+const PROTEST_CREATE_FORM_PREFIX = 'protest-create';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
@@ -102,35 +107,18 @@ function event_offset_xy(ev) {
     }
 }
 /**********************************************************************************************************************/
-function date_from_inputs(date, time) {
-        let dval = date.val();
-        let tval = time.val();
-
-        if(!dval || !tval) {
-            return undefined;
-        }
-
-        let date_parts = dval.split('-');
-        let time_parts = tval.split(':');
-
-        return new Date(
-                date_parts[0], date_parts[1] - 1, date_parts[2], time_parts[0], time_parts[1]
-        );
-}
-/**********************************************************************************************************************/
 function setup_click_drag_pins(map) {
     let desktop_pin = $('#droppable-pin');
     let mobile_pin  = $('#mobile-droppable-pin');
 
     let mobile_pin_parent = mobile_pin.parent();
 
-    let protest_form_modal = $('#protest-create-form-modal');
     let mobile_pin_modal = $('#pin-drop-modal');
 
-    activate_drop_pin(map, desktop_pin, protest_form_modal);
+    activate_drop_pin(map, desktop_pin);
 
     activate_drop_pin(
-        map, mobile_pin, protest_form_modal,
+        map, mobile_pin,
         (pin) => {
             pin.detach();
             $(document.body).append(mobile_pin);
@@ -143,7 +131,7 @@ function setup_click_drag_pins(map) {
     );
 }
 /**********************************************************************************************************************/
-function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
+function activate_drop_pin(map, pin, on_grab, on_reset) {
 
     if(on_grab === undefined) {
         on_grab = () => {};
@@ -235,11 +223,9 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
             $('#display-protest-plan-location').text(
                 `Lat: ${position.lat.toFixed(3)}, Long: ${protest_map.normalize_longitude(position.lng.toFixed(3))}`
             );
-            $('#protest-create-input-latitude').val(position.lat);
-            $('#protest-create-input-longitude').val(position.lng);
 
+            protest_form.open_form(PROTEST_CREATE_FORM_PREFIX, position.lat, position.lng);
             state.modal_open = true;
-            protest_form_modal.modal('show');
         });
         $(document.body).on('touchcancel.pindrag', () => {
 
@@ -251,7 +237,7 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
         });
     });
 
-    protest_form_modal.on('hidden.bs.modal', () => {
+    protest_form.on_hide(PROTEST_CREATE_FORM_PREFIX, () => {
         state.modal_open = false;
         restore_pin();
     });
@@ -277,100 +263,6 @@ function setup_menu() {
         pin_drop_menu_item.removeClass('hidden');
         pin_drop_menu_item.on('click', () => $('#pin-drop-modal').modal('show'));
     }
-}
-/**********************************************************************************************************************/
-function setup_protest_form() {
-
-    let form = $('#protest-create-form');
-    let submit_button = $('#protest-create-form-submit');
-
-    let title = $('#protest-create-input-title');
-    let dress_code = $('#protest-create-input-dress-code');
-    let description = $('#protest-create-input-description');
-    let date = $('#protest-create-input-date');
-    let time = $('#protest-create-input-time');
-    let dt_validity_feedback = $('#protest-create-date-time-validity-feedback');
-    let modal = $('#protest-create-form-modal');
-
-    title.attr('maxlength', 256);
-    title.attr('minlength', 4);
-
-    description.attr('maxlength', 768);
-    description.attr('minlength', 8);
-
-    dress_code.attr('maxlength', 128);
-
-    window.setInterval(() => {
-        let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(Date.now());
-        $('#protest-create-user-current-time').text(dt);
-    }, 1000);
-
-    function validate_date() {
-
-        let dt = date_from_inputs(date, time);
-
-        if(dt === undefined) {
-            let msg = 'Date & time are required';
-            dt_validity_feedback.text(msg);
-            date[0].setCustomValidity(msg);
-            return;
-        }
-
-        let now = new Date(Date.now());
-
-        if(dt.getTime() < now.getTime()) {
-            let msg = 'Must be set in future.';
-            dt_validity_feedback.text(msg);
-            date[0].setCustomValidity(msg);
-        } else {
-            date[0].setCustomValidity('');
-        }
-    };
-
-    date.on('input', validate_date);
-    time.on('input', validate_date);
-
-    submit_button.on('click', () => form.submit());
-
-    form.submit((ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-
-        validate_date();
-
-        let valid = form[0].checkValidity();
-        form.addClass('was-validated');
-
-        if(!valid) {
-            return;
-        }
-
-        let username = api.whoami();
-
-        if(username === undefined) {
-            return;
-        }
-
-        let protest = {
-            'location': {
-                'latitude': $('#protest-create-input-latitude').val(),
-                'longitude': $('#protest-create-input-longitude').val()
-            },
-            'owner': username,
-            'title': title.val(),
-            'description': description.val(),
-            'dressCode': dress_code.val(),
-            'date': date_from_inputs(date, time).getTime()
-        };
-
-        api.call(
-            '/api/pins',
-            'POST',
-            protest,
-            () => window.location.reload(true),
-            (status, error) => popup_ajax_error(status, error)
-        );
-    });
 }
 /**********************************************************************************************************************/
 function setup_login() {
@@ -438,7 +330,7 @@ function setup_auth_page() {
 }
 /**********************************************************************************************************************/
 function setup_unauth_page() {
-    setup_protest_form();
+    protest_form.setup_form(PROTEST_CREATE_FORM_PREFIX, popup_ajax_error);
 }
 /**********************************************************************************************************************/
 $(document).ready(function() {

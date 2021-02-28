@@ -22,6 +22,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -177,5 +178,11 @@ public class PrivateProtestData implements BsonSerializable {
         );
 
         return result.getModifiedCount() == 1;
+    }
+
+    public static boolean deleteProtest(UUID protestId) {
+        DeleteResult result = collection().deleteOne(Filters.eq("protestId", protestId));
+
+        return result.getDeletedCount() == 1;
     }
 }

@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.UUID;
 import ldprotest.business.PrivateProtestData;
 import ldprotest.business.PublicProtestData;
+import ldprotest.serialization.JsonSerializable;
+import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.server.auth.HttpVerbTypes;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
@@ -54,6 +56,12 @@ public final class Protests {
 
                 .build()
         );
+
+        registerEdit();
+        registerDelete();
+    }
+
+    private static void registerEdit() {
 
         JsonEndpoint.post(PATH, PublicProtestData.class, (protest, request, response) -> {
 
@@ -94,7 +102,7 @@ public final class Protests {
             try {
                 orig = PrivateProtestData.lookupByProtestId(protestIdMayFail.result());
             } catch(MongoException ex) {
-                LOGGER.error("Datbase error lookin up protest", ex);
+                LOGGER.error("Datbase error looking up protest", ex);
                 return JsonEndpoint.responseFromError(JsonError.internalError(), response);
             }
 
@@ -123,6 +131,68 @@ public final class Protests {
         });
     }
 
+    private static void registerDelete() {
+        JsonEndpoint.delete(PATH, EmptyJsonDoc.class, (body, request, response) -> {
+
+            Optional<UserSessionInfo> sessionInfo = SecurityFilter.bearerSessionInfo(request);
+            UserRole role = SecurityFilter.userRoleAttr(request);
+            MayFail<String> protestIdField = getRequiredSplat(request, 0);
+
+            if(sessionInfo.isEmpty()) {
+                LOGGER.error(
+                    "Unauthenticated request past the security filter. This means that the security filter has failed!"
+                );
+                return JsonEndpoint.responseFromError(JsonError.unauthorizedError(), response);
+            }
+
+            UUID userId = sessionInfo.get().globalUniqueUserId;
+            String username = sessionInfo.get().username;
+
+            if(protestIdField.isFailure()) {
+                LOGGER.warn("Missing required protest ID url path element");
+                return JsonEndpoint.responseFromError(JsonError.invalidParams("missing url protest ID"), response);
+            }
+
+            MayFail<UUID> protestIdMayFail = MayFail.succeedOrEatException(
+                IllegalArgumentException.class, () -> UUID.fromString(protestIdField.result())
+            );
+
+            if(protestIdMayFail.isFailure()) {
+                LOGGER.warn("Invalid protest ID format");
+                return JsonEndpoint.responseFromError(JsonError.invalidParams("invalid protest ID"), response);
+            }
+
+            PrivateProtestData orig;
+            try {
+                orig = PrivateProtestData.lookupByProtestId(protestIdMayFail.result());
+            } catch(MongoException ex) {
+                LOGGER.error("Datbase error looking up protest", ex);
+                return JsonEndpoint.responseFromError(JsonError.internalError(), response);
+            }
+
+            if(orig == null) {
+                LOGGER.warn("Attempt by {} to modify non-existant protest", userId);
+                return JsonEndpoint.responseFromError(JsonError.invalidParams("Protest Not Found"), response);
+            }
+
+            if(!(role.equals(UserRole.ADMIN) || role.equals(UserRole.MODERATOR))) {
+                if(!orig.owner.get().equals(username) || !orig.ownerId.equals(userId)) {
+                    LOGGER.error("Attempt by {} {} to delete a protest they don't own", username, userId);
+                    return JsonEndpoint.responseFromError(JsonError.unauthorizedError(), response);
+                }
+            }
+
+            try {
+                PrivateProtestData.deleteProtest(orig.protestId);
+            } catch(MongoException ex) {
+                LOGGER.error("Datbase error deleting protest", ex);
+                return JsonEndpoint.responseFromError(JsonError.internalError(), response);
+            }
+
+            return JsonError.success();
+        });
+    }
+
     private static MayFail<String> getRequiredSplat(Request request, int index) {
         String[] fields = request.splat();
 
@@ -137,5 +207,12 @@ public final class Protests {
         }
 
         return MayFail.success(s);
+    }
+
+    private static final class EmptyJsonDoc implements JsonSerializable {
+        @ReflectiveConstructor
+        private EmptyJsonDoc() {
+
+        }
     }
 }

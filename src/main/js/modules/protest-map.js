@@ -117,16 +117,20 @@ function update_protests(map, state) {
     } else {
         state.protest_zone = buffer_bounds(map_bounds);
         state.last_protest_update = now;
-        load_protests(map, state.protest_zone, state.config.display_error);
+        load_protests(map, state.protest_zone, state.config.render_popup, state.config.display_error);
     }
 }
 /**********************************************************************************************************************/
-function load_protests(map, bounds, display_error) {
+function load_protests(map, bounds, render_popup, display_error) {
 
     let north = bounds.north;
     let west = bounds.west;
     let south = bounds.south;
     let east = bounds.east;
+
+    if(render_popup === undefined) {
+        render_popup = () => '<p>Popup Renderer Undefined</p>';
+    }
 
     if(display_error === undefined) {
         display_error = (alert) => alert('error loading protests');
@@ -144,21 +148,16 @@ function load_protests(map, bounds, display_error) {
                     protest.location.longitude, map
                 );
 
-                let title = sanitize.encode_api_html(protest.title);
-                let owner = sanitize.encode_api_html(protest.owner);
-                let description = sanitize.encode_api_html(protest.description);
-                let dress_code = sanitize.encode_api_html(protest.dressCode);
-                let date = new Date(protest.date);
-
-                let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(date);
-
                 let mark = L.marker([lat, lng]).addTo(map);
-                mark.bindPopup(
-                    `<p><strong>${title}</strong> - by ${owner}</p>` +
-                    `<p><strong>Scheduled for:</strong> ${dt}</p>` +
-                    `<p><strong>Dresss Code:</strong> ${dress_code} </p>` +
-                    `<p><strong>Description: </strong></br>${description}</p>`
-                );
+                mark.bindPopup(() => render_popup({
+                    'title': sanitize.encode_api_html(protest.title),
+                    'owner': sanitize.encode_api_html(protest.owner),
+                    'description': sanitize.encode_api_html(protest.description),
+                    'dress_code': sanitize.encode_api_html(protest.dressCode),
+                    'date': new Date(protest.date),
+                    'location': protest.location,
+                    'protestId': protest.protestId
+                }));
             });
         },
         (status, error_body) => {

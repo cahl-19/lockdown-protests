@@ -44,6 +44,17 @@ function popup_ajax_error(status, error_body) {
     }
 }
 /**********************************************************************************************************************/
+function render_popup(protest) {
+    let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(protest.date);
+
+    return (
+        `<p><strong>${protest.title}</strong> - by ${protest.owner}</p>` +
+        `<p><strong>Scheduled for:</strong> ${dt}</p>` +
+        `<p><strong>Dresss Code:</strong> ${protest.dress_code} </p>` +
+        `<p><strong>Description: </strong></br>${protest.description}</p>`
+    );
+}
+/**********************************************************************************************************************/
 function make_spinner() {
     return $('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
 }
@@ -387,6 +398,7 @@ function setup_auth_page() {
 
     protest_map.init_map(
         $('#map-div'), {
+            'render_popup': (protest) => render_popup(protest),
             'display_error': (status, error) => popup_ajax_error(status, error).then(() => window.location.reload(true))
         }
     ).then((map) => {

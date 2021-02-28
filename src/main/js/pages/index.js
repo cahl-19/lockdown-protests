@@ -21,7 +21,7 @@
 import $ from 'jquery';
 import protest_map from 'protest-map';
 import api from 'api';
-import sanitize from 'sanitize'
+import sanitize from 'sanitize';
 import display_error from 'display-error';
 
 import '!style-loader!css-loader!bootstrap/dist/css/bootstrap.min.css';
@@ -44,15 +44,41 @@ function popup_ajax_error(status, error_body) {
     }
 }
 /**********************************************************************************************************************/
+function can_edit_protest(protest) {
+    return (
+        api.whoami() === protest.owner ||
+        api.current_user_role() === 'ADMIN' ||
+        api.current_user_role() === 'MODERATOR'
+    );
+}
+/**********************************************************************************************************************/
 function render_popup(protest) {
     let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(protest.date);
 
-    return (
-        `<p><strong>${protest.title}</strong> - by ${protest.owner}</p>` +
-        `<p><strong>Scheduled for:</strong> ${dt}</p>` +
-        `<p><strong>Dresss Code:</strong> ${protest.dress_code} </p>` +
-        `<p><strong>Description: </strong></br>${protest.description}</p>`
+    let content = $(
+        '<div class="protest-popup">' +
+            '<div>' +
+            `<p><strong>${protest.title}</strong> - by ${protest.owner}</p>` +
+            `<p><strong>Scheduled for:</strong> ${dt}</p>` +
+            `<p><strong>Dresss Code:</strong> ${protest.dress_code} </p>` +
+            `<p><strong>Description: </strong></br>${protest.description}</p>` +
+            '</div>' +
+        '</div>'
     );
+
+    if(can_edit_protest(protest)) {
+        let edit_row = $('<div class="text-right"></div>');
+        let edit_link = $('<a href="#">Edit</a>');
+
+        edit_link.on(
+                'click', () => alert('code is working')
+        );
+
+        edit_row.append(edit_link);
+        content.append(edit_row);
+    }
+
+    return content[0];
 }
 /**********************************************************************************************************************/
 function make_spinner() {

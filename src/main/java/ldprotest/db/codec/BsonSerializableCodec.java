@@ -37,7 +37,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -351,11 +350,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         });
 
         map.put(UUID.class,(writer, object) -> {
-            UUID uuid = (UUID)object;
-            writer.writeStartArray();
-            writer.writeInt64(uuid.getMostSignificantBits());
-            writer.writeInt64(uuid.getLeastSignificantBits());
-            writer.writeEndArray();
+            UUIDCodec.encode(writer, (UUID)object);
         });
 
         return map;
@@ -556,12 +551,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         });
 
         map.put(UUID.class, (reader, clazz) -> {
-            reader.readStartArray();
-            long msb = reader.readInt64();
-            long lsb = reader.readInt64();
-            reader.readEndArray();
-
-            return new UUID(msb, lsb);
+            return UUIDCodec.decode(reader);
         });
 
         return map;

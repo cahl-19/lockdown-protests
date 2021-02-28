@@ -21,6 +21,7 @@ import java.security.SecureRandom;
 import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Objects;
+import java.util.UUID;
 import ldprotest.db.DbIndex;
 import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
@@ -38,6 +39,7 @@ public class UserSessionInfo implements JsonSerializable {
     public final String username;
     public final String email;
     public final UserRole role;
+    public final UUID globalUniqueUserId;
     public final ZonedDateTime createdAt;
 
     @ReflectiveConstructor
@@ -46,14 +48,18 @@ public class UserSessionInfo implements JsonSerializable {
         username = null;
         email = null;
         role = null;
+        globalUniqueUserId = null;
         createdAt = null;
     }
 
-    public UserSessionInfo(String sessionId, String username, String email, UserRole role, ZonedDateTime createdAt) {
+    public UserSessionInfo(
+        String sessionId, String username, String email, UserRole role, UUID globalUniqueUserId, ZonedDateTime createdAt
+    ) {
         this.sessionId = sessionId;
         this.username = username;
         this.email = email;
         this.role = role;
+        this.globalUniqueUserId = globalUniqueUserId;
         this.createdAt = createdAt;
     }
 
@@ -69,6 +75,7 @@ public class UserSessionInfo implements JsonSerializable {
             info.publicUsername,
             info.email,
             info.userRole,
+            info.globalUniqueId,
             ServerTime.now()
         );
     }
@@ -78,11 +85,11 @@ public class UserSessionInfo implements JsonSerializable {
     }
 
     public UserInfo toUserInfo() {
-        return new UserInfo(username, email, role);
+        return UserInfo.fromUserSessionInfo(this);
     }
 
     public UserSessionInfo withNewCreationDate(ZonedDateTime creation) {
-        return new UserSessionInfo(sessionId, username, email, role, creation);
+        return new UserSessionInfo(sessionId, username, email, role, globalUniqueUserId, creation);
     }
 
     @Override

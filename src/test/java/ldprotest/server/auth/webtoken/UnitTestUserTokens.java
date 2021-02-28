@@ -34,7 +34,7 @@ public class UnitTestUserTokens {
     public void testRoundTripToken() {
 
         UserSessionInfo info = UserSessionInfo.generateSession(
-            new UserInfo("test-username-123", "test-email-456", UserRole.MODERATOR)
+            UserInfo.generate("test-username-123", "test-email-456", UserRole.MODERATOR)
         );
 
         String token = UserTokens.sign(info, UserTokenSubject.FOR_COOKIE);
@@ -49,7 +49,7 @@ public class UnitTestUserTokens {
     public void testCorruption() {
 
         UserSessionInfo info = UserSessionInfo.generateSession(
-            new UserInfo("test-username-123", "test-email-456", UserRole.MODERATOR)
+            UserInfo.generate("test-username-123", "test-email-456", UserRole.MODERATOR)
         );
 
         String token = UserTokens.sign(info, UserTokenSubject.FOR_COOKIE) + "a";

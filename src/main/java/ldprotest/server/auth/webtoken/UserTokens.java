@@ -27,6 +27,7 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import java.util.Date;
+import java.util.UUID;
 import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
 import ldprotest.server.auth.UserRole;
@@ -85,6 +86,7 @@ public final class UserTokens {
             jwt.getClaim("username").asString(),
             jwt.getClaim("email").asString(),
             UserRole.valueOf(jwt.getClaim("role").asString()),
+            bitsToUUID(jwt.getClaim("uid").asArray(Long.class)),
             DateTools.DateToZonedDateTime(jwt.getClaim("sessionCreatedAt").asDate())
         );
     }
@@ -97,11 +99,13 @@ public final class UserTokens {
        }
 
        public String sign(UserSessionInfo info, UserTokenSubject subject) {
+
            Algorithm algorithm = Algorithm.RSA512(deferredKeyProvider.getKeyProvider());
            Date expiry = Date.from(ServerTime.now().plusSeconds(Main.args().tokenExpiresSeconds).toInstant());
 
            return JWT.create()
                .withClaim("username", info.username)
+               .withArrayClaim("uid", uuidToBits(info.globalUniqueUserId))
                .withClaim("email", info.email)
                .withClaim("role", info.role.name())
                .withClaim("sessionId", info.sessionId)
@@ -157,10 +161,23 @@ public final class UserTokens {
            try {
                return Result.success(sessionInfoFromDecodedJWT(jwt));
            }  catch (IllegalArgumentException ex) {
-               LOGGER.error("Received Token With Invalid Role: {}", jwt.getClaim("role").asString());
+               LOGGER.error("Error converting JWT to user session", ex);
                return Result.failure(VerificationFailure.OTHER_ERROR);
            }
        }
+    }
+
+    private static Long[] uuidToBits(UUID uuid) {
+        Long[] uuidBits = {uuid.getMostSignificantBits(), uuid.getLeastSignificantBits()};
+        return uuidBits;
+    }
+
+    private static UUID bitsToUUID(Long [] bits) {
+        if(bits == null || bits.length != 2) {
+            throw new IllegalArgumentException("UUID field in token is wrong length");
+        }
+
+        return new UUID(bits[0], bits[1]);
     }
 
     public static enum VerificationFailure {

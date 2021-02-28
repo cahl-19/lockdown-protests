@@ -17,6 +17,7 @@
 */
 package ldprotest.db.codec;
 
+import java.util.UUID;
 import ldprotest.geo.Coordinate;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -41,6 +42,8 @@ public class CodecProvider implements org.bson.codecs.configuration.CodecProvide
             return (Codec<T>) codecCache.computeIfAbsent(clazz, () -> new BsonSerializableCodec(clazz));
         } else if(Coordinate.class.isAssignableFrom(clazz)) {
             return (Codec<T>)new CoordinateCodec();
+        } else if(UUID.class.isAssignableFrom(clazz)) {
+            return (Codec<T>)new UUIDCodec();
         } else {
             return null;
         }

@@ -80,7 +80,7 @@ public final class UserAccount {
         byte[] hash = hashPassword(secret, salt, DEFAULT_ALGO, DEFAULT_ITERATIONS);
 
         UserCredentialInfo data = new UserCredentialInfo(
-            new UserInfo(username, email, role),
+            UserInfo.generate(username, email, role),
             hash,
             salt,
             DEFAULT_ALGO,

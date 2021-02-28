@@ -18,6 +18,7 @@
 package ldprotest.server.auth;
 
 import java.util.Objects;
+import java.util.UUID;
 import ldprotest.db.DbIndex;
 import ldprotest.db.DbSortOrder;
 import ldprotest.serialization.JsonSerializable;
@@ -31,6 +32,9 @@ public class UserInfo implements JsonSerializable {
     @DbIndex(order = DbSortOrder.ASCENDING, groupId = 1)
     public final String publicUsername;
 
+    @DbIndex(order = DbSortOrder.ASCENDING, groupId = 2)
+    public final UUID globalUniqueId;
+
     public final UserRole userRole;
 
     @ReflectiveConstructor
@@ -38,12 +42,22 @@ public class UserInfo implements JsonSerializable {
         publicUsername = "";
         email = "";
         userRole = UserRole.UNAUTHENTICATED;
+        globalUniqueId = null;
     }
 
-    public UserInfo(String publicUsername, String email, UserRole userRole) {
+    private UserInfo(String publicUsername, String email, UserRole userRole, UUID globalUniqueId) {
         this.publicUsername = publicUsername;
         this.email = email;
         this.userRole = userRole;
+        this.globalUniqueId = globalUniqueId;
+    }
+
+    public static UserInfo generate(String publicUsername, String email, UserRole userRole) {
+        return new UserInfo(publicUsername, email, userRole, UUID.randomUUID());
+    }
+
+    public static UserInfo fromUserSessionInfo(UserSessionInfo info) {
+        return new UserInfo(info.username, info.email, info.role, info.globalUniqueUserId);
     }
 
     @Override
@@ -57,7 +71,8 @@ public class UserInfo implements JsonSerializable {
         return
             publicUsername.equals(otherInfo.publicUsername) &&
             email.equals(otherInfo.email) &&
-            userRole.equals(otherInfo.userRole);
+            userRole.equals(otherInfo.userRole) &&
+            globalUniqueId.equals(otherInfo.globalUniqueId);
     }
 
     @Override

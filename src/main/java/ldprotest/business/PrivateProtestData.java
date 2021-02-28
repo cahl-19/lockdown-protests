@@ -18,30 +18,26 @@
 package ldprotest.business;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.result.UpdateResult;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import ldprotest.db.MainDatabase;
 import ldprotest.geo.Coordinate;
-import ldprotest.serialization.JsonSerializable;
+import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
-import ldprotest.serialization.Sanitizable;
-import ldprotest.server.infra.http.Sanitize;
-import ldprotest.util.interfaces.Validatable;
 
-public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, Validatable {
+public class PrivateProtestData implements BsonSerializable {
 
     private static final String COLLECTION_NAME = "protests";
 
-    private static final int MIN_TITLE_LENGTH = 4;
-    private static final int MAX_TITLE_LENGTH = 256;
-    private static final int MAX_DESCRIPTION_LENGTH = 768;
-    private static final int MAX_DRESS_CODE_LENGTH = 128;
-
     public final Coordinate location;
     public final Optional<String> owner;
+    public final UUID ownerId;
 
     public final String title;
     public final String description;
@@ -49,12 +45,13 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
 
     public final ZonedDateTime date;
 
-    public final Optional<UUID> protestId;
+    public final UUID protestId;
 
     @ReflectiveConstructor
-    private ProtestData() {
+    private PrivateProtestData() {
         location = null;
         owner = null;
+        ownerId = null;
 
         title = null;
         description = null;
@@ -63,17 +60,19 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
         protestId = null;
     }
 
-    private ProtestData(
+    private PrivateProtestData(
         Coordinate location,
         Optional<String> owner,
+        UUID ownerId,
         String title,
         String description,
         ZonedDateTime date,
         Optional<String> dressCode,
-        Optional<UUID> protestId
+        UUID protestId
     ) {
         this.location = location;
         this.owner = owner;
+        this.ownerId = ownerId;
         this.title = title;
         this.description = description;
         this.dressCode = dressCode;
@@ -81,77 +80,74 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
         this.protestId = protestId;
     }
 
-    public static ProtestData generate(
-        Coordinate location, String owner, String title, String description, ZonedDateTime date, String dressCode
+    public static PrivateProtestData generate(
+        Coordinate location,
+        String owner,
+        UUID ownerId,
+        String title,
+        String description,
+        ZonedDateTime date,
+        String dressCode
     ) {
-        return new ProtestData(
+        return new PrivateProtestData(
             location,
             Optional.of(owner),
+            ownerId,
             title, description,
             date,
             Optional.of(dressCode),
-            Optional.of(UUID.randomUUID())
+            UUID.randomUUID()
         );
     }
 
-    public static ProtestData generate(
-        Coordinate location, String owner, String title, String description, ZonedDateTime date
+    public static PrivateProtestData generate(
+        Coordinate location,
+        String owner,
+        UUID ownerId,
+        String title,
+        String description,
+        ZonedDateTime date
     ) {
-        return new ProtestData(
+        return new PrivateProtestData(
             location,
             Optional.of(owner),
+            ownerId,
             title,
             description,
             date,
             Optional.empty(),
-            Optional.of(UUID.randomUUID())
+            UUID.randomUUID()
         );
     }
 
-    public static ProtestData generate(ProtestData data) {
-        return new ProtestData(
+    public static PrivateProtestData generate(PublicProtestData data, UUID userId) {
+        return new PrivateProtestData(
             data.location,
             Optional.of(data.owner.get()),
+            userId,
             data.title,
             data.description,
             data.date,
             data.dressCode,
-            Optional.of(UUID.randomUUID())
+            UUID.randomUUID()
         );
     }
 
-    @Override
-    public boolean validate() {
-        if(title.length() > MAX_TITLE_LENGTH) {
-            return false;
-        } else if(title.length() < MIN_TITLE_LENGTH) {
-            return false;
-        } else if(description.length() > MAX_DESCRIPTION_LENGTH) {
-            return false;
-        } else if(dressCode.isPresent() && dressCode.get().length() > MAX_DRESS_CODE_LENGTH) {
-            return false;
-        } else if(!location.validate()) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    @Override
-    public ProtestData sanitize() {
-        return new ProtestData(
-            location,
-            owner,
-            Sanitize.encodeHtml(title),
-            Sanitize.encodeHtml(description),
-            date,
-            dressCode.isEmpty() ? dressCode : Optional.of(Sanitize.encodeHtml(dressCode.get())),
+    public static PrivateProtestData publicToPrivate(PublicProtestData data, UUID userId, UUID protestId) {
+        return new PrivateProtestData(
+            data.location,
+            Optional.of(data.owner.get()),
+            userId,
+            data.title,
+            data.description,
+            data.date,
+            data.dressCode,
             protestId
         );
     }
 
     public static void setupDbIndex() {
-        MongoCollection<ProtestData> collection = collection();
+        MongoCollection<PrivateProtestData> collection = collection();
         IndexOptions pidIndexOptions = new IndexOptions();
 
         pidIndexOptions.unique(true);
@@ -162,7 +158,24 @@ public class ProtestData implements JsonSerializable, Sanitizable<ProtestData>, 
         );
     }
 
-    public static MongoCollection<ProtestData> collection() {
-        return MainDatabase.database().getCollection(COLLECTION_NAME, ProtestData.class);
+    public static MongoCollection<PrivateProtestData> collection() {
+        return MainDatabase.database().getCollection(COLLECTION_NAME, PrivateProtestData.class);
+    }
+
+    public static PrivateProtestData lookupByProtestId(UUID protestId) {
+        return collection().find(
+            Filters.eq("protestId", protestId)
+        ).first();
+    }
+
+    public static boolean updateProtest(PrivateProtestData protest) {
+        ReplaceOptions options = new ReplaceOptions();
+        options.upsert(false);
+
+        UpdateResult result = collection().replaceOne(
+            Filters.eq("protestId", protest.protestId), protest, options
+        );
+
+        return result.getModifiedCount() == 1;
     }
 }

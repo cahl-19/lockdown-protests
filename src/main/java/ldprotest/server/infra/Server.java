@@ -28,6 +28,7 @@ import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.endpoints.GeoPin;
 import ldprotest.server.endpoints.Login;
 import ldprotest.server.endpoints.Logout;
+import ldprotest.server.endpoints.Protests;
 import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.TokenRefresh;
 import ldprotest.server.endpoints.WhoAmI;
@@ -70,6 +71,7 @@ public class Server {
         WhoAmI.register();
         TokenRefresh.register();
         GeoPin.register();
+        Protests.register();
 
         serveDynamicTestEndpoints();
     }

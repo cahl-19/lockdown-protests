@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import ldprotest.business.ProtestData;
+import ldprotest.business.PrivateProtestData;
+import ldprotest.business.PublicProtestData;
 import ldprotest.geo.Coordinate;
 import ldprotest.geo.GeoRectangle;
 import ldprotest.serialization.JsonSerializable;
@@ -72,7 +73,7 @@ public class GeoPin {
                 .build()
         );
 
-        JsonEndpoint.post(PATH, ProtestData.class, (protest, request, response) -> {
+        JsonEndpoint.post(PATH, PublicProtestData.class, (protest, request, response) -> {
 
             Optional<UserSessionInfo> sessionInfo = SecurityFilter.bearerSessionInfo(request);
 
@@ -97,7 +98,9 @@ public class GeoPin {
             }
 
             try {
-                ProtestData.collection().insertOne(ProtestData.generate(protest));
+                PrivateProtestData.collection().insertOne(
+                    PrivateProtestData.generate(protest, sessionInfo.get().globalUniqueUserId)
+                );
             } catch(MongoException ex) {
                 LOGGER.error("Datbase error inserting protest", ex);
                 return JsonEndpoint.responseFromError(JsonError.internalError(), response);
@@ -153,10 +156,10 @@ public class GeoPin {
     }
 
     private static Protests searchProtests(GeoRectangle area) {
-        MongoCollection<ProtestData> collection = ProtestData.collection();
-        List<ProtestData> protests = new ArrayList<>();
+        MongoCollection<PrivateProtestData> collection = PrivateProtestData.collection();
+        List<PrivateProtestData> protests = new ArrayList<>();
 
-        for(ProtestData data: collection.find(area.bsonFilter("location")).limit(MAX_PROTESTS_PER_REQUEST)) {
+        for(PrivateProtestData data: collection.find(area.bsonFilter("location")).limit(MAX_PROTESTS_PER_REQUEST)) {
             protests.add(data);
         }
 
@@ -164,9 +167,9 @@ public class GeoPin {
     }
 
     private static final class Protests implements JsonSerializable {
-        List<ProtestData> protests;
+        List<PrivateProtestData> protests;
 
-        public Protests(List<ProtestData> protests) {
+        public Protests(List<PrivateProtestData> protests) {
             this.protests = protests;
         }
     }

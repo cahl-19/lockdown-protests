@@ -65,11 +65,13 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="{{id_prefix}}-form-submit">Submit</button>
-        {{#if include_delete}}
-            <button type="button" class="btn btn-danger" id="{{id_prefix}}-protest-delete">Delete</button>
-        {{/if}}
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <div>
+            <button type="button" class="btn btn-primary" id="{{id_prefix}}-form-submit">Submit</button>
+            {{#if include_delete}}
+                <button type="button" class="btn btn-danger" id="{{id_prefix}}-protest-delete">Delete</button>
+            {{/if}}
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
       </div>
     </div>
   </div>

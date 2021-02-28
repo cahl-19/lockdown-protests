@@ -25,6 +25,7 @@ import api from 'api';
 import sanitize from 'sanitize';
 import display_error from 'display-error';
 import spinner from 'spinner';
+import confirm from 'confirm';
 
 import '!style-loader!css-loader!bootstrap/dist/css/bootstrap.min.css';
 import '!style-loader!css-loader?url=false!leaflet/dist/leaflet.css';
@@ -324,7 +325,6 @@ function setup_protest_forms() {
     protest_form.setup_form(
         PROTEST_CREATE_FORM_PREFIX,
         (protest, submit_button) => {
-            console.log(protest);
             let stop_spin = spinner.spin(submit_button, ' Loading');
             api.call(
                 '/api/pins',
@@ -351,6 +351,29 @@ function setup_protest_forms() {
                 (status, error) => {
                     stop_spin();
                     popup_ajax_error(status, error);
+                }
+            );
+        },
+        (protest, delete_button) => {
+            let stop_spin = spinner.spin(delete_button, ' Loading');
+
+            confirm.display(
+                    $('#confirm-popup'), "Are you sure you want to delete this protest?\nThis cannot be undone."
+            ).then(
+                () => {
+                    api.call(
+                        `/api/protests/${protest.protestId}`,
+                        'DELETE',
+                        {},
+                        () => window.location.reload(true),
+                        (status, error) => {
+                            stop_spin();
+                            popup_ajax_error(status, error);
+                        }
+                    );
+                },
+                () => {
+                    stop_spin();
                 }
             );
         }

@@ -92,8 +92,6 @@ export let protest_form = {
         set_if_defined($(`#${id_prefix}-input-protest-id`), populate.protestId);
         set_if_defined($(`#${id_prefix}-input-description`), populate.description);
 
-        console.log(populate.protestId);
-
         $(`#${id_prefix}-display-location`).text(
             `Lat: ${populate.location.latitude.toFixed(3)}, ` +
             `Long: ${populate.location.longitude.toFixed(3)}`
@@ -105,7 +103,7 @@ export let protest_form = {
 
         let form = $(`#${id_prefix}-form`);
         let submit_button = $(`#${id_prefix}-form-submit`);
-        let delete_button = $(`#${id_prefix}--protest-delete`);
+        let delete_button = $(`#${id_prefix}-protest-delete`);
 
         let title = $(`#${id_prefix}-input-title`);
         let dress_code = $(`#${id_prefix}-input-dress-code`);
@@ -192,7 +190,7 @@ export let protest_form = {
             submit(protest_data(), submit_button);
         });
 
-        delete_button.on('click', () => delete_protest(protest_data()));
+        delete_button.on('click', () => delete_protest(protest_data(), delete_button));
     }
 };
 /**********************************************************************************************************************/

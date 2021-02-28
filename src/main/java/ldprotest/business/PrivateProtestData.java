@@ -182,7 +182,7 @@ public class PrivateProtestData implements BsonSerializable {
     }
 
     public static boolean deleteProtest(UUID protestId) {
-        DeleteResult result = collection().deleteOne(Filters.eq("protestId", protestId));
+        DeleteResult result = collection().deleteOne(Filters.eq("protestId", UUIDCodec.toBsonValue(protestId)));
 
         return result.getDeletedCount() == 1;
     }

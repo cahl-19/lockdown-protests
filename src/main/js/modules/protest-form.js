@@ -114,6 +114,7 @@ export let protest_form = {
         let time = $(`#${id_prefix}-input-time`);
         let dt_validity_feedback = $(`#${id_prefix}-date-time-validity-feedback`);
         let protest_id = $(`#${id_prefix}-input-protest-id`);
+        let user_current_time = $(`#${id_prefix}-user-current-time`);
 
 
         title.attr('maxlength', 256);
@@ -126,7 +127,7 @@ export let protest_form = {
 
         window.setInterval(() => {
             let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(Date.now());
-            $(`${id_prefix}-user-current-time`).text(dt);
+            user_current_time.text(dt);
         }, 1000);
 
         function validate_date() {

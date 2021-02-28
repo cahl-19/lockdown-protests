@@ -20,6 +20,7 @@
 ***********************************************************************************************************************/
 import $ from 'jquery';
 import api from 'api';
+import spinner from 'spinner';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
@@ -43,6 +44,9 @@ export let protest_form = {
     'on_hide': function(id_prefix, fun) {
         return $(`#${id_prefix}-form-modal`).on('hidden.bs.modal', fun);
     },
+    'close_form': function(id_prefix) {
+        $(`#${id_prefix}-form-modal`).modal('hide');
+    },
     'open_form': function(id_prefix, lat, lng) {
         let modal = $(`#${id_prefix}-form-modal`);
 
@@ -51,7 +55,7 @@ export let protest_form = {
 
         modal.modal('show');
     },
-    'setup_form': function(id_prefix, display_error) {
+    'setup_form': function(id_prefix, submit, delete_protest) {
 
         let form = $(`#${id_prefix}-form`);
         let submit_button = $(`#${id_prefix}-form-submit`);
@@ -135,13 +139,7 @@ export let protest_form = {
                 'date': date_from_inputs(date, time).getTime()
             };
 
-            api.call(
-                '/api/pins',
-                'POST',
-                protest,
-                () => window.location.reload(true),
-                (status, error) => display_error(status, error)
-            );
+            submit(protest, submit_button);
         });
     }
 };

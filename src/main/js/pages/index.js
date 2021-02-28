@@ -24,6 +24,7 @@ import protest_form from 'protest-form';
 import api from 'api';
 import sanitize from 'sanitize';
 import display_error from 'display-error';
+import spinner from 'spinner';
 
 import '!style-loader!css-loader!bootstrap/dist/css/bootstrap.min.css';
 import '!style-loader!css-loader?url=false!leaflet/dist/leaflet.css';
@@ -84,10 +85,6 @@ function render_popup(protest) {
     }
 
     return content[0];
-}
-/**********************************************************************************************************************/
-function make_spinner() {
-    return $('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
 }
 /**********************************************************************************************************************/
 function event_client_xy(ev) {
@@ -285,13 +282,7 @@ function setup_login() {
         submit_login.on('click', (ev) => {
         ev.preventDefault();
 
-        let orig_button_content = submit_login.html();
-        let spinner = make_spinner();
-
-        submit_login.html('');
-
-        submit_login.append(spinner);
-        submit_login.append($('<span> Loading</span>'));
+        let stop_spin = spinner.spin(submit_login, ' Loading');
 
         api.login(
             email_input.val(), password_input.val(),
@@ -299,7 +290,7 @@ function setup_login() {
                 window.location.reload(true);
             },
             (status, error) => {
-                submit_login.html(orig_button_content);
+                stop_spin();
 
                 if(error !== undefined && error.code === api.error_codes.LOGIN_FAILURE) {
                     password_input[0].setCustomValidity('Invalid username or password');
@@ -311,6 +302,25 @@ function setup_login() {
             }
         );
     });
+}
+/**********************************************************************************************************************/
+function setup_protest_create_form() {
+    protest_form.setup_form(
+        PROTEST_CREATE_FORM_PREFIX,
+        (protest, submit_button) => {
+            let stop_spin = spinner.spin(submit_button, ' Loading');
+            api.call(
+                '/api/pins',
+                'POST',
+                protest,
+                () => window.location.reload(true),
+                (status, error) => {
+                    stop_spin();
+                    popup_ajax_error(status, error);
+                }
+            );
+        }
+    );
 }
 /**********************************************************************************************************************/
 function setup_auth_page() {
@@ -330,7 +340,7 @@ function setup_auth_page() {
 }
 /**********************************************************************************************************************/
 function setup_unauth_page() {
-    protest_form.setup_form(PROTEST_CREATE_FORM_PREFIX, popup_ajax_error);
+    setup_protest_create_form();
 }
 /**********************************************************************************************************************/
 $(document).ready(function() {

@@ -29,9 +29,12 @@ import java.util.Map;
 import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
 import ldprotest.server.infra.HttpCaching;
+import ldprotest.util.LruCache;
 
 import static spark.Spark.get;
 import ldprotest.util.TypeTools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServeTemplate {
 
@@ -39,7 +42,17 @@ public class ServeTemplate {
     private static final String TEMPLATE_RESOURCE_PREFIX = "/templates";
     private static final String PAGE_TEMPLATE_BODY_ALIAS = "content";
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(ServeTemplate.class);
+
     private static final Map<String, Object> MAIN_HTML_ATTRIBUTES;
+
+    private static final int CACHE_MAX_DATA_SIZE = 1024 * 1024;
+    private static final LruCache<Integer, String, String> TEMPLATE_CACHE = new LruCache<>(
+        (val, size) -> size + val.length(),
+        (val, size) -> size - val.length(),
+        (size) -> size > CACHE_MAX_DATA_SIZE,
+        0
+    );
 
     static {
         MAIN_HTML_ATTRIBUTES = new HashMap<>();
@@ -100,12 +113,21 @@ public class ServeTemplate {
             get(url, (req, resp) -> {
                 if(HttpCaching.needsRefresh(req, resourceTimestamp)) {
                     HttpCaching.setCacheHeaders(resp, resourceTimestamp, Main.args().httpCacheMaxAge);
-                    return template.apply(model.getModel());
+                    return TEMPLATE_CACHE.computeIfAbsent(url, () -> applyTemplate(template, model));
                 } else {
                     HttpCaching.setNotModifiedResponse(resp);
                     return "";
                 }
             });
+        }
+
+        private static String applyTemplate(Template template, ModelAndView model) {
+            try {
+                return template.apply(model.getModel());
+            } catch(IOException ex) {
+                LOGGER.error("Error applying template", ex);
+                return "";
+            }
         }
     }
 }

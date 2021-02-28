@@ -124,7 +124,7 @@ function setup_click_drag_pins(map) {
 
     let mobile_pin_parent = mobile_pin.parent();
 
-    let protest_form_modal = $('#protest-form-modal');
+    let protest_form_modal = $('#protest-create-form-modal');
     let mobile_pin_modal = $('#pin-drop-modal');
 
     activate_drop_pin(map, desktop_pin, protest_form_modal);
@@ -235,8 +235,8 @@ function activate_drop_pin(map, pin, protest_form_modal, on_grab, on_reset) {
             $('#display-protest-plan-location').text(
                 `Lat: ${position.lat.toFixed(3)}, Long: ${protest_map.normalize_longitude(position.lng.toFixed(3))}`
             );
-            $('#protest-latitude').val(position.lat);
-            $('#protest-longitude').val(position.lng);
+            $('#protest-create-input-latitude').val(position.lat);
+            $('#protest-create-input-longitude').val(position.lng);
 
             state.modal_open = true;
             protest_form_modal.modal('show');
@@ -281,16 +281,16 @@ function setup_menu() {
 /**********************************************************************************************************************/
 function setup_protest_form() {
 
-    let form = $('#protest-form');
-    let submit_button = $('#submit-new-protest');
+    let form = $('#protest-create-form');
+    let submit_button = $('#protest-create-form-submit');
 
-    let title = $('#protest-title');
-    let dress_code = $('#protest-dress-code');
-    let description = $('#protest-description');
-    let date = $('#protest-date');
-    let time = $('#protest-time');
-    let dt_validity_feedback = $('#protest-date-time-validity-feedback');
-    let modal = $('#protest-form-modal');
+    let title = $('#protest-create-input-title');
+    let dress_code = $('#protest-create-input-dress-code');
+    let description = $('#protest-create-input-description');
+    let date = $('#protest-create-input-date');
+    let time = $('#protest-create-input-time');
+    let dt_validity_feedback = $('#protest-create-date-time-validity-feedback');
+    let modal = $('#protest-create-form-modal');
 
     title.attr('maxlength', 256);
     title.attr('minlength', 4);
@@ -302,7 +302,7 @@ function setup_protest_form() {
 
     window.setInterval(() => {
         let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(Date.now());
-        $('#protest-user-current-time').text(dt);
+        $('#protest-create-user-current-time').text(dt);
     }, 1000);
 
     function validate_date() {
@@ -353,7 +353,8 @@ function setup_protest_form() {
 
         let protest = {
             'location': {
-                'latitude': $('#protest-latitude').val(), 'longitude': $('#protest-longitude').val()
+                'latitude': $('#protest-create-input-latitude').val(),
+                'longitude': $('#protest-create-input-longitude').val()
             },
             'owner': username,
             'title': title.val(),

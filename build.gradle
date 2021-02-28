@@ -115,7 +115,10 @@ yarn_install {
 
 application {
     mainClassName = 'ldprotest.main.Main'
-    applicationDefaultJvmArgs = ['--add-opens java.base/java.lang.reflect=ALL-UNNAMED']
+    applicationDefaultJvmArgs = [\
+        '--add-opens java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens java.base/java.util=ALL-UNNAMED'
+    ]
 }
 
 ext.countLeadWhitespace = { line ->

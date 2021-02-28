@@ -35,6 +35,7 @@ import 'bootstrap';
 *                                                      CONSTANTS                                                       *
 ***********************************************************************************************************************/
 const PROTEST_CREATE_FORM_PREFIX = 'protest-create';
+const PROTEST_EDIT_FORM_PREFIX = 'protest-edit';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
@@ -44,9 +45,9 @@ function popup_ajax_error(status, error_body) {
     if(error_body === undefined && status === 0){
         return display_error.display(error_popup, 'Unable to complete request, lost connection to server.');
     } else if(error_body !== undefined) {
-        return display_error.display(error_popup, `Error: ${status} - ${error.description}.`);
+        return display_error.display(error_popup, `Error: ${status} - ${error_body.description}.`);
     } else {
-        return display_error.display('Error completing request.');
+        return display_error.display(error_popup, 'Error completing request.');
     }
 }
 /**********************************************************************************************************************/
@@ -66,7 +67,7 @@ function render_popup(protest) {
             '<div>' +
             `<p><strong>${protest.title}</strong> - by ${protest.owner}</p>` +
             `<p><strong>Scheduled for:</strong> ${dt}</p>` +
-            `<p><strong>Dresss Code:</strong> ${protest.dress_code} </p>` +
+            `<p><strong>Dresss Code:</strong> ${protest.dressCode} </p>` +
             `<p><strong>Description: </strong></br>${protest.description}</p>` +
             '</div>' +
         '</div>'
@@ -77,7 +78,17 @@ function render_popup(protest) {
         let edit_link = $('<a href="#">Edit</a>');
 
         edit_link.on(
-                'click', () => alert('code is working')
+            'click', () => protest_form.open_form(
+                PROTEST_EDIT_FORM_PREFIX, {
+                    'title': sanitize.decode_api_html(protest.title),
+                    'owner': sanitize.decode_api_html(protest.owner),
+                    'description': sanitize.decode_api_html(protest.description),
+                    'dressCode': sanitize.decode_api_html(protest.dressCode),
+                    'date': protest.date,
+                    'location': protest.location,
+                    'protestId': protest.protestId
+                }
+            )
         );
 
         edit_row.append(edit_link);
@@ -214,14 +225,18 @@ function activate_drop_pin(map, pin, on_grab, on_reset) {
             }
 
             let position = protest_map.xy_to_latlng(
-                    map, x + pin.width() / 2, y + pin.height()
+                map, x + pin.width() / 2, y + pin.height()
             );
 
-            $('#display-protest-plan-location').text(
-                `Lat: ${position.lat.toFixed(3)}, Long: ${protest_map.normalize_longitude(position.lng.toFixed(3))}`
+            protest_form.open_form(
+                PROTEST_CREATE_FORM_PREFIX,
+                {
+                    'location': {
+                        'latitude': position.lat,
+                        'longitude': protest_map.normalize_longitude(position.lng)
+                    }
+                }
             );
-
-            protest_form.open_form(PROTEST_CREATE_FORM_PREFIX, position.lat, position.lng);
             state.modal_open = true;
         });
         $(document.body).on('touchcancel.pindrag', () => {
@@ -304,13 +319,32 @@ function setup_login() {
     });
 }
 /**********************************************************************************************************************/
-function setup_protest_create_form() {
+function setup_protest_forms() {
+
     protest_form.setup_form(
         PROTEST_CREATE_FORM_PREFIX,
         (protest, submit_button) => {
+            console.log(protest);
             let stop_spin = spinner.spin(submit_button, ' Loading');
             api.call(
                 '/api/pins',
+                'POST',
+                protest,
+                () => window.location.reload(true),
+                (status, error) => {
+                    stop_spin();
+                    popup_ajax_error(status, error);
+                }
+            );
+        }
+    );
+
+    protest_form.setup_form(
+        PROTEST_EDIT_FORM_PREFIX,
+        (protest, submit_button) => {
+            let stop_spin = spinner.spin(submit_button, ' Loading');
+            api.call(
+                `/api/protests/${protest.protestId}`,
                 'POST',
                 protest,
                 () => window.location.reload(true),
@@ -340,7 +374,7 @@ function setup_auth_page() {
 }
 /**********************************************************************************************************************/
 function setup_unauth_page() {
-    setup_protest_create_form();
+    setup_protest_forms();
 }
 /**********************************************************************************************************************/
 $(document).ready(function() {

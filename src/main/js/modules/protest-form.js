@@ -40,6 +40,33 @@ function date_from_inputs(date, time) {
         );
 }
 /**********************************************************************************************************************/
+function zero_pad(num, length) {
+    let s = `${num}`;
+
+    while(s.length < length) {
+        s = '0' + s;
+    }
+
+    return s;
+}
+/**********************************************************************************************************************/
+function date_to_date_input(date) {
+    if(date === undefined) {
+        return undefined;
+    }
+
+    return `${date.getFullYear()}-${zero_pad(date.getMonth() + 1, 2)}-${zero_pad(date.getDay(), 2)}`;
+}
+/**********************************************************************************************************************/
+function date_to_time_input(date) {
+
+    if(date === undefined) {
+        return undefined;
+    }
+
+    return `${zero_pad(date.getHours(), 2)}:${zero_pad(date.getMinutes(), 2)}`;
+}
+/**********************************************************************************************************************/
 export let protest_form = {
     'on_hide': function(id_prefix, fun) {
         return $(`#${id_prefix}-form-modal`).on('hidden.bs.modal', fun);
@@ -47,11 +74,30 @@ export let protest_form = {
     'close_form': function(id_prefix) {
         $(`#${id_prefix}-form-modal`).modal('hide');
     },
-    'open_form': function(id_prefix, lat, lng) {
+    'open_form': function(id_prefix, populate) {
         let modal = $(`#${id_prefix}-form-modal`);
 
-        $(`#${id_prefix}-input-latitude`).val(lat);
-        $(`#${id_prefix}-input-longitude`).val(lng);
+        function set_if_defined(elem, value) {
+            if(value !== undefined && value !== '') {
+                elem.val(value);
+            }
+        }
+
+        set_if_defined($(`#${id_prefix}-input-latitude`), populate.location.latitude);
+        set_if_defined($(`#${id_prefix}-input-longitude`), populate.location.longitude);
+        set_if_defined($(`#${id_prefix}-input-title`), populate.title);
+        set_if_defined($(`#${id_prefix}-input-dress-code`), populate.dressCode);
+        set_if_defined($(`#${id_prefix}-input-date`), date_to_date_input(populate.date));
+        set_if_defined($(`#${id_prefix}-input-time`), date_to_time_input(populate.date));
+        set_if_defined($(`#${id_prefix}-input-protest-id`), populate.protestId);
+        set_if_defined($(`#${id_prefix}-input-description`), populate.description);
+
+        console.log(populate.protestId);
+
+        $(`#${id_prefix}-display-location`).text(
+            `Lat: ${populate.location.latitude.toFixed(3)}, ` +
+            `Long: ${populate.location.longitude.toFixed(3)}`
+        );
 
         modal.modal('show');
     },
@@ -59,6 +105,7 @@ export let protest_form = {
 
         let form = $(`#${id_prefix}-form`);
         let submit_button = $(`#${id_prefix}-form-submit`);
+        let delete_button = $(`#${id_prefix}--protest-delete`);
 
         let title = $(`#${id_prefix}-input-title`);
         let dress_code = $(`#${id_prefix}-input-dress-code`);
@@ -66,6 +113,7 @@ export let protest_form = {
         let date = $(`#${id_prefix}-input-date`);
         let time = $(`#${id_prefix}-input-time`);
         let dt_validity_feedback = $(`#${id_prefix}-date-time-validity-feedback`);
+        let protest_id = $(`#${id_prefix}-input-protest-id`);
 
 
         title.attr('maxlength', 256);
@@ -103,6 +151,21 @@ export let protest_form = {
             }
         };
 
+        function protest_data() {
+            return {
+                'location': {
+                    'latitude': $(`#${id_prefix}-input-latitude`).val(),
+                    'longitude': $(`#${id_prefix}-input-longitude`).val()
+                },
+                'owner': api.whoami(),
+                'title': title.val(),
+                'description': description.val(),
+                'dressCode': dress_code.val(),
+                'date': date_from_inputs(date, time).getTime(),
+                'protestId': protest_id.val()
+            };
+        }
+
         date.on('input', validate_date);
         time.on('input', validate_date);
 
@@ -121,26 +184,14 @@ export let protest_form = {
                 return;
             }
 
-            let username = api.whoami();
-
-            if(username === undefined) {
+            if(api.whoami() === undefined) {
                 return;
             }
 
-            let protest = {
-                'location': {
-                    'latitude': $(`#${id_prefix}-input-latitude`).val(),
-                    'longitude': $(`#${id_prefix}-input-longitude`).val()
-                },
-                'owner': username,
-                'title': title.val(),
-                'description': description.val(),
-                'dressCode': dress_code.val(),
-                'date': date_from_inputs(date, time).getTime()
-            };
-
-            submit(protest, submit_button);
+            submit(protest_data(), submit_button);
         });
+
+        delete_button.on('click', () => delete_protest(protest_data()));
     }
 };
 /**********************************************************************************************************************/

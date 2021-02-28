@@ -120,7 +120,20 @@ public final class JsonEndpoint {
             return JsonSerialization.GSON.toJson(responseFromError(secCheckResult.reason(), response));
         }
 
-        T data = JsonSerialization.GSON.fromJson(request.body(), clazz);
+        T data;
+        try {
+            data = JsonSerialization.GSON.fromJson(request.body(), clazz);
+        } catch(NumberFormatException ex) {
+            return JsonSerialization.GSON.toJson(
+                responseFromError(JsonError.invalidBody("Invalid JSON or violated schema"), response)
+            );
+        }
+        if(data == null) {
+            return JsonSerialization.GSON.toJson(
+                responseFromError(JsonError.invalidBody("Invalid JSON or violated schema"), response)
+            );
+        }
+
         JsonSerializable body = route.handle(data, request, response);
 
         return returnJsonResponse(body, response);

@@ -28,6 +28,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import ldprotest.db.MainDatabase;
+import ldprotest.db.codec.UUIDCodec;
 import ldprotest.geo.Coordinate;
 import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
@@ -165,7 +166,7 @@ public class PrivateProtestData implements BsonSerializable {
 
     public static PrivateProtestData lookupByProtestId(UUID protestId) {
         return collection().find(
-            Filters.eq("protestId", protestId)
+            Filters.eq("protestId", UUIDCodec.toBsonValue((protestId)))
         ).first();
     }
 
@@ -174,7 +175,7 @@ public class PrivateProtestData implements BsonSerializable {
         options.upsert(false);
 
         UpdateResult result = collection().replaceOne(
-            Filters.eq("protestId", protest.protestId), protest, options
+            Filters.eq("protestId", UUIDCodec.toBsonValue(protest.protestId)), protest, options
         );
 
         return result.getModifiedCount() == 1;

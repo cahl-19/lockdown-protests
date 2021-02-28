@@ -62,6 +62,13 @@ export let sanitize = {
 
         return __encode_html(__decode_html(text));
     },
+    'decode_api_html': function(text) {
+        /* Note that the sever is supposed to html encode all user content, so here we first attempt to decode any
+         * encoded elements before re-encoding again. If the server did it's job correctly this will do nothing.
+         * Otherwise any html unsafe characters will be safely encoded */
+
+        return __decode_html(text);
+    },
     'jquery_set_elem_text': function(elem_text) {
         /**
          * Should be preferred to calling encode_api_html. Jquery's text method will safely html encode a string. The

@@ -153,7 +153,7 @@ function load_protests(map, bounds, render_popup, display_error) {
                     'title': sanitize.encode_api_html(protest.title),
                     'owner': sanitize.encode_api_html(protest.owner),
                     'description': sanitize.encode_api_html(protest.description),
-                    'dress_code': sanitize.encode_api_html(protest.dressCode),
+                    'dressCode': sanitize.encode_api_html(protest.dressCode),
                     'date': new Date(protest.date),
                     'location': protest.location,
                     'protestId': protest.protestId

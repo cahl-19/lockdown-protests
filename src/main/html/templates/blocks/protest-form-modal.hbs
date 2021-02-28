@@ -9,12 +9,13 @@
       </div>
       <div class="modal-body">
         <div class="protest-location">
-            <small>For a Protest Located At: <span id='{{id_prefix}}-display-location'></span></small>
+            <small>Protest Located At: <span id='{{id_prefix}}-display-location'></span></small>
         </div>
         <form class="needs-validation" id='{{id_prefix}}-form' autocomplete="off" novalidate>
 
             <input type="hidden" id="{{id_prefix}}-input-latitude">
             <input type="hidden" id="{{id_prefix}}-input-longitude">
+            <input type="hidden" id="{{id_prefix}}-input-protest-id">
 
             <div class="form-group">
               <label for="{{id_prefix}}-input-title">Title</label>
@@ -65,6 +66,9 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" id="{{id_prefix}}-form-submit">Submit</button>
+        {{#if include_delete}}
+            <button type="button" class="btn btn-danger" id="{{id_prefix}}-protest-delete">Delete</button>
+        {{/if}}
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
       </div>
     </div>

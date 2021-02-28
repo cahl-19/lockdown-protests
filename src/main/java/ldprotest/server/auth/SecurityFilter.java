@@ -342,7 +342,7 @@ public final class SecurityFilter {
     }
 
     private static String prefix(String path) {
-        return path.substring(path.lastIndexOf("/") + 1);
+        return path.substring(0, path.lastIndexOf("/"));
     }
 
     private static enum Wildness {

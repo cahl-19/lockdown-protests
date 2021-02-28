@@ -18,7 +18,10 @@
 package ldprotest.db.codec;
 
 import java.util.UUID;
+import org.bson.BsonArray;
+import org.bson.BsonInt64;
 import org.bson.BsonReader;
+import org.bson.BsonValue;
 import org.bson.BsonWriter;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
@@ -32,8 +35,8 @@ public class UUIDCodec implements Codec<UUID>  {
     }
 
     @Override
-    public void encode(BsonWriter writer, UUID coord, EncoderContext ctx) {
-        encode(writer, coord);
+    public void encode(BsonWriter writer, UUID val, EncoderContext ctx) {
+        encode(writer, val);
     }
 
     public static void encode(BsonWriter writer, UUID uuid) {
@@ -59,5 +62,14 @@ public class UUIDCodec implements Codec<UUID>  {
         reader.readEndArray();
 
         return new UUID(msb, lsb);
+    }
+
+    public static BsonValue toBsonValue(UUID value) {
+        BsonArray ret = new BsonArray();
+
+        ret.add(new BsonInt64(value.getMostSignificantBits()));
+        ret.add(new BsonInt64(value.getLeastSignificantBits()));
+
+        return ret;
     }
 }

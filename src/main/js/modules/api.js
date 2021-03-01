@@ -179,7 +179,7 @@ export let api = {
               }
         });
     },
-    'call': function(path, method, data, success_cb, failure_cb) {
+    'call': function(path, method, request_body, success_cb, failure_cb) {
         if(success_cb === undefined) {
             success_cb = () => {};
         }
@@ -188,18 +188,18 @@ export let api = {
         }
 
         api_call(
-                path, method, data,
-                (data) => {
-                    success_cb(data);
+                path, method, request_body,
+                (response_body) => {
+                    success_cb(response_body);
                 },
-                (status, data, jqXHR, text_status, error_thrown) => {
-                    if(is_unauthorized(status, data)) {
+                (status, error_body, jqXHR, text_status, error_thrown) => {
+                    if(is_unauthorized(status, error_body)) {
                         refresh(
-                            () => api_call(path, method, data, success_cb, failure_cb),
-                            () => failure_cb(status, data, jqXHR, text_status, error_thrown)
+                            () => api_call(path, method, request_body, success_cb, failure_cb),
+                            () => failure_cb(status, error_body, jqXHR, text_status, error_thrown)
                         );
                     } else {
-                        failure_cb(status, data, jqXHR, text_status, error_thrown);
+                        failure_cb(status, error_body, jqXHR, text_status, error_thrown);
                     }
                 }
         );

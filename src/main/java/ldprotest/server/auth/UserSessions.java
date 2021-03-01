@@ -21,17 +21,17 @@ import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 import java.time.ZonedDateTime;
-import ldprotest.db.IndexTools;
 import ldprotest.db.MainDatabase;
+import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
 import ldprotest.server.auth.UserAccount.UserLookupError;
 import ldprotest.util.DateTools;
 import ldprotest.util.ErrorCode;
 import ldprotest.util.Result;
-import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,14 +41,15 @@ public class UserSessions {
     private final static Logger LOGGER = LoggerFactory.getLogger(UserSessions.class);
 
     public static void setupDbIndex() {
-        IndexOptions options = new IndexOptions();
         MongoCollection<UserSessionInfo> collection = collection();
 
-        options.unique(true);
+        IndexOptions sessionIdIndexOptions = new IndexOptions();
+        sessionIdIndexOptions.unique(true);
+        collection.createIndex(Indexes.ascending("sessionId"), sessionIdIndexOptions);
 
-        for(Bson index: IndexTools.reflectiveBuildIndexes(UserSessionInfo.class)) {
-            collection.createIndex(index,options);
-        }
+        IndexOptions createdAtIndexOptions = new IndexOptions();
+        createdAtIndexOptions.unique(false);
+        collection.createIndex(Indexes.ascending("createdAt"), createdAtIndexOptions);
     }
 
     public static Result<SessionCreationError, UserSessionInfo> createSession(UserInfo info) {
@@ -117,6 +118,21 @@ public class UserSessions {
         }
     }
 
+    public static ErrorCode<SessionDeleteError> deleteExpired() {
+        MongoCollection<UserSessionInfo> collection = collection();
+        ZonedDateTime expirePoint = ServerTime.now().minusSeconds(Main.args().sessionExpiresSeconds);
+        long expirePointValue = expirePoint.toInstant().toEpochMilli();
+
+        try {
+            collection.deleteMany(Filters.lt("createdAt", expirePointValue));
+        } catch(MongoException ex) {
+            LOGGER.info("Exception thrown during deletion", ex);
+            return ErrorCode.error(SessionDeleteError.DATABASE_ERROR);
+        }
+
+        return ErrorCode.success();
+    }
+
     private static SessionCreationError SessionCreationErrorFromUserLookupError(UserLookupError from) {
             switch(from) {
                 case INVALID_USER:
@@ -145,5 +161,9 @@ public class UserSessions {
     public static enum SessionLookupError {
         DATABASE_ERROR,
         NO_SUCH_SESSION;
+    }
+
+    public static enum SessionDeleteError {
+        DATABASE_ERROR;
     }
 }

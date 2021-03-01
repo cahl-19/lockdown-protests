@@ -20,7 +20,6 @@ package ldprotest.main;
 import com.mongodb.MongoException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ldprotest.db.SetupDatabase;
@@ -29,20 +28,20 @@ import ldprotest.server.infra.Server;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
 import ldprotest.config.AppConfig;
 import ldprotest.config.CmdLineArgs;
 import ldprotest.config.ConfigFile;
 import ldprotest.config.DefaultConfig;
 import ldprotest.db.MainDatabase;
+import ldprotest.tasks.PeriodicTaskManager;
 import ldprotest.util.ErrorCode;
 
 import static ldprotest.main.AppLogging.ResourceType.ON_CLASSPATH;
 import ldprotest.server.auth.webtoken.UserTokens;
+import ldprotest.tasks.SessionVacuum;
 import ldprotest.util.Result;
 
 public class Main {
@@ -186,8 +185,14 @@ public class Main {
         LOGGER.info("Database Version {}", SetupDatabase.setup(MainDatabase.database()));
 
         UserTokens.init();
+        startPeriodicTasks();
 
         Server.start();
+    }
+
+    private static void startPeriodicTasks() {
+        PeriodicTaskManager.start();
+        SessionVacuum.register();
     }
 
     private static void waitForDatabase() {

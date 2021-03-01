@@ -22,7 +22,6 @@ import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
-import ldprotest.db.DbIndex;
 import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
 import ldprotest.serialization.JsonSerializable;
@@ -33,7 +32,6 @@ public class UserSessionInfo implements JsonSerializable {
     static private final int SESSION_ID_BYTE_LEN = 32;
     static private final Base64.Encoder B64_ENCODER = Base64.getEncoder();
 
-    @DbIndex
     public final String sessionId;
 
     public final String username;

@@ -25,6 +25,7 @@ import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 import java.time.ZonedDateTime;
+import ldprotest.db.IndexTools;
 import ldprotest.db.MainDatabase;
 import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
@@ -43,13 +44,8 @@ public class UserSessions {
     public static void setupDbIndex() {
         MongoCollection<UserSessionInfo> collection = collection();
 
-        IndexOptions sessionIdIndexOptions = new IndexOptions();
-        sessionIdIndexOptions.unique(true);
-        collection.createIndex(Indexes.ascending("sessionId"), sessionIdIndexOptions);
-
-        IndexOptions createdAtIndexOptions = new IndexOptions();
-        createdAtIndexOptions.unique(false);
-        collection.createIndex(Indexes.ascending("createdAt"), createdAtIndexOptions);
+        IndexTools.createIndexWithOpts(collection, Indexes.ascending("sessionId"), true, false);
+        IndexTools.createIndexWithOpts(collection, Indexes.ascending("createdAt"), false, false);
     }
 
     public static Result<SessionCreationError, UserSessionInfo> createSession(UserInfo info) {

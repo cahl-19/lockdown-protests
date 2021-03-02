@@ -17,6 +17,8 @@
 */
 package ldprotest.db;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -31,6 +33,15 @@ public final class IndexTools {
 
     private IndexTools() {
         /* do not construct */
+    }
+
+    public static void createIndexWithOpts(MongoCollection<?> collection, Bson index, boolean unique, boolean sparse) {
+        IndexOptions options = new IndexOptions();
+
+        options.unique(unique);
+        options.sparse(sparse);
+
+        collection.createIndex(index, options);
     }
 
     public static Collection<Bson> reflectiveBuildIndexes(Class<?> clazz) {

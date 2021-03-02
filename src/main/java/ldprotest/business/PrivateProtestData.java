@@ -27,6 +27,7 @@ import com.mongodb.client.result.UpdateResult;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import ldprotest.db.IndexTools;
 import ldprotest.db.MainDatabase;
 import ldprotest.db.codec.UUIDCodec;
 import ldprotest.geo.Coordinate;
@@ -149,15 +150,12 @@ public class PrivateProtestData implements BsonSerializable {
     }
 
     public static void setupDbIndex() {
-        MongoCollection<PrivateProtestData> collection = collection();
-        IndexOptions pidIndexOptions = new IndexOptions();
 
-        pidIndexOptions.unique(true);
+        MongoCollection<PrivateProtestData> collection = collection();
+
+        IndexTools.createIndexWithOpts(collection, Indexes.ascending("protestId"), true, false);
 
         collection.createIndex(Indexes.geo2dsphere("location"));
-        collection.createIndex(
-            Indexes.ascending("protestId"), pidIndexOptions
-        );
     }
 
     public static MongoCollection<PrivateProtestData> collection() {

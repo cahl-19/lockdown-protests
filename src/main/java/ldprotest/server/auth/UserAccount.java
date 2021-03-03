@@ -66,7 +66,6 @@ public final class UserAccount {
         options.unique(true);
 
         for(Bson index: IndexTools.reflectiveBuildIndexes(UserCredentialInfo.class)) {
-            LOGGER.info("Index: {}", index);
             collection.createIndex(index,options);
         }
     }

@@ -239,3 +239,6 @@ body, html {
   cursor: pointer;
 }
 
+.dropdown-menu {
+    z-index: 1500;
+}

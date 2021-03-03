@@ -55,7 +55,7 @@ function date_to_date_input(date) {
         return undefined;
     }
 
-    return `${date.getFullYear()}-${zero_pad(date.getMonth() + 1, 2)}-${zero_pad(date.getDay(), 2)}`;
+    return `${date.getFullYear()}-${zero_pad(date.getMonth() + 1, 2)}-${zero_pad(date.getDate(), 2)}`;
 }
 /**********************************************************************************************************************/
 function date_to_time_input(date) {

@@ -41,6 +41,7 @@ import ldprotest.util.ErrorCode;
 
 import static ldprotest.main.AppLogging.ResourceType.ON_CLASSPATH;
 import ldprotest.server.auth.webtoken.UserTokens;
+import ldprotest.tasks.ProtestVacuum;
 import ldprotest.tasks.SessionVacuum;
 import ldprotest.util.Result;
 
@@ -193,6 +194,7 @@ public class Main {
     private static void startPeriodicTasks() {
         PeriodicTaskManager.start();
         SessionVacuum.register();
+        ProtestVacuum.register();
     }
 
     private static void waitForDatabase() {

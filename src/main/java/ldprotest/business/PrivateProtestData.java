@@ -19,7 +19,6 @@ package ldprotest.business;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.result.DeleteResult;
@@ -30,6 +29,7 @@ import java.util.UUID;
 import ldprotest.db.IndexTools;
 import ldprotest.db.MainDatabase;
 import ldprotest.db.codec.UUIDCodec;
+import ldprotest.main.ServerTime;
 import ldprotest.geo.Coordinate;
 import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
@@ -154,6 +154,7 @@ public class PrivateProtestData implements BsonSerializable {
         MongoCollection<PrivateProtestData> collection = collection();
 
         IndexTools.createIndexWithOpts(collection, Indexes.ascending("protestId"), true, false);
+        IndexTools.createIndexWithOpts(collection, Indexes.ascending("date"), false, false);
 
         collection.createIndex(Indexes.geo2dsphere("location"));
     }
@@ -166,6 +167,12 @@ public class PrivateProtestData implements BsonSerializable {
         return collection().find(
             Filters.eq("protestId", UUIDCodec.toBsonValue((protestId)))
         ).first();
+    }
+
+    public static long deleteOlderThan(long ageMillis) {
+        long now = ServerTime.nowMillis();
+
+        return collection().deleteMany(Filters.lt("date", now - ageMillis)).getDeletedCount();
     }
 
     public static boolean updateProtest(PrivateProtestData protest) {

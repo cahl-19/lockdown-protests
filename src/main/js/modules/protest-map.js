@@ -117,30 +117,31 @@ function update_protests(map, state) {
     } else {
         state.protest_zone = buffer_bounds(map_bounds);
         state.last_protest_update = now;
-        load_protests(map, state.protest_zone, state.config.render_popup, state.config.display_error);
+        load_protests(map, state.protest_zone, state);
     }
 }
 /**********************************************************************************************************************/
-function load_protests(map, bounds, render_popup, display_error) {
+function load_protests(map, bounds, state) {
 
     let north = bounds.north;
     let west = bounds.west;
     let south = bounds.south;
     let east = bounds.east;
 
-    if(render_popup === undefined) {
-        render_popup = () => '<p>Popup Renderer Undefined</p>';
-    }
-
-    if(display_error === undefined) {
-        display_error = (alert) => alert('error loading protests');
-    }
-
     api.call(
         `/api/pins`,
         'GET',
         {'SW': `${south},${west}`, 'NE': `${north},${east}`},
         (data) => {
+
+            let old_markers = state.markers;
+
+            old_markers.forEach((mark) => {
+                map.removeLayer(mark);
+            });
+
+            old_markers.splice(0, old_markers.length);
+
             data.protests.forEach((protest) => {
 
                 let lat = protest.location.latitude;
@@ -149,7 +150,7 @@ function load_protests(map, bounds, render_popup, display_error) {
                 );
 
                 let mark = L.marker([lat, lng]).addTo(map);
-                mark.bindPopup(() => render_popup({
+                mark.bindPopup(() => state.config.render_popup({
                     'title': sanitize.encode_api_html(protest.title),
                     'owner': sanitize.encode_api_html(protest.owner),
                     'description': sanitize.encode_api_html(protest.description),
@@ -158,10 +159,11 @@ function load_protests(map, bounds, render_popup, display_error) {
                     'location': protest.location,
                     'protestId': protest.protestId
                 }));
+                state.markers.push(mark);
             });
         },
         (status, error_body) => {
-            display_error(status, error_body);
+            state.config.display_error(status, error_body);
         }
     );
 }
@@ -171,7 +173,8 @@ function config_map(map_div, api_token, config) {
     let state = {
         'config': config,
         'protest_zone': undefined,
-        'last_protest_update': Number.NEGATIVE_INFINITY
+        'last_protest_update': Number.NEGATIVE_INFINITY,
+        'markers': []
     };
     let map = L.map(
         map_div.attr('id'),

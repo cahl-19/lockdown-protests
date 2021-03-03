@@ -33,6 +33,10 @@ public final class ServerTime {
         return ZonedDateTime.ofInstant(Instant.now(), SERVER_TZ);
     }
 
+    public static long nowMillis() {
+        return now().toInstant().toEpochMilli();
+    }
+
     public static ZonedDateTime ofEpochSecond(long epochSecond) {
         return ZonedDateTime.ofInstant(Instant.ofEpochSecond(epochSecond), SERVER_TZ);
     }

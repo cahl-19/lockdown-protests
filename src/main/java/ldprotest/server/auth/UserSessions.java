@@ -33,6 +33,7 @@ import ldprotest.server.auth.UserAccount.UserLookupError;
 import ldprotest.util.DateTools;
 import ldprotest.util.ErrorCode;
 import ldprotest.util.Result;
+import org.bson.BsonDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,9 +119,10 @@ public class UserSessions {
         MongoCollection<UserSessionInfo> collection = collection();
         ZonedDateTime expirePoint = ServerTime.now().minusSeconds(Main.args().sessionExpiresSeconds);
         long expirePointValue = expirePoint.toInstant().toEpochMilli();
+        BsonDateTime threshold = new BsonDateTime(expirePointValue);
 
         try {
-            collection.deleteMany(Filters.lt("createdAt", expirePointValue));
+            collection.deleteMany(Filters.lt("createdAt", threshold));
         } catch(MongoException ex) {
             LOGGER.info("Exception thrown during deletion", ex);
             return ErrorCode.error(SessionDeleteError.DATABASE_ERROR);

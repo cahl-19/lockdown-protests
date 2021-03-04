@@ -33,6 +33,7 @@ import ldprotest.main.ServerTime;
 import ldprotest.geo.Coordinate;
 import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
+import org.bson.BsonDateTime;
 
 public class PrivateProtestData implements BsonSerializable {
 
@@ -171,8 +172,9 @@ public class PrivateProtestData implements BsonSerializable {
 
     public static long deleteOlderThan(long ageMillis) {
         long now = ServerTime.nowMillis();
+        BsonDateTime threshold = new BsonDateTime(now - ageMillis);
 
-        return collection().deleteMany(Filters.lt("date", now - ageMillis)).getDeletedCount();
+        return collection().deleteMany(Filters.lt("date", threshold)).getDeletedCount();
     }
 
     public static boolean updateProtest(PrivateProtestData protest) {

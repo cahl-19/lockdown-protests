@@ -257,7 +257,6 @@ function activate_drop_pin(map, pin, on_grab, on_reset) {
 }
 /**********************************************************************************************************************/
 function setup_sidebar() {
-
     if(api.whoami() === undefined) {
         return;
     }
@@ -268,21 +267,20 @@ function setup_sidebar() {
 /**********************************************************************************************************************/
 function setup_menu() {
     if(api.whoami() === undefined) {
-        $('#login-menu-item').removeClass('hidden');
-        $('#register-menu-item').removeClass('hidden');
+        $('.dropdown-item-unauth').removeClass('hidden');
     } else {
-        let pin_drop_menu_item = $('#drop-pin-menu-item');
+        $('.dropdown-item-auth').removeClass('hidden');
 
-        pin_drop_menu_item.removeClass('hidden');
+        let pin_drop_menu_item = $('#drop-pin-menu-item');
         pin_drop_menu_item.on('click', () => $('#pin-drop-modal').modal('show'));
     }
 }
 /**********************************************************************************************************************/
 function setup_registration() {
-    let register_button = $('#register-button');
+    let register_button = $('.registration-link');
     let register_modal = $('#registration-modal');
     let contributing_link = $('.contributing-link');
-    let contributing_modal = $('#contributing-cmodal');
+    let contributing_modal = $('#contributing-modal');
 
     register_button.on('click', () => register_modal.modal('show'));
 

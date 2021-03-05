@@ -23,9 +23,18 @@
                                 </svg>
                             </button>
                               <div class="dropdown-menu" aria-labelledby="menu-button">
-                                <a class="dropdown-item hidden" id="login-menu-item" href="#">Login</a>
-                                <a class="dropdown-item hidden" id="register-menu-item" href="#">Register</a>
-                                <a class="dropdown-item hidden" id="drop-pin-menu-item" href="#">Drop a Protest</a>
+                                <a class="dropdown-item dropdown-item-unauth hidden" id="login-menu-item" href="#">
+                                    Login
+                                </a>
+                                <a class="dropdown-item dropdown-item-unauth registration-link hidden" href="#">
+                                    Register
+                                </a>
+                                <a class="dropdown-item dropdown-item-auth hidden" id="drop-pin-menu-item" href="#">
+                                    Drop a Protest
+                                </a>
+                                <a class="dropdown-item dropdown-item-auth contributing-link hidden" href="#">
+                                    Contribute
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -50,7 +59,7 @@
                                     </div>
                                     <div><strong>Or</strong></div>
                                     <div>
-                                        <button type="button" class="btn btn-primary login-button" id="register-button">
+                                        <button type="button" class="btn btn-primary login-button registration-link">
                                             Register
                                         </button>
                                     </div>
@@ -160,7 +169,7 @@
       </div>
     </div>
 
-    <div class="modal" tabindex="-1" role="dialog" id="contributing-cmodal">
+    <div class="modal" tabindex="-1" role="dialog" id="contributing-modal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header d-block">
@@ -170,7 +179,9 @@
             </button>
           </div>
           <div class="modal-body">
-              ...
+              This is a free and open source project. You can support us by leaving your comments, suggestions,
+              bug reports or, if you are a software developer, your code contributions, on our github page at
+                <a href="https://github.com/cahl-19/lockdown-protests">https://github.com/cahl-19/lockdown-protests</a>.
           </div>
         </div>
       </div>

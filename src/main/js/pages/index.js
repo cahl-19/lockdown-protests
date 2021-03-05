@@ -278,6 +278,21 @@ function setup_menu() {
     }
 }
 /**********************************************************************************************************************/
+function setup_registration() {
+    let register_button = $('#register-button');
+    let register_modal = $('#registration-modal');
+    let contributing_link = $('.contributing-link');
+    let contributing_modal = $('#contributing-cmodal');
+
+    register_button.on('click', () => register_modal.modal('show'));
+
+    contributing_link.on('click', (ev) => {
+        ev.preventDefault();
+        register_modal.modal('hide');
+        contributing_modal.modal('show');
+    });
+}
+/**********************************************************************************************************************/
 function setup_login() {
 
     let submit_login = $('#submit-login');
@@ -394,6 +409,7 @@ function setup_auth_page() {
     setup_sidebar();
     setup_menu();
     setup_login();
+    setup_registration();
 }
 /**********************************************************************************************************************/
 function setup_unauth_page() {

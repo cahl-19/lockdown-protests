@@ -258,11 +258,12 @@ function activate_drop_pin(map, pin, on_grab, on_reset) {
 /**********************************************************************************************************************/
 function setup_sidebar() {
     if(api.whoami() === undefined) {
-        return;
+        $('.sidebar-unauth').removeClass('hidden');
+    } else {
+        $('.sidebar-auth').removeClass('hidden');
+        
+        $('#contribute-button').tooltip();
     }
-
-    $('#pin-card').removeClass('hidden');
-    $('#notification-card').removeClass('hidden');
 }
 /**********************************************************************************************************************/
 function setup_menu() {
@@ -301,8 +302,6 @@ function setup_login() {
     if(api.whoami() !== undefined) {
         return;
     }
-
-    $('#login-card').removeClass('hidden');
 
     $('#login-button,#login-menu-item').on('click', () => {
         $('#login-modal').modal('show');

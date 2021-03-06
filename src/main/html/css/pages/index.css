@@ -97,12 +97,34 @@ body, html {
     height: 100px;
 }
 
+.control-card {
+    height: 20px;
+    margin-right: 5px;
+    margin-top: 5px;
+    padding-left: 20px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
 .notification-card {
     border-style: dotted;
     border-width: thin;
     padding: 15px;
     margin: 5px;
-    height: calc(100% - 105px);
+    height: calc(100% - 130px);
+}
+
+.sidebar-control-button {
+    height: 100%;
+    padding: 0px;
+    border: none;
+    vertical-align: baseline;
+}
+
+.sidebar-control-button-image {
+    height: 100%;
+    width: auto;
+    vertical-align: baseline;
 }
 
 .select_disable {

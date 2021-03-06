@@ -49,7 +49,7 @@
                 <div class="row">
                     <div class="d-none d-md-block col-md-2 sidebar">
 
-                        <div class="login-card text-center hidden" id="login-card">
+                        <div class="login-card text-center sidebar-unauth hidden" id="login-card">
                             <table class="layout-table"><tbody><tr>
                                 <td class="align-middle">
                                     <div>
@@ -68,7 +68,20 @@
                             </tr></tbody></table>
                         </div>
 
-                        <div class="notification-card text-center hidden" id="notification-card">
+                        <div class="control-card sidebar-auth text-left hidden">
+                            <button
+                                type="button" class="btn btn-light sidebar-control-button contributing-link"
+                                id="contribute-button"
+                                data-toggle="tooltip" data-placement="top" title="Contribute"
+                            >
+                                <img
+                                    class="sidebar-control-button-image" src="/assets/bootstrap/icons/lightbulb.svg"
+                                    alt="c"
+                                />
+                            </button>
+                        </div>
+
+                        <div class="notification-card text-center sidebar-auth hidden" id="notification-card">
                             <table class="layout-table"><tbody><tr>
                                 <td class="align-middle">
                                     <span class="text-muted">No New Notifications.</span>
@@ -76,7 +89,7 @@
                             </tr></tbody></table>
                         </div>
 
-                        <div class="pin-card text-center hidden" id="pin-card">
+                        <div class="pin-card text-center sidebar-auth hidden" id="pin-card">
                             <div>Drop a Pin</div>
                             <img
                                 id='droppable-pin' class='grabbable select_disable'
@@ -180,7 +193,8 @@
           </div>
           <div class="modal-body">
               This is a free and open source project. You can support us by leaving your comments, suggestions,
-              bug reports or, if you are a software developer, your code contributions, on our github page at
+              bug reports or, if you are a software developer or web designer, your code contributions, on our
+              github page at
                 <a href="https://github.com/cahl-19/lockdown-protests">https://github.com/cahl-19/lockdown-protests</a>.
           </div>
         </div>

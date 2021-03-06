@@ -65,13 +65,18 @@ task copyLeafletAssets(type: Copy) {
         into file("${buildDir}/resources/main/assets/leaflet/")
 }
 
-task copyBootsrapAssets(type: Copy) {
+task copyBootstrapIcons(type: Copy) {
         from file("${buildDir}/node_modules/bootstrap-icons/bootstrap-icons.svg")
         into file("${buildDir}/resources/main/assets/bootstrap/")
 }
 
+task copyBootstrapIndividualIcons(type: Copy) {
+    from file("${buildDir}/node_modules/bootstrap-icons/icons/")
+    into file("${buildDir}/resources/main/assets/bootstrap/icons/")
+}
+
 task copyNpmAssets {
-    dependsOn copyLeafletAssets, copyBootsrapAssets
+    dependsOn copyLeafletAssets, copyBootstrapIcons, copyBootstrapIndividualIcons
 }
 
 

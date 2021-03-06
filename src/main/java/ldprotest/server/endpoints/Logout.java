@@ -17,14 +17,18 @@
 */
 package ldprotest.server.endpoints;
 
+import java.util.Optional;
 import ldprotest.main.Main;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.server.auth.HttpVerbTypes;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.auth.UserRole;
+import ldprotest.server.auth.UserSessionInfo;
+import ldprotest.server.auth.UserSessions;
 import ldprotest.server.infra.JsonEndpoint;
 import ldprotest.server.infra.JsonError;
+import ldprotest.util.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,15 +57,22 @@ public class Logout {
                 .add(UserRole.ADMIN, HttpVerbTypes.POST)
                 .add(UserRole.MODERATOR, HttpVerbTypes.POST)
                 .add(UserRole.PLANNER, HttpVerbTypes.POST)
+                .setAuthEndpoint()
                 .build()
         );
 
         JsonEndpoint.post(PATH, LougoutRequestBody.class, (loginData, request, response) -> {
 
-            UserRole role = SecurityFilter.userRoleAttr(request);
+            Optional<UserSessionInfo> session = SecurityFilter.httpSessionInfo(request);
 
-            if(role.equals(UserRole.UNAUTHENTICATED)) {
+            if(session.isEmpty()) {
                 LOGGER.info("Request to logout from client not logged in.");
+            } else {
+                ErrorCode<UserSessions.SessionDeleteError> err = UserSessions.delete(session.get().sessionId);
+
+                if(err.failed()) {
+                    LOGGER.warn("Failed to delete user session on logout request with reason: {}", err.reason());
+                }
             }
 
             Login.deleteTokenCookie().setCookie(response);

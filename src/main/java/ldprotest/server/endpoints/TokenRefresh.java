@@ -75,6 +75,11 @@ public class TokenRefresh {
                 return JsonEndpoint.responseFromError(JsonError.unauthorizedError(), response);
             }
 
+            if(body.token.isEmpty()) {
+                LOGGER.warn("Recieved empty token for refresh request.");
+                return JsonEndpoint.responseFromError(JsonError.unauthorizedError(), response);
+            }
+
             Result<UserTokens.VerificationFailure, UserSessionInfo> verifyResult = UserTokens.verifyWithoutExpiration(
                 body.token, UserTokenSubject.FOR_BEARER_TOKEN
             );

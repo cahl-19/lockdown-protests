@@ -23,6 +23,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import java.time.ZonedDateTime;
 import ldprotest.db.IndexTools;
@@ -131,6 +132,23 @@ public class UserSessions {
         return ErrorCode.success();
     }
 
+    public static ErrorCode<SessionDeleteError> delete(String sessionId) {
+        MongoCollection<UserSessionInfo> collection = collection();
+
+        try {
+            DeleteResult result = collection.deleteOne(Filters.eq("sessionId", sessionId));
+
+            if(result.getDeletedCount() == 0) {
+                return ErrorCode.error(SessionDeleteError.NO_SUCH_SESSION);
+            } else {
+                return ErrorCode.success();
+            }
+
+        } catch(MongoException ex) {
+            return ErrorCode.error(SessionDeleteError.DATABASE_ERROR);
+        }
+    }
+
     private static SessionCreationError SessionCreationErrorFromUserLookupError(UserLookupError from) {
             switch(from) {
                 case INVALID_USER:
@@ -162,6 +180,7 @@ public class UserSessions {
     }
 
     public static enum SessionDeleteError {
-        DATABASE_ERROR;
+        DATABASE_ERROR,
+        NO_SUCH_SESSION;
     }
 }

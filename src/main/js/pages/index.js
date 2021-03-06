@@ -261,7 +261,7 @@ function setup_sidebar() {
         $('.sidebar-unauth').removeClass('hidden');
     } else {
         $('.sidebar-auth').removeClass('hidden');
-        
+
         $('#contribute-button').tooltip();
     }
 }
@@ -328,6 +328,15 @@ function setup_login() {
                     popup_ajax_error(status, error);
                 }
             }
+        );
+    });
+}
+/**********************************************************************************************************************/
+function setup_logout() {
+    $('.logout-link').on('click', (ev) => {
+        ev.preventDefault();
+        confirm.display($('#confirm-popup'), 'Logout?').then(
+            () => api.logout(() => window.location.reload(true), window.location.reload(true))
         );
     });
 }
@@ -406,6 +415,7 @@ function setup_auth_page() {
     setup_sidebar();
     setup_menu();
     setup_login();
+    setup_logout();
     setup_registration();
 }
 /**********************************************************************************************************************/

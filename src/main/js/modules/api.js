@@ -165,8 +165,8 @@ export let api = {
 
         return $.ajax({
               type: "POST",
-              url: "/api/login",
-              data: JSON.stringify(credentials),
+              url: "/api/logout",
+              data: JSON.stringify({}),
               contentType: "application/json; charset=utf-8",
               dataType: "json",
               success: function(data){
@@ -194,10 +194,17 @@ export let api = {
                 },
                 (status, error_body, jqXHR, text_status, error_thrown) => {
                     if(is_unauthorized(status, error_body)) {
-                        refresh(
-                            () => api_call(path, method, request_body, success_cb, failure_cb),
-                            () => failure_cb(status, error_body, jqXHR, text_status, error_thrown)
-                        );
+                        if(this.whoami() === undefined) {
+                            this.logout(
+                                () => api_call(path, method, request_body, success_cb, failure_cb),
+                                () => failure_cb(status, error_body, jqXHR, text_status, error_thrown)
+                            );
+                        } else {
+                            refresh(
+                                () => api_call(path, method, request_body, success_cb, failure_cb),
+                                () => failure_cb(status, error_body, jqXHR, text_status, error_thrown)
+                            );
+                        }
                     } else {
                         failure_cb(status, error_body, jqXHR, text_status, error_thrown);
                     }

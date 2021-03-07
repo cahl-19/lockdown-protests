@@ -21,9 +21,24 @@
 import $ from 'jquery';
 import api from 'api';
 import spinner from 'spinner';
+import protest_object from 'protest-object';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
+function validate_url(url) {
+    return /^(www|http|https):\/\/[^ "]+$/.test(url);
+}
+/**********************************************************************************************************************/
+function input_value(inp) {
+    let val = inp.val();
+
+    if(val === undefined || val === '') {
+        return undefined;
+    } else {
+        return val;
+    }
+}
+/**********************************************************************************************************************/
 function date_from_inputs(date, time) {
         let dval = date.val();
         let tval = time.val();
@@ -38,33 +53,6 @@ function date_from_inputs(date, time) {
         return new Date(
                 date_parts[0], date_parts[1] - 1, date_parts[2], time_parts[0], time_parts[1]
         );
-}
-/**********************************************************************************************************************/
-function zero_pad(num, length) {
-    let s = `${num}`;
-
-    while(s.length < length) {
-        s = '0' + s;
-    }
-
-    return s;
-}
-/**********************************************************************************************************************/
-function date_to_date_input(date) {
-    if(date === undefined) {
-        return undefined;
-    }
-
-    return `${date.getFullYear()}-${zero_pad(date.getMonth() + 1, 2)}-${zero_pad(date.getDate(), 2)}`;
-}
-/**********************************************************************************************************************/
-function date_to_time_input(date) {
-
-    if(date === undefined) {
-        return undefined;
-    }
-
-    return `${zero_pad(date.getHours(), 2)}:${zero_pad(date.getMinutes(), 2)}`;
 }
 /**********************************************************************************************************************/
 export let protest_form = {
@@ -85,12 +73,13 @@ export let protest_form = {
 
         set_if_defined($(`#${id_prefix}-input-latitude`), populate.location.latitude);
         set_if_defined($(`#${id_prefix}-input-longitude`), populate.location.longitude);
-        set_if_defined($(`#${id_prefix}-input-title`), populate.title);
-        set_if_defined($(`#${id_prefix}-input-dress-code`), populate.dressCode);
-        set_if_defined($(`#${id_prefix}-input-date`), date_to_date_input(populate.date));
-        set_if_defined($(`#${id_prefix}-input-time`), date_to_time_input(populate.date));
+        set_if_defined($(`#${id_prefix}-input-title`), populate.htmlDecodedTitle());
+        set_if_defined($(`#${id_prefix}-input-dress-code`), populate.htmlDecodedDressCode);
+        set_if_defined($(`#${id_prefix}-input-date`), populate.date_input_val());
+        set_if_defined($(`#${id_prefix}-input-time`), populate.time_input_val());
         set_if_defined($(`#${id_prefix}-input-protest-id`), populate.protestId);
-        set_if_defined($(`#${id_prefix}-input-description`), populate.description);
+        set_if_defined($(`#${id_prefix}-input-description`), populate.htmlDecodedDescription());
+        set_if_defined($(`#${id_prefix}-input-home-page`), populate.homePage);
 
         $(`#${id_prefix}-display-location`).text(
             `Lat: ${populate.location.latitude.toFixed(3)}, ` +
@@ -113,7 +102,9 @@ export let protest_form = {
         let dt_validity_feedback = $(`#${id_prefix}-date-time-validity-feedback`);
         let protest_id = $(`#${id_prefix}-input-protest-id`);
         let user_current_time = $(`#${id_prefix}-user-current-time`);
-
+        let home_page = $(`#${id_prefix}-input-home-page`);
+        let latitude = $(`#${id_prefix}-input-latitude`);
+        let longitude = $(`#${id_prefix}-input-longitude`);
 
         title.attr('maxlength', 256);
         title.attr('minlength', 4);
@@ -153,15 +144,16 @@ export let protest_form = {
         function protest_data() {
             return {
                 'location': {
-                    'latitude': $(`#${id_prefix}-input-latitude`).val(),
-                    'longitude': $(`#${id_prefix}-input-longitude`).val()
+                    'latitude': input_value(latitude),
+                    'longitude': input_value(longitude)
                 },
                 'owner': api.whoami(),
-                'title': title.val(),
-                'description': description.val(),
-                'dressCode': dress_code.val(),
+                'title': input_value(title),
+                'description': input_value(description),
+                'dressCode': input_value(dress_code),
                 'date': date_from_inputs(date, time).getTime(),
-                'protestId': protest_id.val()
+                'protestId': input_value(protest_id),
+                'homePage': input_value(home_page)
             };
         }
 
@@ -171,10 +163,17 @@ export let protest_form = {
         submit_button.on('click', () => form.submit());
 
         form.submit((ev) => {
+
+            let home_page_val = home_page.val().trim();
+
             ev.preventDefault();
             ev.stopPropagation();
 
             validate_date();
+
+            if(home_page_val && !validate_url(home_page_val)) {
+                home_page[0].setCustomValidity('Invalid URL');
+            }
 
             let valid = form[0].checkValidity();
             form.addClass('was-validated');
@@ -190,7 +189,7 @@ export let protest_form = {
             submit(protest_data(), submit_button);
         });
 
-        delete_button.on('click', () => delete_protest(protest_data(), delete_button));
+        delete_button.on('click', () => delete_protest(new protest_object.Protest(protest_data()), delete_button));
     }
 };
 /**********************************************************************************************************************/

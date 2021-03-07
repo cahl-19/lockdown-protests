@@ -232,6 +232,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         assert(typeParameters.size() == 1);
 
         if(optional.isEmpty()) {
+            writer.writeNull();
             return;
         }
 
@@ -418,6 +419,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         Type optType = ReflectionTools.getGenericTypeParameters(type).get(0);
 
         if(reader.getCurrentBsonType() == BsonType.NULL) {
+            reader.readNull();
             return Optional.empty();
         } else {
             return Optional.of(decodeNonGenericType(reader, (Class<?>)optType).get());

@@ -22,6 +22,7 @@ import $ from 'jquery';
 import L from 'leaflet';
 import api from 'api';
 import sanitize from 'sanitize';
+import protest_object from 'protest-object';
 /***********************************************************************************************************************
 *                                                      CONSTANTS                                                       *
 ***********************************************************************************************************************/
@@ -150,15 +151,7 @@ function load_protests(map, bounds, state) {
                 );
 
                 let mark = L.marker([lat, lng]).addTo(map);
-                mark.bindPopup(() => state.config.render_popup({
-                    'title': sanitize.encode_api_html(protest.title),
-                    'owner': sanitize.encode_api_html(protest.owner),
-                    'description': sanitize.encode_api_html(protest.description),
-                    'dressCode': sanitize.encode_api_html(protest.dressCode),
-                    'date': new Date(protest.date),
-                    'location': protest.location,
-                    'protestId': protest.protestId
-                }));
+                mark.bindPopup(() => state.config.render_popup(new protest_object.Protest(protest)));
                 state.markers.push(mark);
             });
         },

@@ -37,6 +37,8 @@ const ERROR_CODES = {
     'UNAUTHORIZED_FAILURE': UNAUTHORIZED_FAILURE
 };
 
+const CONTENT_TYPE = "application/json; charset=utf-8";
+
 const AUTHORIZATION_STORAGE_KEY = 'authorization';
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
@@ -48,7 +50,7 @@ function is_unauthorized(status, response_body) {
         return status === 401;
     }
 }
-/**********************************************************************************************************************/
+
 function parse_error_response(response_text) {
     try{
         return JSON.parse(response_text);
@@ -56,7 +58,7 @@ function parse_error_response(response_text) {
         return undefined;
     }
 }
-/**********************************************************************************************************************/
+
 function refresh(success_cb, failure_cb) {
 
     if(success_cb === undefined) {
@@ -74,7 +76,7 @@ function refresh(success_cb, failure_cb) {
           type: "POST",
           url: "/api/refresh-token",
           data: JSON.stringify(body),
-          contentType: "application/json; charset=utf-8",
+          contentType: CONTENT_TYPE,
           dataType: "json",
           success: function(data){
               localStorage.setItem("authorization", data.token);
@@ -89,7 +91,7 @@ function refresh(success_cb, failure_cb) {
             }
     });
 }
-/**********************************************************************************************************************/
+
 function api_call(path, method, data, success_cb, failure_cb) {
 
         if(success_cb === undefined) {
@@ -106,7 +108,7 @@ function api_call(path, method, data, success_cb, failure_cb) {
               type: method,
               url: path,
               data: method === "GET" ? data : JSON.stringify(data),
-              contentType: "application/json; charset=utf-8",
+              contentType: CONTENT_TYPE,
               dataType: "json",
               headers: headers,
               success: function(data){
@@ -117,12 +119,12 @@ function api_call(path, method, data, success_cb, failure_cb) {
               }
         });
 }
-/**********************************************************************************************************************/
+
 function decode_token() {
     let token = localStorage.getItem(AUTHORIZATION_STORAGE_KEY);
     return token ? jwt_decode(token) : undefined;
 }
-/**********************************************************************************************************************/
+
 export let api = {
     'error_codes': ERROR_CODES,
     'login': function(username, password, success_cb, failure_cb) {
@@ -143,7 +145,7 @@ export let api = {
               type: "POST",
               url: "/api/login",
               data: JSON.stringify(credentials),
-              contentType: "application/json; charset=utf-8",
+              contentType: CONTENT_TYPE,
               dataType: "json",
               success: function(data){
                   localStorage.setItem(AUTHORIZATION_STORAGE_KEY, data.token);
@@ -167,7 +169,7 @@ export let api = {
               type: "POST",
               url: "/api/logout",
               data: JSON.stringify({}),
-              contentType: "application/json; charset=utf-8",
+              contentType: CONTENT_TYPE,
               dataType: "json",
               success: function(data){
                   localStorage.removeItem(AUTHORIZATION_STORAGE_KEY);
@@ -180,35 +182,32 @@ export let api = {
         });
     },
     'call': function(path, method, request_body, success_cb, failure_cb) {
-        if(success_cb === undefined) {
-            success_cb = () => {};
-        }
-        if(failure_cb === undefined) {
-            failure_cb = () => {};
-        }
+
+        success_cb = success_cb ? success_cb : () => {};
+        failure_cb = failure_cb ? failure_cb : () => {};
 
         api_call(
-                path, method, request_body,
-                (response_body) => {
-                    success_cb(response_body);
-                },
-                (status, error_body, jqXHR, text_status, error_thrown) => {
-                    if(is_unauthorized(status, error_body)) {
-                        if(this.whoami() === undefined) {
-                            this.logout(
-                                () => api_call(path, method, request_body, success_cb, failure_cb),
-                                () => failure_cb(status, error_body, jqXHR, text_status, error_thrown)
-                            );
-                        } else {
-                            refresh(
-                                () => api_call(path, method, request_body, success_cb, failure_cb),
-                                () => failure_cb(status, error_body, jqXHR, text_status, error_thrown)
-                            );
-                        }
+            path, method, request_body,
+            (response_body) => {
+                success_cb(response_body);
+            },
+            (status, error_body, jqXHR, text_status, error_thrown) => {
+                if(is_unauthorized(status, error_body)) {
+                    if(decode_token() === undefined) {
+                        this.logout(
+                            () => api_call(path, method, request_body, success_cb, failure_cb),
+                            () => failure_cb(status, error_body, jqXHR, text_status, error_thrown)
+                        );
                     } else {
-                        failure_cb(status, error_body, jqXHR, text_status, error_thrown);
+                        refresh(
+                            () => api_call(path, method, request_body, success_cb, failure_cb),
+                            () => failure_cb(status, error_body, jqXHR, text_status, error_thrown)
+                        );
                     }
+                } else {
+                    failure_cb(status, error_body, jqXHR, text_status, error_thrown);
                 }
+            }
         );
     },
     'whoami': function() {
@@ -254,6 +253,6 @@ export let api = {
         });
     }
 };
-/**********************************************************************************************************************/
+
 export default api;
 /**********************************************************************************************************************/

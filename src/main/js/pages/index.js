@@ -26,6 +26,7 @@ import sanitize from 'sanitize';
 import display_error from 'display-error';
 import spinner from 'spinner';
 import confirm from 'confirm';
+import protest_object from 'protest-object';
 
 import '!style-loader!css-loader!bootstrap/dist/css/bootstrap.min.css';
 import '!style-loader!css-loader?url=false!leaflet/dist/leaflet.css';
@@ -63,15 +64,40 @@ function can_edit_protest(protest) {
 function render_popup(protest) {
     let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(protest.date);
 
-    let content = $(
-        '<div class="protest-popup">' +
-            '<div>' +
-            `<p><strong>${protest.title}</strong> - by ${protest.owner}</p>` +
-            `<p><strong>Scheduled for:</strong> ${dt}</p>` +
-            `<p><strong>Dresss Code:</strong> ${protest.dressCode} </p>` +
-            `<p><strong>Description: </strong></br>${protest.description}</p>` +
-            '</div>' +
-        '</div>'
+    let content = $('<div>');
+
+    let title = $('<strong>').text(protest.htmlDecodedTitle());
+
+    content.addClass('protest-popup-content');
+
+    content.append(
+        $('<p>')
+            .append($('<strong>').text(protest.htmlDecodedTitle()))
+            .append($('<span>').text(` - by ${protest.owner}`))
+    );
+    content.append(
+        $('<p>')
+            .append($('<strong>Sceduled for: </strong>'))
+            .append($('<span>').text(dt))
+    );
+    if(protest.dressCode) {
+        content.append(
+            $('<p>')
+                .append($('<strong>Dress Code: </strong>'))
+                .append($('<span>').text(protest.dressCode))
+        );
+    }
+    if(protest.homePage) {
+        content.append(
+            $('<p>')
+                .append($('<strong>Home Page: </strong>'))
+                .append($('<a>').attr('href', protest.homePage).text(protest.homePage))
+        );
+    }
+    content.append(
+        $('<p>')
+            .append($('<strong>Description: </strong>'))
+            .append($('<span>').text(protest.description))
     );
 
     if(can_edit_protest(protest)) {
@@ -80,15 +106,7 @@ function render_popup(protest) {
 
         edit_link.on(
             'click', () => protest_form.open_form(
-                PROTEST_EDIT_FORM_PREFIX, {
-                    'title': sanitize.decode_api_html(protest.title),
-                    'owner': sanitize.decode_api_html(protest.owner),
-                    'description': sanitize.decode_api_html(protest.description),
-                    'dressCode': sanitize.decode_api_html(protest.dressCode),
-                    'date': protest.date,
-                    'location': protest.location,
-                    'protestId': protest.protestId
-                }
+                PROTEST_EDIT_FORM_PREFIX, protest
             )
         );
 
@@ -231,12 +249,12 @@ function activate_drop_pin(map, pin, on_grab, on_reset) {
 
             protest_form.open_form(
                 PROTEST_CREATE_FORM_PREFIX,
-                {
+                new protest_object.Protest({
                     'location': {
                         'latitude': position.lat,
                         'longitude': protest_map.normalize_longitude(position.lng)
                     }
-                }
+                })
             );
             state.modal_open = true;
         });

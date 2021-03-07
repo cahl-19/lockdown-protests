@@ -46,6 +46,7 @@ public class PrivateProtestData implements BsonSerializable {
     public final String title;
     public final String description;
     public final Optional<String> dressCode;
+    public final Optional<String> homePage;
 
     public final ZonedDateTime date;
 
@@ -62,6 +63,7 @@ public class PrivateProtestData implements BsonSerializable {
         dressCode = null;
         date = null;
         protestId = null;
+        homePage = null;
     }
 
     private PrivateProtestData(
@@ -72,7 +74,8 @@ public class PrivateProtestData implements BsonSerializable {
         String description,
         ZonedDateTime date,
         Optional<String> dressCode,
-        UUID protestId
+        UUID protestId,
+        Optional<String> homePage
     ) {
         this.location = location;
         this.owner = owner;
@@ -82,46 +85,7 @@ public class PrivateProtestData implements BsonSerializable {
         this.dressCode = dressCode;
         this.date = date;
         this.protestId = protestId;
-    }
-
-    public static PrivateProtestData generate(
-        Coordinate location,
-        String owner,
-        UUID ownerId,
-        String title,
-        String description,
-        ZonedDateTime date,
-        String dressCode
-    ) {
-        return new PrivateProtestData(
-            location,
-            Optional.of(owner),
-            ownerId,
-            title, description,
-            date,
-            Optional.of(dressCode),
-            UUID.randomUUID()
-        );
-    }
-
-    public static PrivateProtestData generate(
-        Coordinate location,
-        String owner,
-        UUID ownerId,
-        String title,
-        String description,
-        ZonedDateTime date
-    ) {
-        return new PrivateProtestData(
-            location,
-            Optional.of(owner),
-            ownerId,
-            title,
-            description,
-            date,
-            Optional.empty(),
-            UUID.randomUUID()
-        );
+        this.homePage = homePage;
     }
 
     public static PrivateProtestData generate(PublicProtestData data, UUID userId) {
@@ -133,7 +97,8 @@ public class PrivateProtestData implements BsonSerializable {
             data.description,
             data.date,
             data.dressCode,
-            UUID.randomUUID()
+            UUID.randomUUID(),
+            data.homePage
         );
     }
 
@@ -146,7 +111,8 @@ public class PrivateProtestData implements BsonSerializable {
             data.description,
             data.date,
             data.dressCode,
-            protestId
+            protestId,
+            data.homePage
         );
     }
 

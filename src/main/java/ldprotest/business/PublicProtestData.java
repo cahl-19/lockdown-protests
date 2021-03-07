@@ -17,6 +17,8 @@
 */
 package ldprotest.business;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,14 +27,20 @@ import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.serialization.Sanitizable;
 import ldprotest.server.infra.http.Sanitize;
+import ldprotest.server.infra.http.Validate;
 import ldprotest.util.interfaces.Validatable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PublicProtestData implements JsonSerializable, Validatable, Sanitizable<PublicProtestData> {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(PublicProtestData.class);
 
     private static final int MIN_TITLE_LENGTH = 4;
     private static final int MAX_TITLE_LENGTH = 256;
     private static final int MAX_DESCRIPTION_LENGTH = 768;
     private static final int MAX_DRESS_CODE_LENGTH = 128;
+    private static final int MAX_HOME_PAGE_LENGTH = 256;
 
     public final Coordinate location;
     public final Optional<String> owner;
@@ -40,6 +48,7 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
     public final String title;
     public final String description;
     public final Optional<String> dressCode;
+    public final Optional<String> homePage;
 
     public final ZonedDateTime date;
 
@@ -55,6 +64,7 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
         dressCode = null;
         date = null;
         protestId = null;
+        homePage = null;
     }
 
     private PublicProtestData(
@@ -64,7 +74,8 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
         String description,
         ZonedDateTime date,
         Optional<String> dressCode,
-        Optional<UUID> protestId
+        Optional<UUID> protestId,
+        Optional<String> homePage
     ) {
         this.location = location;
         this.owner = owner;
@@ -73,6 +84,7 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
         this.dressCode = dressCode;
         this.date = date;
         this.protestId = protestId;
+        this.homePage = homePage;
     }
 
     public PublicProtestData(
@@ -85,7 +97,8 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
             data.description,
             data.date,
             data.dressCode,
-            Optional.of(data.protestId)
+            Optional.of(data.protestId),
+            data.homePage
         );
     }
 
@@ -100,6 +113,10 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
         } else if(dressCode.isPresent() && dressCode.get().length() > MAX_DRESS_CODE_LENGTH) {
             return false;
         } else if(!location.validate()) {
+            return false;
+        } else if(homePage.isPresent() && !Validate.validateUrl(homePage.get())) {
+            return false;
+        } else if(homePage.isPresent() && homePage.get().length() > MAX_HOME_PAGE_LENGTH) {
             return false;
         } else {
             return true;
@@ -116,8 +133,8 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
             Sanitize.encodeHtml(description),
             date,
             dressCode.isEmpty() ? dressCode : Optional.of(Sanitize.encodeHtml(dressCode.get())),
-            protestId
+            protestId,
+            homePage.isEmpty() ? homePage : Sanitize.encodeUrl(homePage.get()).toOpt()
         );
     }
-
 }

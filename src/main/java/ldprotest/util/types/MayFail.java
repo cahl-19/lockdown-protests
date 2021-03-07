@@ -62,4 +62,8 @@ public class MayFail<R> {
     public R result() {
         return successData.get();
     }
+
+    public Optional<R> toOpt() {
+        return successData;
+    }
 }

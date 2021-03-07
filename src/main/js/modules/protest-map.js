@@ -66,21 +66,18 @@ function normalize_longitude(lng) {
     return lng;
 }
 
-function normalize_long_bounds(west, east) {
+function normalize_bounds(bounds) {
 
-    if((east - west) >= 360) {
-        return {'west': -180.0, 'east': 180.0};
+    if((bounds.east - bounds.west) >= 360) {
+        return {'west': -180.0, 'east': 180.0, 'north': bounds.north, 'south': bounds.south};
     }
 
-    while(west < -180) {
-        west += 360;
-        east += 360;
-    }
-    while(west > 180) {
-        west -= 360;
-        east -= 360;
-    }
-    return {'west': west, 'east': east};
+    return {
+        'west': normalize_longitude(bounds.west),
+        'east': normalize_longitude(bounds.east),
+        'north': bounds.north,
+        'south': bounds.south
+    };
 }
 
 function clamp_lattitude(lat) {
@@ -120,13 +117,11 @@ function buffer_bounds(bounds) {
     let ew_adj = span_ew * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2;
     let ns_adj = span_ns * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2;
 
-    let norm_ew = normalize_long_bounds(bounds.west - ew_adj, bounds.east + ew_adj);
-
     return {
         'north': clamp_lattitude(bounds.north + ns_adj),
-        'west': norm_ew.west,
+        'west': bounds.west - ew_adj,
         'south': clamp_lattitude(bounds.south - ns_adj),
-        'east': norm_ew.east
+        'east': bounds.east + ew_adj
     };
 }
 
@@ -134,13 +129,11 @@ function update_protests(map, state) {
     let bounds = map.getBounds();
     let now = Date.now();
 
-    let norm_ew = normalize_long_bounds(bounds._southWest.lng, bounds._northEast.lng);
-
     let map_bounds = {
         'north': bounds._northEast.lat,
-        'west': norm_ew.west,
+        'west': bounds._southWest.lng,
         'south': bounds._southWest.lat,
-        'east': norm_ew.east
+        'east': bounds._northEast.lng
     };
 
     if(bounds_contained(state.protest_zone, map_bounds) && !time_to_refresh_pins(now, state.last_protest_update)) {
@@ -148,7 +141,7 @@ function update_protests(map, state) {
     } else {
         state.protest_zone = buffer_bounds(map_bounds);
         state.last_protest_update = now;
-        load_protests(map, state.protest_zone, state);
+        load_protests(map, normalize_bounds(state.protest_zone), state);
     }
 }
 

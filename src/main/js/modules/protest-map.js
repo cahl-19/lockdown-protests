@@ -34,7 +34,7 @@ const PROTEST_REFRESH_PERIOD = 60000;
 function error_map(map_div, error_message) {
     map_div.html(`<p>Error initializing map: ${error_message}</p>`);
 }
-/**********************************************************************************************************************/
+
 function denormalize_longitude(lng, map) {
 
         let lngCenter = map.getCenter().lng;
@@ -49,7 +49,7 @@ function denormalize_longitude(lng, map) {
 
         return lng;
     }
-/**********************************************************************************************************************/
+
 function normalize_longitude(lng) {
         while(lng < -180) {
             lng += 360;
@@ -59,7 +59,7 @@ function normalize_longitude(lng) {
         }
         return lng;
     }
-/**********************************************************************************************************************/
+
 function clamp_lattitude(lat) {
     if(lat > 90.0) {
         return 90.0;
@@ -69,7 +69,7 @@ function clamp_lattitude(lat) {
         return lat;
     }
 }
-/**********************************************************************************************************************/
+
 function bounds_contained(container, bounds) {
     if(container === undefined) {
         return false;
@@ -85,11 +85,11 @@ function bounds_contained(container, bounds) {
         return true;
     }
 }
-/**********************************************************************************************************************/
+
 function time_to_refresh_pins(now, last_update) {
     return now > (last_update + PROTEST_REFRESH_PERIOD);
 }
-/**********************************************************************************************************************/
+
 function buffer_bounds(bounds) {
     let span_ns = bounds.north - bounds.south;
     let span_ew = bounds.east - bounds.west;
@@ -101,7 +101,7 @@ function buffer_bounds(bounds) {
         'east': normalize_longitude(bounds.east + span_ew * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2)
     };
 }
-/**********************************************************************************************************************/
+
 function update_protests(map, state) {
     let bounds = map.getBounds();
     let now = Date.now();
@@ -121,7 +121,7 @@ function update_protests(map, state) {
         load_protests(map, state.protest_zone, state);
     }
 }
-/**********************************************************************************************************************/
+
 function load_protests(map, bounds, state) {
 
     let north = bounds.north;
@@ -160,7 +160,7 @@ function load_protests(map, bounds, state) {
         }
     );
 }
-/**********************************************************************************************************************/
+
 function config_map(map_div, api_token, config) {
 
     let state = {
@@ -214,7 +214,7 @@ function config_map(map_div, api_token, config) {
 
     return map;
 }
-/**********************************************************************************************************************/
+
 export let protest_map = {
 
     'load_protests': load_protests,
@@ -258,6 +258,6 @@ export let protest_map = {
         });
     }
 };
-/**********************************************************************************************************************/
+
 export default protest_map;
-/**********************************************************************************************************************/
+

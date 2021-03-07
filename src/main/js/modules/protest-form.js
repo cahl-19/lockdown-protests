@@ -28,7 +28,7 @@ import protest_object from 'protest-object';
 function validate_url(url) {
     return /^(www|http|https):\/\/[^ "]+$/.test(url);
 }
-/**********************************************************************************************************************/
+
 function input_value(inp) {
     let val = inp.val();
 
@@ -38,7 +38,7 @@ function input_value(inp) {
         return val;
     }
 }
-/**********************************************************************************************************************/
+
 function date_from_inputs(date, time) {
         let dval = date.val();
         let tval = time.val();
@@ -54,7 +54,7 @@ function date_from_inputs(date, time) {
                 date_parts[0], date_parts[1] - 1, date_parts[2], time_parts[0], time_parts[1]
         );
 }
-/**********************************************************************************************************************/
+
 export let protest_form = {
     'on_hide': function(id_prefix, fun) {
         return $(`#${id_prefix}-form-modal`).on('hidden.bs.modal', fun);
@@ -192,6 +192,5 @@ export let protest_form = {
         delete_button.on('click', () => delete_protest(new protest_object.Protest(protest_data()), delete_button));
     }
 };
-/**********************************************************************************************************************/
+
 export default protest_form;
-/**********************************************************************************************************************/

@@ -40,7 +40,7 @@ function display(popup, msg) {
         });
     });
 }
-/**********************************************************************************************************************/
+
 function hide(popup) {
     let confirm_button = popup.find('.confirmation-popup-confirm-button');
     let cancel_button = popup.find('.confirmation-popup-cancel-button');
@@ -53,11 +53,10 @@ function hide(popup) {
     confirm_button.off('click.confirm_popup');
     cancel_button.off('click.confirm_popup');
 }
-/**********************************************************************************************************************/
+
 export let confirm = {
     'display': display,
     'hide': hide
 };
-/**********************************************************************************************************************/
+
 export default confirm;
-/**********************************************************************************************************************/

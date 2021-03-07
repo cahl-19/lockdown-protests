@@ -28,7 +28,7 @@ const ENTITY_MAP = {
   '`': '&#x60;',
   '=': '&#x3D;'
 };
-/**********************************************************************************************************************/
+
 const REV_ENTITY_MAP = {
   '&amp;': '&',
   '&lt;': '<',
@@ -47,13 +47,13 @@ function __encode_html(text) {
     return ENTITY_MAP[s];
   });
 }
-/**********************************************************************************************************************/
+
 function __decode_html(text) {
   return String(text).replace(/&(amp;|lt;|gt;|quot;|#x27;|#x2F;|#x60;|#x3D;)/g, (s) => {
     return REV_ENTITY_MAP[s];
   });
 }
-/**********************************************************************************************************************/
+
 export let sanitize = {
     'encode_api_html': function(text) {
         /* Note that the sever is supposed to html encode all user content, so here we first attempt to decode any
@@ -78,6 +78,5 @@ export let sanitize = {
         return elem.text(__decode_html(elem_text));
     }
 };
-/**********************************************************************************************************************/
+
 export default sanitize;
-/**********************************************************************************************************************/

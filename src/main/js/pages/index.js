@@ -52,7 +52,7 @@ function popup_ajax_error(status, error_body) {
         return display_error.display(error_popup, 'Error completing request.');
     }
 }
-/**********************************************************************************************************************/
+
 function can_edit_protest(protest) {
     return (
         api.whoami() === protest.owner ||
@@ -60,7 +60,7 @@ function can_edit_protest(protest) {
         api.current_user_role() === 'MODERATOR'
     );
 }
-/**********************************************************************************************************************/
+
 function render_popup(protest) {
     let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(protest.date);
 
@@ -116,7 +116,7 @@ function render_popup(protest) {
 
     return content[0];
 }
-/**********************************************************************************************************************/
+
 function event_client_xy(ev) {
     if (ev.touches !== undefined) {
         return {'x': ev.touches[0].clientX, 'y': ev.touches[0].clientY};
@@ -124,7 +124,7 @@ function event_client_xy(ev) {
         return {'x': ev.clientX, 'y': ev.clientY};
     }
 }
-/**********************************************************************************************************************/
+
 function event_offset_xy(ev) {
     if (ev.touches !== undefined) {
         let rect = ev.target.getBoundingClientRect();
@@ -133,7 +133,7 @@ function event_offset_xy(ev) {
         return {'x': ev.offsetX, 'y': ev.offsetY};
     }
 }
-/**********************************************************************************************************************/
+
 function setup_click_drag_pins(map) {
     let desktop_pin = $('#droppable-pin');
     let mobile_pin  = $('#mobile-droppable-pin');
@@ -157,7 +157,7 @@ function setup_click_drag_pins(map) {
         }
     );
 }
-/**********************************************************************************************************************/
+
 function activate_drop_pin(map, pin, on_grab, on_reset) {
 
     if(on_grab === undefined) {
@@ -273,7 +273,7 @@ function activate_drop_pin(map, pin, on_grab, on_reset) {
         restore_pin();
     });
 }
-/**********************************************************************************************************************/
+
 function setup_sidebar() {
     if(api.whoami() === undefined) {
         $('.sidebar-unauth').removeClass('hidden');
@@ -283,7 +283,7 @@ function setup_sidebar() {
         $('#contribute-button').tooltip();
     }
 }
-/**********************************************************************************************************************/
+
 function setup_menu() {
     if(api.whoami() === undefined) {
         $('.dropdown-item-unauth').removeClass('hidden');
@@ -294,7 +294,7 @@ function setup_menu() {
         pin_drop_menu_item.on('click', () => $('#pin-drop-modal').modal('show'));
     }
 }
-/**********************************************************************************************************************/
+
 function setup_registration() {
     let register_button = $('.registration-link');
     let register_modal = $('#registration-modal');
@@ -309,7 +309,7 @@ function setup_registration() {
         contributing_modal.modal('show');
     });
 }
-/**********************************************************************************************************************/
+
 function setup_login() {
 
     let submit_login = $('#submit-login');
@@ -349,7 +349,7 @@ function setup_login() {
         );
     });
 }
-/**********************************************************************************************************************/
+
 function setup_logout() {
     $('.logout-link').on('click', (ev) => {
         ev.preventDefault();
@@ -358,7 +358,7 @@ function setup_logout() {
         );
     });
 }
-/**********************************************************************************************************************/
+
 function setup_protest_forms() {
 
     protest_form.setup_form(
@@ -418,7 +418,7 @@ function setup_protest_forms() {
         }
     );
 }
-/**********************************************************************************************************************/
+
 function setup_auth_page() {
 
     protest_map.init_map(
@@ -436,13 +436,12 @@ function setup_auth_page() {
     setup_logout();
     setup_registration();
 }
-/**********************************************************************************************************************/
+
 function setup_unauth_page() {
     setup_protest_forms();
 }
-/**********************************************************************************************************************/
+
 $(document).ready(function() {
     setup_unauth_page();
     api.clean_dead_sessions().then(setup_auth_page);
 });
-/**********************************************************************************************************************/

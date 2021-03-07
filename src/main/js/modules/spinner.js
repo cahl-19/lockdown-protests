@@ -25,7 +25,7 @@ import $ from 'jquery';
 function make_spinner() {
     return $('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
 }
-/**********************************************************************************************************************/
+
 export let spinner = {
     'spin': function(parent, msg) {
 
@@ -44,6 +44,5 @@ export let spinner = {
         return () => parent.html(orig_content);
     }
 };
-/**********************************************************************************************************************/
+
 export default spinner;
-/**********************************************************************************************************************/

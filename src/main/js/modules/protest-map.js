@@ -32,6 +32,11 @@ const POPUP_MAX_WIDTH_PIXELS = 500;
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
+function popup_max_width_pixels() {
+    return Math.min(0.8 * $(window).width(), POPUP_MAX_WIDTH_PIXELS)
+}
+
+
 function error_map(map_div, error_message) {
     map_div.html(`<p>Error initializing map: ${error_message}</p>`);
 }
@@ -153,7 +158,7 @@ function load_protests(map, bounds, state) {
 
                 let mark = L.marker([lat, lng]).addTo(map);
                 mark.bindPopup(() => state.config.render_popup(new protest_object.Protest(protest)), {
-                    'maxWidth' : POPUP_MAX_WIDTH_PIXELS
+                    'maxWidth' : popup_max_width_pixels()
                 });
 
                 state.markers.push(mark);
@@ -220,7 +225,7 @@ function config_map(map_div, api_token, config) {
 }
 
 export let protest_map = {
-    'POPUP_MAX_WIDTH_PIXELS': POPUP_MAX_WIDTH_PIXELS,
+    'popup_max_width_pixels': popup_max_width_pixels,
     'load_protests': load_protests,
     'denormalize_longitude': denormalize_longitude,
     'normalize_longitude': normalize_longitude,

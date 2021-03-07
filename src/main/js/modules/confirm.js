@@ -16,16 +16,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /***********************************************************************************************************************
+*                                                       IMPORTS                                                        *
+***********************************************************************************************************************/
+import $ from 'jquery';
+/***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
 function display(popup, msg) {
     let msg_area = popup.find('.confirm-message');
     let confirm_button = popup.find('.confirmation-popup-confirm-button');
     let cancel_button = popup.find('.confirmation-popup-cancel-button');
-    let overlay = popup.next('.error-overlay');
+    let overlay = $('.error-overlay');
 
     msg_area.text(msg);
-    overlay.css('display', 'block');
+    overlay.removeClass('hidden');
     popup.addClass('confirm-popup-open');
     popup.css('display', 'block');
 
@@ -44,11 +48,11 @@ function display(popup, msg) {
 function hide(popup) {
     let confirm_button = popup.find('.confirmation-popup-confirm-button');
     let cancel_button = popup.find('.confirmation-popup-cancel-button');
-    let overlay = popup.next('.error-overlay');
+    let overlay = $('.error-overlay');
 
     popup.removeClass('confirm-popup-open');
     popup.css('display', '');
-    overlay.css('display', '');
+    overlay.addClass('hidden');
 
     confirm_button.off('click.confirm_popup');
     cancel_button.off('click.confirm_popup');

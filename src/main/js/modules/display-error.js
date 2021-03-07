@@ -16,16 +16,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /***********************************************************************************************************************
+*                                                       IMPORTS                                                        *
+***********************************************************************************************************************/
+import $ from 'jquery';
+/***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
 function display(popup, msg) {
     let msg_area = popup.find('.error-message');
     let close_button = popup.find('.close-error-popup');
-    let error_overlay = popup.next('.error-overlay');
+    let error_overlay = $('.error-overlay');
 
     msg_area.text(msg);
-    error_overlay.css('display', 'block');
+    error_overlay.removeClass('hidden');
     popup.addClass('error-popup-open');
+
     popup.css('display', 'block');
 
     return new Promise((accepted) => {
@@ -38,11 +43,11 @@ function display(popup, msg) {
 
 function hide(popup) {
     let close_button = popup.find('.close-error-popup');
-    let error_overlay = popup.next('.error-overlay');
+    let error_overlay = $('.error-overlay');
 
     popup.removeClass('error-popup-open');
     popup.css('display', '');
-    error_overlay.css('display', '');
+    error_overlay.addClass('hidden');
     close_button.off('click.error_popup');
 }
 

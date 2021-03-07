@@ -63,7 +63,9 @@ public class FsKeyProvider implements DeferredKeyProvider {
         File f = new File(prefix);
 
         if(!testFsKeyDirectory(prefix)) {
-            throw new IllegalArgumentException("Invalid file location for FS Key store");
+            throw new IllegalArgumentException(
+                "Invalid file location for FS Key store. Directory is inaccesible or doesn't exist: " + prefix
+            );
         }
 
         this.prefix = prefix;

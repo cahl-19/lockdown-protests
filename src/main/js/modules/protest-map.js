@@ -28,6 +28,7 @@ import protest_object from 'protest-object';
 ***********************************************************************************************************************/
 const PROTEST_LOAD_ZONE_BUFFER_FACTOR = 1.25;
 const PROTEST_REFRESH_PERIOD = 60000;
+const POPUP_MAX_WIDTH_PIXELS = 500;
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
@@ -151,7 +152,10 @@ function load_protests(map, bounds, state) {
                 );
 
                 let mark = L.marker([lat, lng]).addTo(map);
-                mark.bindPopup(() => state.config.render_popup(new protest_object.Protest(protest)));
+                mark.bindPopup(() => state.config.render_popup(new protest_object.Protest(protest)), {
+                    'maxWidth' : POPUP_MAX_WIDTH_PIXELS
+                });
+
                 state.markers.push(mark);
             });
         },
@@ -216,7 +220,7 @@ function config_map(map_div, api_token, config) {
 }
 
 export let protest_map = {
-
+    'POPUP_MAX_WIDTH_PIXELS': POPUP_MAX_WIDTH_PIXELS,
     'load_protests': load_protests,
     'denormalize_longitude': denormalize_longitude,
     'normalize_longitude': normalize_longitude,

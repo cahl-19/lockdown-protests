@@ -66,6 +66,9 @@ function render_popup(protest) {
 
     let content = $('<div>');
 
+    /* Strange but for some reason necessary for popups to size correctly  */
+    content.attr('width', protest_map.POPUP_MAX_WIDTH_PIXELS);
+
     let title = $('<strong>').text(protest.htmlDecodedTitle());
 
     content.addClass('protest-popup-content');

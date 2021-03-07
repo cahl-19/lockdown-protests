@@ -44,9 +44,6 @@ The default username, password and database used for Mongo are `ldprotest`,
 `ldprotest` and `ldprotest` respectivley. This will eventually be made
 configurable.
 
-At the moment, the ldprotest user must be added as a root user (this is not
-intentional and will eventually be fixed).
-
 The script ./scripts/setup-mongo will perform this setup for you if you are
 using the containerized database with docker-compose.
 

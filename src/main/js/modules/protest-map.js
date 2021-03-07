@@ -193,7 +193,7 @@ function config_map(map_div, api_token, config) {
 
     L.Icon.Default.imagePath = 'assets/leaflet/';
 
-    map.setMinZoom(1);
+    map.setMinZoom(3);
 
     L.tileLayer(url, {
         attribution: (

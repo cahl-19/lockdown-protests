@@ -18,10 +18,6 @@
 package ldprotest.geo;
 
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.geojson.Polygon;
-import com.mongodb.client.model.geojson.Position;
-import java.util.Arrays;
-import java.util.List;
 import org.bson.conversions.Bson;
 
 public class GeoRectangle {
@@ -37,13 +33,8 @@ public class GeoRectangle {
     @SuppressWarnings("unchecked")
     public Bson bsonFilter(String field) {
 
-        Position northWest = new Position(swCorner.longitude, neCorner.latitude);
-        Position northEast = new Position(neCorner.longitude, neCorner.latitude);
-        Position southEast = new Position(neCorner.longitude, swCorner.latitude);
-        Position southWest = new Position(swCorner.longitude, swCorner.latitude);
-
-        List<Position> points = Arrays.asList(northWest, northEast, southEast, southWest, northWest);
-
-        return Filters.geoWithin(field, new Polygon(points));
+        return Filters.geoWithinBox(
+            field, swCorner.longitude, swCorner.latitude, neCorner.longitude, neCorner.latitude
+        );
     }
 }

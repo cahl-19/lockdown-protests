@@ -44,4 +44,9 @@ public class Coordinate implements JsonSerializable, Validatable {
             latitude < 90 &&
             latitude > -90;
     }
+
+    @Override
+    public String toString() {
+        return "LatLong=(" + latitude + ", " + longitude + ")";
+    }
 }

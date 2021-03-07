@@ -53,4 +53,14 @@ public final class Result<E,R> {
     public R result() {
         return successData.get();
     }
+
+
+    @Override
+    public String toString() {
+        if(isSuccess()) {
+            return "Result(Success=true, Result=" + successData.get() + ")";
+        } else {
+            return "Result(Success=false, Failure=" + successData.get() + ")";
+        }
+    }
 }

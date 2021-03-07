@@ -32,7 +32,6 @@ public class GeoRectangle {
 
     @SuppressWarnings("unchecked")
     public Bson bsonFilter(String field) {
-
         return Filters.geoWithinBox(
             field, swCorner.longitude, swCorner.latitude, neCorner.longitude, neCorner.latitude
         );

@@ -43,28 +43,45 @@ function error_map(map_div, error_message) {
 
 function denormalize_longitude(lng, map) {
 
-        let lngCenter = map.getCenter().lng;
+    let lngCenter = map.getCenter().lng;
 
-        while(Math.abs(lngCenter - lng) > 180.0) {
-            if(lng < lngCenter) {
-                lng += 360.0;
-            } else {
-                lng -= 360.0;
-            }
+    while(Math.abs(lngCenter - lng) > 180.0) {
+        if(lng < lngCenter) {
+            lng += 360.0;
+        } else {
+            lng -= 360.0;
         }
-
-        return lng;
     }
+
+    return lng;
+}
 
 function normalize_longitude(lng) {
-        while(lng < -180) {
-            lng += 360;
-        }
-        while(lng > 180) {
-            lng -= 360;
-        }
-        return lng;
+    while(lng < -180) {
+        lng += 360;
     }
+    while(lng > 180) {
+        lng -= 360;
+    }
+    return lng;
+}
+
+function normalize_long_bounds(west, east) {
+
+    if((east - west) >= 360) {
+        return {'west': -180.0, 'east': 180.0};
+    }
+
+    while(west < -180) {
+        west += 360;
+        east += 360;
+    }
+    while(west > 180) {
+        west -= 360;
+        east -= 360;
+    }
+    return {'west': west, 'east': east};
+}
 
 function clamp_lattitude(lat) {
     if(lat > 90.0) {
@@ -100,11 +117,16 @@ function buffer_bounds(bounds) {
     let span_ns = bounds.north - bounds.south;
     let span_ew = bounds.east - bounds.west;
 
+    let ew_adj = span_ew * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2;
+    let ns_adj = span_ns * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2;
+
+    let norm_ew = normalize_long_bounds(bounds.west - ew_adj, bounds.east + ew_adj);
+
     return {
-        'north': clamp_lattitude(bounds.north + span_ns * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2),
-        'west': normalize_longitude(bounds.west - span_ew * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2),
-        'south': clamp_lattitude(bounds.south - span_ns * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2),
-        'east': normalize_longitude(bounds.east + span_ew * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2)
+        'north': clamp_lattitude(bounds.north + ns_adj),
+        'west': norm_ew.west,
+        'south': clamp_lattitude(bounds.south - ns_adj),
+        'east': norm_ew.east
     };
 }
 
@@ -112,11 +134,13 @@ function update_protests(map, state) {
     let bounds = map.getBounds();
     let now = Date.now();
 
+    let norm_ew = normalize_long_bounds(bounds._southWest.lng, bounds._northEast.lng);
+
     let map_bounds = {
         'north': bounds._northEast.lat,
-        'west': normalize_longitude(bounds._southWest.lng),
+        'west': norm_ew.west,
         'south': bounds._southWest.lat,
-        'east': normalize_longitude(bounds._northEast.lng)
+        'east': norm_ew.east
     };
 
     if(bounds_contained(state.protest_zone, map_bounds) && !time_to_refresh_pins(now, state.last_protest_update)) {
@@ -193,7 +217,7 @@ function config_map(map_div, api_token, config) {
 
     L.Icon.Default.imagePath = 'assets/leaflet/';
 
-    map.setMinZoom(3);
+    map.setMinZoom(4);
 
     L.tileLayer(url, {
         attribution: (

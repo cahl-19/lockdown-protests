@@ -273,7 +273,12 @@ export let protest_map = {
                 'GET',
                 {},
                 (data) => {
-                    success(config_map(map_div, data.token, config));
+                    if(data.token) {
+                        success(config_map(map_div, data.token, config));
+                    } else {
+                        error_map(map_div, `No API token defined.`);
+                        fail();
+                    }
                 },
                 (status, err) => {
                     let description = err === undefined ? status : err.description;

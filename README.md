@@ -16,7 +16,7 @@ Build this project by executing `./gradlew build`. On completion, a script
 will be generated and written to ./scripts which you may execute to launch
 the webserver on [http://localhost:4567](http://localhost:4567).
 
-To produce an optomized/minified built, use `./gradlew release`.
+To produce an optomized/minified build, use `./gradlew release`.
 
 In order to use the test map you will need to obtain a
 [mapbox api token](https://www.mapbox.com/studio/account/tokens/) and supply
@@ -27,6 +27,20 @@ good enough for development and simple tests.
 Other configuration settings can be set via the command line or by supplying
 a config file. See doc/examples/config.yml for a usable configuration file
 which also includes descriptions of each parameter as comments.
+
+# Install
+
+On debian based distros, run `./gradew deployDeb` to generate a .deb package
+in ./build/distributions. The deb package will handle all steps of installing
+package dependencies, creating an appropriate FS heirarchy, setting up
+configuration files and generating run and service scripts. Afterward,
+configuration of the mongo DB connection and map API token can be done by
+modifying the config file in /opt/ldprotest/etc/ldprotest/config.yml.
+
+On other distros these steps need to be performed manually. Example
+configuration files in ./doc/example can be used as a starting point. The
+development tree run script generated in scripts/run-server can be used as a
+starting point for creating your own run-script.
 
 # Mongo Database
 

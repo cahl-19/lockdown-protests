@@ -20,6 +20,7 @@ plugins {
     id 'java'
     id 'application'
     id "com.github.node-gradle.node" version "3.0.1"
+    id 'nebula.ospackage' version "8.5.6"
 }
 
 repositories {
@@ -51,6 +52,8 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
 }
+
+ext.deployPrefix = project.hasProperty('prefix') ? project.prefix : '/opt/ldprotest'
 
 task copyVersionInfo(type: Copy) {
 
@@ -173,14 +176,13 @@ task makeRunScripts {
 
          createUser.text = unindent(
             """#!/bin/bash
-                exec java -Dlogging.appender.STDOUT.level=ERROR \
+                exec java -Dlogging.appender.STDOUT.level=ERROR \\
                     ${jvmArgs} -cp ${cp} ldprotest.server.auth.CmdLineCreateUser "\${@}"
             """
         )
         createUser.setExecutable(true);
     }
 }
-
 
 build {
     dependsOn makeRunScripts
@@ -191,9 +193,131 @@ task release {
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.hasTask(release)) {
+    if (taskGraph.hasTask(release) || taskGraph.hasTask(deployDeb)) {
         yarn_build.args = ["--mode=production"]
     } else {
         yarn_build.args = ["--mode=development"]
     }
+}
+
+task makeDebFiles {
+    doLast {
+        mkdir "${projectDir}/build/deb-install"
+
+        def keystore = "'\"'\"'${deployPrefix}/var/lib/ldprotest/jwt-keys'\"'\"'".replace("/", "\\/")
+
+        def runscript = new File("${projectDir}/build/deb-install", "ldprotest")
+        def createUser = new File("${projectDir}/build/deb-install", "make-user")
+        def service = new File("${projectDir}/build/deb-install", "ldprotest.service")
+        def preinst = new File("${projectDir}/build/deb-install", "preInstall.sh")
+        def postinst = new File("${projectDir}/build/deb-install", "postInstall.sh")
+        def postUninst = new File("${projectDir}/build/deb-install", "postUninstall.sh")
+
+        def jvmArgs = applicationDefaultJvmArgs.join(" ")
+        def cp = "${deployPrefix}/lib/ldprotest/*"
+
+        createUser.text = unindent(
+            """#!/bin/bash
+                JAVA="\$(find /usr/lib/jvm/  -maxdepth 1 -name "java-11-openjdk*" | head -n1)/bin/java"
+                exec "\${JAVA} -Dlogging.appender.STDOUT.level=ERROR \\
+                    ${jvmArgs} -cp ${cp} ldprotest.server.auth.CmdLineCreateUser "\${@}"
+            """
+        )
+        runscript.text = unindent(
+            """#!/bin/bash\n\
+                JAVA="\$(find /usr/lib/jvm/  -maxdepth 1 -name "java-11-openjdk*" | head -n1)/bin/java"
+                exec "\${JAVA}" -Dlogging.appender.STDOUT.level=ERROR ${jvmArgs} -cp '${cp}' ${mainClassName} "\${@}"
+            """
+        )
+        service.text = unindent(
+            """
+                [Unit]
+                    Description=ldprotest HTTP Server
+                    After=network.target
+                    Type=simple
+                    Restart=always
+                    RestartSec=1
+                    User=ldprotest
+                    ExecStart="${deployPrefix}/bin/ldprotest" -f "${deployPrefix}/etc/ldprotest/config.yml"
+
+                [Install]
+                    WantedBy=multi-user.target
+            """
+        )
+        preinst.text = unindent(
+            """
+                mkdir -p "${deployPrefix}/var/lib/ldprotest/jwt-keys"
+
+                adduser \\
+                    --system --home "${deployPrefix}/var/lib/ldprotest" --no-create-home --shell /bin/false \\
+                    --group --disabled-password --disabled-login ldprotest
+
+                chown -R ldprotest.ldprotest "${deployPrefix}/var/lib/ldprotest"
+                chmod 700 "${deployPrefix}/var/lib/ldprotest/jwt-keys"
+            """
+        )
+        postinst.text = unindent(
+            """
+                sed -i -r 's/^(\\s*fsKeyStorePath: )(.*)/\\1${keystore}/g' "${deployPrefix}/etc/ldprotest/config.yml"
+            """
+        )
+        postUninst.text = unindent(
+            """
+                rm -rf ${deployPrefix}/var/lib/ldprotest/\n\
+                deluser ldprotest 1>/dev/null 2>/dev/null || true
+            """
+        )
+
+        runscript.setExecutable(true, false)
+        createUser.setExecutable(true, false)
+    }
+}
+
+task deployDeb(type: Deb) {
+
+    dependsOn build, makeDebFiles
+
+    packageName = 'ldprotest'
+    version = new File("${projectDir}/version.txt").text.strip()
+    release = 1
+
+    packager = 'anon'
+    maintainer = 'anon'
+    uploaders = 'anon'
+
+    user = 'ldprotest'
+    permissionGroup = 'ldprotest'
+
+    preInstall file("${projectDir}/build/deb-install/preInstall.sh")
+    postInstall file("${projectDir}/build/deb-install/postInstall.sh")
+    postUninstall file("${projectDir}/build/deb-install/postUninstall.sh")
+
+    configurationFile("${deployPrefix}/etc/ldprotest/config.yml")
+
+    requires('openjdk-11-jdk-headless')
+
+    into "${deployPrefix}"
+
+    from("${projectDir}/doc/example/config.yml") {
+        fileType CONFIG | NOREPLACE
+        into 'etc/ldprotest/'
+    }
+
+    from(jar.outputs.files) {
+        into 'lib/ldprotest/'
+    }
+    from(sourceSets.main.compileClasspath) {
+        into 'lib/ldprotest/'
+    }
+    from("${projectDir}/build/deb-install/ldprotest.service") {
+        into 'lib/systemd/system/'
+    }
+    from("${projectDir}/build/deb-install/ldprotest") {
+        into 'bin/'
+    }
+    from("${projectDir}/build/deb-install/make-user") {
+        into 'bin/'
+    }
+
+    link('/etc/systemd/system/ldprotest.service', "${deployPrefix}/lib/systemd/system/ldprotest.service")
 }

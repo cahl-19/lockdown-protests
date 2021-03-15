@@ -269,7 +269,7 @@ export let protest_map = {
 
         return new Promise((success, fail) => {
             api.call(
-                '/api/test/map-api-token',
+                '/api/map-api-token',
                 'GET',
                 {},
                 (data) => {

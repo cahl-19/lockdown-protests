@@ -32,7 +32,7 @@ import ldprotest.server.endpoints.Protests;
 import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.TokenRefresh;
 import ldprotest.server.endpoints.WhoAmI;
-import ldprotest.server.endpoints.test.MapApiToken;
+import ldprotest.server.endpoints.MapApiToken;
 import ldprotest.server.infra.templates.ServeWebpack;
 import spark.Spark;
 

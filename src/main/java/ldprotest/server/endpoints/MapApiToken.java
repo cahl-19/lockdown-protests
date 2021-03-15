@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package ldprotest.server.endpoints.test;
+package ldprotest.server.endpoints;
 
 import ldprotest.main.Main;
 import ldprotest.serialization.JsonSerializable;
@@ -26,7 +26,7 @@ import ldprotest.server.infra.JsonEndpoint;
 
 public final class MapApiToken {
 
-    private static final String PATH = "/api/test/map-api-token";
+    private static final String PATH = "/api/map-api-token";
 
     private MapApiToken() {
         /* do not construct */

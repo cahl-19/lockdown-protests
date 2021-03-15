@@ -36,10 +36,10 @@ import ldprotest.config.CmdLineArgs;
 import ldprotest.config.ConfigFile;
 import ldprotest.config.DefaultConfig;
 import ldprotest.db.MainDatabase;
+import ldprotest.main.AppLogging.ResourceType;
 import ldprotest.tasks.PeriodicTaskManager;
 import ldprotest.util.ErrorCode;
 
-import static ldprotest.main.AppLogging.ResourceType.ON_CLASSPATH;
 import ldprotest.server.auth.webtoken.UserTokens;
 import ldprotest.tasks.ProtestVacuum;
 import ldprotest.tasks.SessionVacuum;
@@ -124,7 +124,11 @@ public class Main {
         }
 
         try {
-            AppLogging.setLogbackConfig(DEFAULT_LOGBACK_CONFIG, ON_CLASSPATH);
+            if(ARGS.logbackPath.isEmpty()) {
+                AppLogging.setLogbackConfig(DEFAULT_LOGBACK_CONFIG, ResourceType.ON_CLASSPATH);
+            } else {
+                AppLogging.setLogbackConfig(ARGS.logbackPath, ResourceType.ON_FILE_SYSTEM);
+            }
         }
         catch(IOException e) {
             LOGGER.error("Error setting logback configuration.");

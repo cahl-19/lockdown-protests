@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Example logback configuration file.
+
+    Output is logged to a plain text file and rotated daily or if file size reaches 128MB
+-->
+<configuration>
+
+    <appender name="ROLLING_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/var/log/ldprotest/ldprotest.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>ldprotest.log.%d.%i.log</fileNamePattern>
+            <maxFileSize>128MB</maxFileSize>
+            <maxHistory>9</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="ldprotest.main" level="INFO" additivity="false">
+            <appender-ref ref="ROLLING_APPENDER" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="ROLLING_APPENDER" />
+    </root>
+</configuration>

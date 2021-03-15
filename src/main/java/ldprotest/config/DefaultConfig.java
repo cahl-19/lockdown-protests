@@ -38,6 +38,7 @@ public final class DefaultConfig {
 
         AppConfig.Builder builder = AppConfig.builder();
 
+        builder.setLogbackPath("", AppConfig.PRIORITY_DEFAULT);
         builder.setHttpCacheMaxAge(DEFAULT_HTTP_CACHE_MAX_AGE, AppConfig.PRIORITY_DEFAULT);
         builder.setServerPort(DEFAULT_SERVER_PORT, AppConfig.PRIORITY_DEFAULT);
         builder.setFsKeyStorePath("", AppConfig.PRIORITY_DEFAULT);

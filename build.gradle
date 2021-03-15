@@ -204,7 +204,14 @@ task makeDebFiles {
     doLast {
         mkdir "${projectDir}/build/deb-install"
 
-        def keystore = "'\"'\"'${deployPrefix}/var/lib/ldprotest/jwt-keys'\"'\"'".replace("/", "\\/")
+        def escaped_single_quote = "'\"'\"'";
+
+        def keystore = (
+            "${escaped_single_quote}${deployPrefix}/var/lib/ldprotest/jwt-keys${escaped_single_quote}"
+        ).replace("/", "\\/")
+        def logback_path = (
+            "${escaped_single_quote}${deployPrefix}/etc/ldprotest/logback.xml${escaped_single_quote}"
+        ).replace("/", "\\/")
 
         def runscript = new File("${projectDir}/build/deb-install", "ldprotest")
         def createUser = new File("${projectDir}/build/deb-install", "make-user")
@@ -258,11 +265,21 @@ task makeDebFiles {
         )
         postinst.text = unindent(
             """
+                mkdir -p ${deployPrefix}/var/log/ldprotest
+                chown -R ldprotest.ldprotest ${deployPrefix}/var/log/ldprotest
+
                 sed -i -r 's/^(\\s*fsKeyStorePath: )(.*)/\\1${keystore}/g' "${deployPrefix}/etc/ldprotest/config.yml"
+                sed -i -r 's/^(\\s*logbackPath: )(.*)/\\1${logback_path}/g' "${deployPrefix}/etc/ldprotest/config.yml"
+
+                sed -i -r \\
+                    's/${"(/var/log/ldprotest/)".replace("/", "\\/")}/${deployPrefix.replace("/", "\\/")}\\/\\1/g' \\
+                    "${deployPrefix}/etc/ldprotest/logback.xml"
             """
         )
         postUninst.text = unindent(
             """
+                chown -R root.root ${deployPrefix}/var/log/ldprotest
+
                 rm -rf ${deployPrefix}/var/lib/ldprotest/\n\
                 deluser ldprotest 1>/dev/null 2>/dev/null || true
             """
@@ -293,6 +310,7 @@ task deployDeb(type: Deb) {
     postUninstall file("${projectDir}/build/deb-install/postUninstall.sh")
 
     configurationFile("${deployPrefix}/etc/ldprotest/config.yml")
+    configurationFile("${deployPrefix}/etc/ldprotest/logback.xml")
 
     requires('openjdk-11-jdk-headless')
 
@@ -301,6 +319,18 @@ task deployDeb(type: Deb) {
     from("${projectDir}/doc/example/config.yml") {
         fileType CONFIG | NOREPLACE
         into 'etc/ldprotest/'
+    }
+    from("${projectDir}/doc/example/logback.xml") {
+        fileType CONFIG | NOREPLACE
+        into 'etc/ldprotest/'
+    }
+
+
+    from("${projectDir}/doc/example/config.yml") {
+        into 'usr/share/doc/examples'
+    }
+    from("${projectDir}/doc/example/logback.xml") {
+        into 'usr/share/doc/examples'
     }
 
     from(jar.outputs.files) {

@@ -18,6 +18,8 @@
 package ldprotest.util;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class PrintTools {
 
@@ -38,6 +40,10 @@ public final class PrintTools {
         sb.append(']');
 
         return sb.toString();
+    }
+
+    public static String listPrint(Stream<?> s) {
+        return listPrint(s.map((i) -> i.toString()).collect(Collectors.toList()));
     }
 
 }

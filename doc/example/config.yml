@@ -17,6 +17,10 @@ serverPort: 4567
 # values)
 httpCacheMaxAge: 60
 
+# Path to logback.xml file to configure system logging. If unset or set to null, logs are sent to stdout
+# See examples for example logback.xml
+logbackPath: null
+
 userSessionConfig:
     # Seconds until a user session expires
     sessionExpiresSeconds: 604800

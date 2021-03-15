@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final String logbackPath;
     public final long httpCacheMaxAge;
     public final int serverPort;
     public final String  fsKeyStorePath;
@@ -39,6 +40,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        String logbackPath,
         long httpCacheMaxAge,
         int serverPort,
         String fsKeyStorePath,
@@ -52,6 +54,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.logbackPath = logbackPath;
         this.httpCacheMaxAge = httpCacheMaxAge;
         this.serverPort = serverPort;
         this.fsKeyStorePath = fsKeyStorePath;
@@ -71,6 +74,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<String> logbackPath;
         public final BuilderField<Long> httpCacheMaxAge;
         public final BuilderField<Integer> serverPort;
         public final BuilderField<String> fsKeyStorePath;
@@ -85,6 +89,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            logbackPath = new BuilderField<>();
             httpCacheMaxAge = new BuilderField<>();
             serverPort = new BuilderField<>();
             fsKeyStorePath = new BuilderField<>();
@@ -97,6 +102,11 @@ public class AppConfig {
             mapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setLogbackPath(String path, int priority) {
+             logbackPath.set(path, priority);
+            return this;
         }
 
         public Builder setHttpCacheMaxAge(long val, int priority) {
@@ -161,6 +171,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                logbackPath.get(),
                 httpCacheMaxAge.get(),
                 serverPort.get(),
                 fsKeyStorePath.get(),

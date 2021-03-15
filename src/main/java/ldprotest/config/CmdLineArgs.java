@@ -87,6 +87,11 @@ public class CmdLineArgs {
             builder.setServerPort(port, AppConfig.PRIORITY_OVERRIDE);
         }
 
+        @Option(names = {"--logback-path"}, description = "Path to logback.xml file to configure logging")
+        void logbackPath(String path) {
+            builder.setLogbackPath(path, AppConfig.PRIORITY_OVERRIDE);
+        }
+
         @Override
         public Integer call() throws Exception {
             return 0;

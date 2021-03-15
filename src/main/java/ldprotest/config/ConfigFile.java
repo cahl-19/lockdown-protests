@@ -49,7 +49,6 @@ public class ConfigFile {
         }
 
         if(data.serverPort != null) {
-
             if(TcpPort.validate(data.serverPort)) {
                 builder.setServerPort(data.serverPort, AppConfig.PRIORITY_CONFIG);
             } else {
@@ -62,6 +61,10 @@ public class ConfigFile {
         }
         if(data.mongoConnect != null) {
             builder.setConfigFilePath(data.mongoConnect, AppConfig.PRIORITY_CONFIG);
+        }
+
+        if(data.logbackPath != null) {
+            builder.setLogbackPath(data.logbackPath, AppConfig.PRIORITY_CONFIG);
         }
 
         if(data.userSessionConfig != null) {
@@ -96,6 +99,7 @@ public class ConfigFile {
         public String mongoConnect;
         public UserSessionConfig userSessionConfig;
         public KeyStoreConfig keyStoreConfig;
+        public String logbackPath;
     }
 
     private static final class UserSessionConfig {

@@ -25,6 +25,8 @@ import java.net.URL;
 import java.nio.file.*;
 import java.util.Collections;
 import java.util.Iterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResourceWalker implements Iterable<String>, AutoCloseable {
 
@@ -32,6 +34,7 @@ public class ResourceWalker implements Iterable<String>, AutoCloseable {
     private final String root;
     private final boolean resourceInJar;
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(ResourceWalker.class);
 
     public ResourceWalker(String path) throws IOException {
 
@@ -54,21 +57,28 @@ public class ResourceWalker implements Iterable<String>, AutoCloseable {
             resourceInJar = false;
             fileSystem = FileSystems.getDefault();
         }
-        root = uri.getPath().startsWith("/") ? uri.getPath() : "/" + uri.getPath();
+
+        if(uri.getPath() == null) {
+            root = path.startsWith("/") ? path : "/" + path;
+        } else {
+            root = uri.getPath().startsWith("/") ? uri.getPath() : "/" + uri.getPath();
+        }
     }
 
     @Override
     public Iterator<String> iterator() {
+
         Path path = fileSystem.getPath(root);
 
         try {
             return Files.walk(path)
-                .filter((p) -> !p.toFile().isDirectory())
+                .filter((p) -> !Files.isDirectory(p))
                 .map((p) -> p.toString())
                 .map((p) -> p.substring(root.length() + 1))
                 .iterator();
 
         } catch (IOException e) {
+            LOGGER.warn("Error opening resource");
             throw new IllegalStateException("Failed to open resource.");
         }
     }

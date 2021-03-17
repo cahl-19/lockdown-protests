@@ -17,14 +17,26 @@
 */
 package ldprotest.server.endpoints;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import ldprotest.business.mapbox.MapboxTokenApi;
+import ldprotest.business.mapbox.MapboxTokenApi.ApiFailure;
+import ldprotest.business.mapbox.MapboxTokenApi.TemporaryTokenResponse;
+import ldprotest.config.TemporaryTokenMapboxConfig;
 import ldprotest.main.Main;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.infra.JsonEndpoint;
+import ldprotest.tasks.PeriodicTaskManager;
+import ldprotest.util.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class MapApiToken {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(MapApiToken.class);
 
     private static final String PATH = "/api/map-api-token";
 
@@ -36,9 +48,72 @@ public final class MapApiToken {
 
         SecurityFilter.add(PATH, SecConfig.ANONYMOUS_GET);
 
-        JsonEndpoint.get(PATH, (request, response) -> {
-            return new JsonDoc(Main.args().staticMapApiToken);
-        });
+        String staticMapApiToken = Main.args().staticMapApiToken;
+        TemporaryTokenMapboxConfig temporaryTokenConfig = Main.args().temporaryTokenConfig;
+
+        if(temporaryTokenConfig.isFullyDefined()) {
+
+            TemporaryTokenHolder holder = new TemporaryTokenHolder(temporaryTokenConfig, staticMapApiToken);
+            holder.register();
+
+            JsonEndpoint.get(PATH, (request, response) -> {
+                return new JsonDoc(holder.get());
+            });
+        } else {
+
+            JsonEndpoint.get(PATH, (request, response) -> {
+                return new JsonDoc(Main.args().staticMapApiToken);
+            });
+        }
+    }
+
+    private static class TemporaryTokenHolder implements PeriodicTaskManager.PeriodicTask {
+
+        private final String username;
+        private final String accessToken;
+        private final int expires;
+        private final int renewal;
+
+        private final String staticToken;
+
+        private final AtomicReference<String> token;
+
+        public TemporaryTokenHolder(TemporaryTokenMapboxConfig temporaryTokenConfig, String staticToken) {
+
+            this.username = temporaryTokenConfig.username;
+            this.accessToken = temporaryTokenConfig.accessToken;
+            this.expires = temporaryTokenConfig.expiresSeconds;
+            this.renewal = temporaryTokenConfig.renewSeconds;
+
+            this.staticToken = staticToken;
+            this.token = new AtomicReference<>(staticToken);
+        }
+
+        @Override
+        public void runTask(PeriodicTaskManager.ShutdownSignal signal) {
+            refresh();
+        }
+
+        public void register() {
+            PeriodicTaskManager.registerTask(0, renewal, TimeUnit.SECONDS, true, this);
+        }
+
+        private void refresh() {
+            Result<ApiFailure, TemporaryTokenResponse> result = MapboxTokenApi.createTemporaryToken(
+                username, accessToken, expires
+            );
+
+            if(result.isFailure()) {
+                LOGGER.warn("Failed to fetch new token. Falling back to static config");
+                token.set(staticToken);
+            } else {
+                token.set(result.result().token);
+            }
+        }
+
+        public String get() {
+            return token.get();
+        }
     }
 
     private static class JsonDoc implements JsonSerializable {

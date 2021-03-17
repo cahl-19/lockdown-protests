@@ -92,12 +92,39 @@ public class ConfigFile {
         if(data.mapboxConfig != null) {
             MapboxConfig config = data.mapboxConfig;
 
-            if(config.staticMapApiToken != null) {
-                builder.setStaticMapApiToken(config.staticMapApiToken, AppConfig.PRIORITY_CONFIG);
+            if(config.staticConfig != null) {
+                StaticMapboxConfig staticConfig = config.staticConfig;
+
+                if(staticConfig.apiToken != null) {
+                    builder.setStaticMapApiToken(staticConfig.apiToken, AppConfig.PRIORITY_CONFIG);
+                }
+            }
+            if(config.temporaryTokenConfig != null) {
+                ConfigFileTemporaryTokenConfig tempConf = config.temporaryTokenConfig;
+
+                TemporaryTokenMapboxConfig configObj = new TemporaryTokenMapboxConfig(
+                        defaultIfNull(tempConf.username, ""),
+                        defaultIfNull(tempConf.accessToken, ""),
+                        defaultIfNull(tempConf.expiresSeconds, TemporaryTokenMapboxConfig.DEFAULT_EXPIRES),
+                        defaultIfNull(tempConf.renewSeconds, TemporaryTokenMapboxConfig.DEFAULT_RENEW),
+                        defaultIfNull(
+                            tempConf.clientTokenRefreshSeconds, TemporaryTokenMapboxConfig.DEFAULT_CLIENT_REFRESH
+                        )
+                );
+
+                if(configObj.expiresSeconds > 3600) {
+                    return Result.failure("Mapbox temporary token expires cannot be greater than 1 hour");
+                }
+
+                builder.setTemporaryTokenConfig(configObj, AppConfig.PRIORITY_CONFIG);
             }
         }
 
         return Result.success(builder);
+    }
+
+    private static <T> T defaultIfNull(T field, T def) {
+        return field != null ? field : def;
     }
 
     private static final class ConfigFileData {
@@ -123,6 +150,19 @@ public class ConfigFile {
     }
 
     private static final class MapboxConfig {
-        public String staticMapApiToken;
+        public StaticMapboxConfig staticConfig;
+        public ConfigFileTemporaryTokenConfig temporaryTokenConfig;
+    }
+
+    private static final class StaticMapboxConfig {
+        public String apiToken;
+    }
+
+    private static final class ConfigFileTemporaryTokenConfig {
+        public String username;
+        public String accessToken;
+        public Integer expiresSeconds;
+        public Integer renewSeconds;
+        public Integer clientTokenRefreshSeconds;
     }
 }

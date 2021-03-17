@@ -219,6 +219,7 @@ task makeDebFiles {
         def preinst = new File("${projectDir}/build/deb-install", "preInstall.sh")
         def postinst = new File("${projectDir}/build/deb-install", "postInstall.sh")
         def postUninst = new File("${projectDir}/build/deb-install", "postUninstall.sh")
+        def preUninst = new File("${projectDir}/build/deb-install", "preUninstall.sh")
 
         def jvmArgs = applicationDefaultJvmArgs.join(" ")
         def cp = "${deployPrefix}/lib/ldprotest/*"
@@ -267,22 +268,39 @@ task makeDebFiles {
         )
         postinst.text = unindent(
             """
+                CONFIG="${deployPrefix}/etc/ldprotest/config.yml"
+                LOGBACK="${deployPrefix}/etc/ldprotest/logback.xml"
+                EX_CONFIG="${deployPrefix}/usr/share/doc/examples/config.yml"
+                EX_LOGBACK="${deployPrefix}/usr/share/doc/examples/logback.xml"
+
                 mkdir -p ${deployPrefix}/var/log/ldprotest
                 chown -R ldprotest.ldprotest ${deployPrefix}/var/log/ldprotest
 
-                sed -i -r 's/^(\\s*fsKeyStorePath: )(.*)/\\1${keystore}/g' "${deployPrefix}/etc/ldprotest/config.yml"
-                sed -i -r 's/^(\\s*logbackPath: )(.*)/\\1${logback_path}/g' "${deployPrefix}/etc/ldprotest/config.yml"
+                if cmp "\${CONFIG}" "\${EX_CONFIG}"; then
+                    sed -i -r 's/^(\\s*fsKeyStorePath: )(.*)/\\1${keystore}/g' "\${CONFIG}"
+                    sed -i -r 's/^(\\s*logbackPath: )(.*)/\\1${logback_path}/g' "\${CONFIG}"
+                fi
 
-                sed -i -r \\
-                    's/${"(/var/log/ldprotest/)".replace("/", "\\/")}/${deployPrefix.replace("/", "\\/")}\\/\\1/g' \\
-                    "${deployPrefix}/etc/ldprotest/logback.xml"
+                if cmp "\${LOGBACK}" "\${EX_LOGBACK}"; then
+                    sed -i -r \\
+                        's/${"(/var/log/ldprotest/)".replace("/", "\\/")}/${deployPrefix.replace("/", "\\/")}\\1/g' \\
+                        "\${LOGBACK}"
+                fi
+
+                systemctl daemon-reload || true
+            """
+        )
+        preUninst.text = unindent(
+            """
+                systemctl stop ldprotest || true
+                systemctl daemon-reload || true
             """
         )
         postUninst.text = unindent(
             """
                 chown -R root.root ${deployPrefix}/var/log/ldprotest
 
-                rm -rf ${deployPrefix}/var/lib/ldprotest/\n\
+                rm -rf ${deployPrefix}/var/lib/ldprotest/
                 deluser ldprotest 1>/dev/null 2>/dev/null || true
             """
         )
@@ -310,6 +328,7 @@ task deployDeb(type: Deb) {
     preInstall file("${projectDir}/build/deb-install/preInstall.sh")
     postInstall file("${projectDir}/build/deb-install/postInstall.sh")
     postUninstall file("${projectDir}/build/deb-install/postUninstall.sh")
+    preUninstall file("${projectDir}/build/deb-install/preUninstall.sh")
 
     configurationFile("${deployPrefix}/etc/ldprotest/config.yml")
     configurationFile("${deployPrefix}/etc/ldprotest/logback.xml")

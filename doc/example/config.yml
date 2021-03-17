@@ -52,5 +52,27 @@ keyStoreConfig:
 # If not properly defined, the app as a whole will not work because the map UI will cease to function.
 mapboxConfig:
 
-    # API token which will be used on each request
-    staticMapApiToken: null
+    # Configuration for static token which will be used on each request, or as a fallback if other token management
+    # schemes fail
+    staticConfig:
+        # Public mapbox API token
+        apiToken: null
+
+    # Configuration for temporary mapbox API token management
+
+    # Temporary tokens are created and automatically rotated periodically. The disadvantage of using temporary tokens
+    # (as opposed to explicitly managed token rotation) is that tokens cannot be manually revoked.
+    temporaryTokenConfig:
+        # Username of mapbox account which owns the token
+        username: null
+        # Mapbox access token which has the tokens:write scope. Used for requesting new temporary tokens
+        accessToken: null
+        # Expire time for temporary tokens. Must not be greater than one hour and configuring too close to one hour
+        # risks rejection from the mapbox API server (due to request transit latency).
+        expiresSeconds: 3540
+        # Temporary token refresh period. Should be somewhat less than the expires seconds so that the old token
+        #  will be valid in between client refreshes.
+        renewSeconds: 3180
+        # Client token refresh period. Should be less than the difference between renewSeconds and expiresSeconds so
+        # that the client never attempts to use an expired token
+        clientTokenRefreshSeconds: 300

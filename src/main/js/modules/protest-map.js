@@ -122,7 +122,30 @@ function buffer_bounds(bounds) {
         'west': bounds.west - ew_adj,
         'south': clamp_lattitude(bounds.south - ns_adj),
         'east': bounds.east + ew_adj
-    };
+    };s
+}
+
+function update_api_token(map_div, title_layer) {
+    api.call(
+        '/api/map-api-token',
+        'GET',
+        {},
+        (data) => {
+            if(data.token) {
+                title_layer.setUrl(
+                    `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${data.token}`
+                );
+            } else {
+                error_map(map_div, `Unable to fetch API token for map redraw.`);
+                fail();
+            }
+        },
+        (status, err) => {
+            let description = err === undefined ? status : err.description;
+            error_map(map_div, `Unable to fetch API token for map redraw - ${description}`);
+            fail();
+        }
+    );
 }
 
 function update_protests(map, state) {
@@ -187,7 +210,7 @@ function load_protests(map, bounds, state) {
     );
 }
 
-function config_map(map_div, api_token, config) {
+function config_map(map_div, initial_api_token, config) {
 
     let state = {
         'config': config,
@@ -206,13 +229,13 @@ function config_map(map_div, api_token, config) {
     map.locate({setView: true, maxZoom: 29});
 
 
-    let url = `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${api_token}`;
+    let url = `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${initial_api_token}`;
 
     L.Icon.Default.imagePath = 'assets/leaflet/';
 
     map.setMinZoom(4);
 
-    L.tileLayer(url, {
+    let title_layer = L.tileLayer(url, {
         attribution: (
             'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
             'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
@@ -237,6 +260,12 @@ function config_map(map_div, api_token, config) {
     window.setInterval(() => {
         update_protests(map, state);
     }, PROTEST_REFRESH_PERIOD / 2);
+
+    if(CLIENT_CONFIG.MAP_API_TOKEN_REFRESH_SECONDS) {
+        window.setInterval(
+            () => update_api_token(map_div, title_layer), CLIENT_CONFIG.MAP_API_TOKEN_REFRESH_SECONDS * 1000
+        );
+    }
 
     return map;
 }

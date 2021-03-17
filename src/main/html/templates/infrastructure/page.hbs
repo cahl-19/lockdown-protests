@@ -12,14 +12,18 @@
     {{#each scripts as |script|}}
         <script src="{{script}}"></script>
     {{/each}}
-    {{#> inlineScripts }}
-    {{/inlineScripts}}
+    {{#each inlineScript as |script|}}
+        <script>{{{script}}}</script>
+    {{/each}}
+
+    {{#> pageTemplateScripts }}
+    {{/pageTemplateScripts}}
 
     {{#each styleSheets as |s|}}
         <link rel="stylesheet" href="{{s}}">
     {{/each}}
-    {{#> inlineStyleSheets }}
-    {{/inlineStyleSheets}}
+    {{#> pageTemplateStyleSheets }}
+    {{/pageTemplateStyleSheets}}
 
 </head>
 

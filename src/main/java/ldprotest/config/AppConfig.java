@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final TemporaryTokenMapboxConfig temporaryTokenConfig;
     public final String logbackPath;
     public final long httpCacheMaxAge;
     public final int serverPort;
@@ -40,6 +41,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        TemporaryTokenMapboxConfig temporaryTokenConfig,
         String logbackPath,
         long httpCacheMaxAge,
         int serverPort,
@@ -54,6 +56,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.temporaryTokenConfig  = temporaryTokenConfig;
         this.logbackPath = logbackPath;
         this.httpCacheMaxAge = httpCacheMaxAge;
         this.serverPort = serverPort;
@@ -74,6 +77,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<TemporaryTokenMapboxConfig> temporaryTokenConfig;
         public final BuilderField<String> logbackPath;
         public final BuilderField<Long> httpCacheMaxAge;
         public final BuilderField<Integer> serverPort;
@@ -89,6 +93,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            temporaryTokenConfig = new BuilderField<>();
             logbackPath = new BuilderField<>();
             httpCacheMaxAge = new BuilderField<>();
             serverPort = new BuilderField<>();
@@ -102,6 +107,11 @@ public class AppConfig {
             staticMapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setTemporaryTokenConfig(TemporaryTokenMapboxConfig val, int priority) {
+            temporaryTokenConfig.set(val, priority);
+            return this;
         }
 
         public Builder setLogbackPath(String path, int priority) {
@@ -171,6 +181,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                temporaryTokenConfig.get(),
                 logbackPath.get(),
                 httpCacheMaxAge.get(),
                 serverPort.get(),

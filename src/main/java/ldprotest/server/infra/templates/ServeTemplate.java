@@ -75,6 +75,7 @@ public class ServeTemplate {
             this.modelMap = new HashMap<>(MAIN_HTML_ATTRIBUTES);
 
             this.modelMap.put("scripts", new ArrayList<String>());
+            this.modelMap.put("inlineScript", new ArrayList<String>());
             this.modelMap.put("styleSheets", new ArrayList<String>());
         }
 
@@ -86,6 +87,12 @@ public class ServeTemplate {
         public Page addScript(String url) {
             List<String> scripts = TypeTools.<List<String>>assertingCast(modelMap.get("scripts"));
             scripts.add(url);
+            return this;
+        }
+
+        public Page addInlineScript(String script) {
+            List<String> scripts = TypeTools.<List<String>>assertingCast(modelMap.get("inlineScript"));
+            scripts.add(script);
             return this;
         }
 

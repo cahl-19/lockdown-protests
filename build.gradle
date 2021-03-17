@@ -357,8 +357,10 @@ task deployDeb(type: Deb) {
     from(jar.outputs.files) {
         into 'lib/ldprotest/'
     }
-    from(sourceSets.main.compileClasspath) {
-        into 'lib/ldprotest/'
+    from(sourceSets.main.runtimeClasspath) {
+        filesMatching("*.jar") {
+            into 'lib/ldprotest/'
+        }
     }
     from("${projectDir}/build/deb-install/ldprotest.service") {
         into 'lib/systemd/system/'

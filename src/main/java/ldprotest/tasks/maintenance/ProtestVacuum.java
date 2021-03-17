@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package ldprotest.tasks;
+package ldprotest.tasks.maintenance;
 
 import com.mongodb.MongoException;
 import java.util.concurrent.TimeUnit;
 import ldprotest.business.PrivateProtestData;
+import ldprotest.tasks.PeriodicTaskManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

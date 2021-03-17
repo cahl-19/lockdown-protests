@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package ldprotest.tasks;
+package ldprotest.tasks.maintenance;
 
 import java.util.concurrent.TimeUnit;
 import ldprotest.server.auth.UserSessions;
+import ldprotest.tasks.PeriodicTaskManager;
 
 public final class SessionVacuum {
     private static final long PERIOD_HOURS = 1;

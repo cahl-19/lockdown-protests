@@ -41,8 +41,8 @@ import ldprotest.tasks.PeriodicTaskManager;
 import ldprotest.util.ErrorCode;
 
 import ldprotest.server.auth.webtoken.UserTokens;
-import ldprotest.tasks.ProtestVacuum;
-import ldprotest.tasks.SessionVacuum;
+import ldprotest.tasks.maintenance.ProtestVacuum;
+import ldprotest.tasks.maintenance.SessionVacuum;
 import ldprotest.util.Result;
 
 public class Main {

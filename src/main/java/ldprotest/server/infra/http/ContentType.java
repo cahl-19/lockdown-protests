@@ -63,7 +63,7 @@ public class ContentType {
             }
         }
 
-        String field1 = value.substring(0, startOfField2 != 0 ? startOfField2 - 1 : len);
+        String field1 = value.substring(0, startOfField2 != 0 ? startOfField2 - 2 : len);
 
         if(startOfField2 != 0) {
             String field2 = value.substring(startOfField2, len);

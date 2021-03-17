@@ -276,12 +276,12 @@ task makeDebFiles {
                 mkdir -p ${deployPrefix}/var/log/ldprotest
                 chown -R ldprotest.ldprotest ${deployPrefix}/var/log/ldprotest
 
-                if cmp "\${CONFIG}" "\${EX_CONFIG}"; then
+                if cmp -s "\${CONFIG}" "\${EX_CONFIG}"; then
                     sed -i -r 's/^(\\s*fsKeyStorePath: )(.*)/\\1${keystore}/g' "\${CONFIG}"
                     sed -i -r 's/^(\\s*logbackPath: )(.*)/\\1${logback_path}/g' "\${CONFIG}"
                 fi
 
-                if cmp "\${LOGBACK}" "\${EX_LOGBACK}"; then
+                if cmp -s "\${LOGBACK}" "\${EX_LOGBACK}"; then
                     sed -i -r \\
                         's/${"(/var/log/ldprotest/)".replace("/", "\\/")}/${deployPrefix.replace("/", "\\/")}\\1/g' \\
                         "\${LOGBACK}"

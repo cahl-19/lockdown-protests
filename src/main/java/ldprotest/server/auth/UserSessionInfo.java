@@ -112,4 +112,37 @@ public class UserSessionInfo implements JsonSerializable {
             sessionId, username, email, role, createdAt
         );
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("UserSessionInfo(");
+
+        sb.append("username=");
+        sb.append(username);
+
+        sb.append(", email=");
+        sb.append(email);
+
+        sb.append(", role=");
+        sb.append(role.name());
+
+        sb.append(", createdAt=");
+        sb.append(createdAt);
+
+        sb.append(", sessionId=");
+
+        if(sessionId == null) {
+            sb.append("null");
+        } else if(sessionId.isEmpty()) {
+            sb.append("<blank>");
+        } else {
+            sb.append("*****");
+        }
+
+        sb.append(")");
+
+        return sb.toString();
+    }
 }

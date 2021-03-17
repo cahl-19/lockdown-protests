@@ -58,7 +58,7 @@ public final class CmdLineCreateUser {
             System.exit(-1);
         }
 
-        MainDatabase.connect("mongodb://ldprotest:ldprotest@localhost:27017/?serverSelectionTimeoutMS=3000");
+        MainDatabase.connect(options.mongoConnect);
 
         ErrorCode<MongoException> e = MainDatabase.testConnection();
 
@@ -108,6 +108,16 @@ public final class CmdLineCreateUser {
             description="user's role (default is ADMIN). Legal values: ${COMPLETION-CANDIDATES}"
         )
         public UserRole role = UserRole.ADMIN;
+
+        @CommandLine.Option(
+            names={"--mongo-connect"},
+            description=(
+                "Mongo connection string for connecting to DB. Default is to connect to server on localhost with " +
+                "username ldprotest and password, ldprotest " +
+                "(i.e. mongodb://ldprotest:ldprotest@localhost:27017/?serverSelectionTimeoutMS=3000)"
+            )
+        )
+        public String mongoConnect = "mongodb://ldprotest:ldprotest@localhost:27017/?serverSelectionTimeoutMS=3000";
 
         @CommandLine.Option(names = { "-h", "--help" }, usageHelp = true, description = "display help text")
         private boolean helpRequested = false;

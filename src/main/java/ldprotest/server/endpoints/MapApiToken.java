@@ -37,7 +37,7 @@ public final class MapApiToken {
         SecurityFilter.add(PATH, SecConfig.ANONYMOUS_GET);
 
         JsonEndpoint.get(PATH, (request, response) -> {
-            return new JsonDoc(Main.args().mapApiToken);
+            return new JsonDoc(Main.args().staticMapApiToken);
         });
     }
 

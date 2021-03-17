@@ -47,3 +47,10 @@ keyStoreConfig:
     # If this option is set to the empty string or is left unspecified, keys will be volatile and will be lost each
     # time the applicatioon restarts.
     fsKeyStorePath: '/tmp/ldprotest-keys'
+
+# Configuration for mabox API
+# If not properly defined, the app as a whole will not work because the map UI will cease to function.
+mapboxConfig:
+
+    # API token which will be used on each request
+    staticMapApiToken: null

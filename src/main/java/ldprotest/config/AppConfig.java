@@ -35,7 +35,7 @@ public class AppConfig {
     public final int sessionExpiresSeconds;
     public final String mongoConnect;
     public final String configFilePath;
-    public final String mapApiToken;
+    public final String staticMapApiToken;
     public final boolean helpRequested;
     public final boolean usingHttps;
 
@@ -64,7 +64,7 @@ public class AppConfig {
         this.sessionExpiresSeconds = sessionExpiresSeconds;
         this.mongoConnect = mongoConnect;
         this.configFilePath = configFilePath;
-        this.mapApiToken = mapApiToken;
+        this.staticMapApiToken = mapApiToken;
         this.helpRequested = helpRequested;
         this.usingHttps = usingHttps;
     }
@@ -84,7 +84,7 @@ public class AppConfig {
         public final BuilderField<Integer> sessionExpiresSeconds;
         public final BuilderField<String> mongoConnect;
         public final BuilderField<String> configFilePath;
-        public final BuilderField<String> mapApiToken;
+        public final BuilderField<String> staticMapApiToken;
         public final BuilderField<Boolean> helpRequested;
         public final BuilderField<Boolean> usingHttps;
 
@@ -99,7 +99,7 @@ public class AppConfig {
             sessionExpiresSeconds = new BuilderField<>();
             mongoConnect = new BuilderField<>();
             configFilePath = new BuilderField<>();
-            mapApiToken = new BuilderField<>();
+            staticMapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
         }
@@ -154,8 +154,8 @@ public class AppConfig {
             return this;
         }
 
-        public Builder setMapApiToken(String token, int priority) {
-            mapApiToken.set(token, priority);
+        public Builder setStaticMapApiToken(String token, int priority) {
+            staticMapApiToken.set(token, priority);
             return this;
         }
 
@@ -181,7 +181,7 @@ public class AppConfig {
                 sessionExpiresSeconds.get(),
                 mongoConnect.get(),
                 configFilePath.get(),
-                mapApiToken.get(),
+                staticMapApiToken.get(),
                 helpRequested.get(),
                 usingHttps.get()
             );

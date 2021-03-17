@@ -54,9 +54,9 @@ public class CmdLineArgs {
             builder.setMongoConnect(val, AppConfig.PRIORITY_OVERRIDE);
         }
 
-        @Option(names = {"--map-api-token"}, description = "mapbox API token")
-        void mapApiToken(String token) {
-            builder.setMapApiToken(token, AppConfig.PRIORITY_OVERRIDE);
+        @Option(names = {"--static-map-api-token"}, description = "mapbox API token to use for loading map tiles")
+        void staticMapApiToken(String token) {
+            builder.setStaticMapApiToken(token, AppConfig.PRIORITY_OVERRIDE);
         }
 
         @Option(names = {"--no-https"}, description = "for development purposes only: assume that https is disabled")

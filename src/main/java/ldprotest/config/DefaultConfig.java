@@ -48,7 +48,7 @@ public final class DefaultConfig {
         builder.setSessionExpiresSeconds(DEFAULT_SESSION_EXPIRES_SECONDS, AppConfig.PRIORITY_DEFAULT);
         builder.setConfigFilePath("", AppConfig.PRIORITY_DEFAULT);
         builder.setUsingHttps(true, AppConfig.PRIORITY_DEFAULT);
-        builder.setMapApiToken("", AppConfig.PRIORITY_DEFAULT);
+        builder.setStaticMapApiToken("", AppConfig.PRIORITY_DEFAULT);
         builder.setHelpRequested(false, AppConfig.PRIORITY_DEFAULT);
 
         builder.setMongoConnect(DEFAULT_MONGO_CONNECT, AppConfig.PRIORITY_DEFAULT);

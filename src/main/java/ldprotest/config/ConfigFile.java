@@ -89,6 +89,14 @@ public class ConfigFile {
             }
         }
 
+        if(data.mapboxConfig != null) {
+            MapboxConfig config = data.mapboxConfig;
+
+            if(config.staticMapApiToken != null) {
+                builder.setStaticMapApiToken(config.staticMapApiToken, AppConfig.PRIORITY_CONFIG);
+            }
+        }
+
         return Result.success(builder);
     }
 
@@ -100,6 +108,7 @@ public class ConfigFile {
         public UserSessionConfig userSessionConfig;
         public KeyStoreConfig keyStoreConfig;
         public String logbackPath;
+        public MapboxConfig mapboxConfig;
     }
 
     private static final class UserSessionConfig {
@@ -111,5 +120,9 @@ public class ConfigFile {
 
     private static final class KeyStoreConfig {
         public String fsKeyStorePath;
+    }
+
+    private static final class MapboxConfig {
+        public String staticMapApiToken;
     }
 }

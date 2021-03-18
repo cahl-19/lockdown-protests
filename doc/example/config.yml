@@ -3,7 +3,7 @@
 # If false, the application will not set secure flag on cookies or use https
 # for endpoints on this server. Should be set to false for development
 # environments only
-usingHttps: true,
+usingHttps: true
 
 # Database connect string. It is strongly reccomended to use a stronger
 # password in production environments.

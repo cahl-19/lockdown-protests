@@ -105,7 +105,7 @@ public final class MapboxTokenApi {
         public final List<String> scopes;
 
         public TemporaryTokenRequest(ZonedDateTime expires, List<String> scopes) {
-            this.expires = expires.format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+            this.expires = expires.format(DateTimeFormatter.ISO_INSTANT);
             this.scopes = scopes;
         }
     }

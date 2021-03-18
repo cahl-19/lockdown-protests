@@ -346,7 +346,6 @@ task deployDeb(type: Deb) {
         into 'etc/ldprotest/'
     }
 
-
     from("${projectDir}/doc/example/config.yml") {
         into 'usr/share/doc/examples'
     }
@@ -358,9 +357,8 @@ task deployDeb(type: Deb) {
         into 'lib/ldprotest/'
     }
     from(sourceSets.main.runtimeClasspath) {
-        filesMatching("*.jar") {
-            into 'lib/ldprotest/'
-        }
+        into 'lib/ldprotest/'
+        include '**/*.jar'
     }
     from("${projectDir}/build/deb-install/ldprotest.service") {
         into 'lib/systemd/system/'

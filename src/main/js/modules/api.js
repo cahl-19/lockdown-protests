@@ -229,7 +229,7 @@ export let api = {
                 fufilled();
             }
 
-            if(now > token.exp) {
+            if(now > (token.exp * 1000)) {
                 refresh(fufilled, fufilled);
             } else {
                 this.call(

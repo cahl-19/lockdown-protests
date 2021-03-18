@@ -235,7 +235,7 @@ public final class SecurityFilter {
         }
 
         if(bearerSession.isPresent()) {
-            attributes.put(BEARER_AUTH_ATTRIBUTE, cookieSession.get());
+            attributes.put(BEARER_AUTH_ATTRIBUTE, bearerSession.get());
         }
 
         if(cookieSession.isPresent() && bearerSession.isPresent()) {

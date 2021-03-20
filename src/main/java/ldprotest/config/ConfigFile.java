@@ -61,7 +61,7 @@ public class ConfigFile {
             builder.setUsingHttps(data.usingHttps, AppConfig.PRIORITY_CONFIG);
         }
         if(data.mongoConnect != null) {
-            builder.setConfigFilePath(data.mongoConnect, AppConfig.PRIORITY_CONFIG);
+            builder.setMongoConnect(data.mongoConnect, AppConfig.PRIORITY_CONFIG);
         }
 
         if(data.logbackPath != null) {

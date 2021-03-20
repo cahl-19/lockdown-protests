@@ -17,6 +17,7 @@
 */
 package ldprotest.server.infra;
 
+import ldprotest.config.RotatingTokenMapboxConfig;
 import ldprotest.config.TemporaryTokenMapboxConfig;
 import ldprotest.main.Main;
 import ldprotest.serialization.JsonSerializable;
@@ -31,7 +32,14 @@ public final class ClientConfig {
     public  static String generateJs() {
 
         TemporaryTokenMapboxConfig tempConfig = Main.args().temporaryTokenConfig;
-        int clientMapboxRenew = tempConfig.isFullyDefined() ? tempConfig.clientTokenRefreshSeconds : 0;
+        RotatingTokenMapboxConfig rotConfig = Main.args().rotatingTokenConfig;
+
+        int clientMapboxRenew = 0;
+        if(rotConfig.isFullyDefined()) {
+            clientMapboxRenew = rotConfig.clientTokenRefreshSeconds;
+        } else if(tempConfig.isFullyDefined()) {
+            clientMapboxRenew = tempConfig.clientTokenRefreshSeconds;
+        }
 
         StringBuilder sb = new StringBuilder();
 

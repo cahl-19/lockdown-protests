@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final RotatingTokenMapboxConfig rotatingTokenConfig;
     public final TemporaryTokenMapboxConfig temporaryTokenConfig;
     public final String logbackPath;
     public final long httpCacheMaxAge;
@@ -41,6 +42,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        RotatingTokenMapboxConfig rotatingTokenConfig,
         TemporaryTokenMapboxConfig temporaryTokenConfig,
         String logbackPath,
         long httpCacheMaxAge,
@@ -56,6 +58,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.rotatingTokenConfig = rotatingTokenConfig;
         this.temporaryTokenConfig  = temporaryTokenConfig;
         this.logbackPath = logbackPath;
         this.httpCacheMaxAge = httpCacheMaxAge;
@@ -77,6 +80,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<RotatingTokenMapboxConfig> rotatingTokenConfig;
         public final BuilderField<TemporaryTokenMapboxConfig> temporaryTokenConfig;
         public final BuilderField<String> logbackPath;
         public final BuilderField<Long> httpCacheMaxAge;
@@ -93,6 +97,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            rotatingTokenConfig = new BuilderField<>();
             temporaryTokenConfig = new BuilderField<>();
             logbackPath = new BuilderField<>();
             httpCacheMaxAge = new BuilderField<>();
@@ -107,6 +112,11 @@ public class AppConfig {
             staticMapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setRotatingTokenConfig(RotatingTokenMapboxConfig val, int priority) {
+            rotatingTokenConfig.set(val, priority);
+            return this;
         }
 
         public Builder setTemporaryTokenConfig(TemporaryTokenMapboxConfig val, int priority) {
@@ -181,6 +191,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                rotatingTokenConfig.get(),
                 temporaryTokenConfig.get(),
                 logbackPath.get(),
                 httpCacheMaxAge.get(),

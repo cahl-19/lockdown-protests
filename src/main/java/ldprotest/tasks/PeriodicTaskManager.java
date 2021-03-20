@@ -54,9 +54,13 @@ public class PeriodicTaskManager {
     private void registerTaskMethod(
         PeriodicTask task, long delay, long period, TimeUnit timeUnit, boolean mayInterrupt
     ) {
-        ScheduledFuture<?> future = executor.scheduleAtFixedRate(
-            () -> task.runTask(shutdownSignal), delay, period, timeUnit
-        );
+        ScheduledFuture<?> future = executor.scheduleAtFixedRate( () -> {
+            try {
+                task.runTask(shutdownSignal);
+            } catch(Throwable ex) {
+                LOGGER.error("Uncaught exception thrown in periodic task", ex);
+            }
+        }, delay, period, timeUnit);
         tasks.add(new ScheduledTaskDescriptor(future, mayInterrupt));
     }
 

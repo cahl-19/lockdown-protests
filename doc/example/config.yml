@@ -60,10 +60,11 @@ mapboxConfig:
 
     # Configuration for temporary mapbox API token management
 
-    # Temporary tokens are created and automatically rotated periodically. The disadvantage of using temporary tokens
-    # (as opposed to explicitly managed token rotation) is that tokens cannot be manually revoked.
+    # Temporary tokens are created and automatically rotated periodically. The disadvantages of using temporary tokens
+    # (as opposed to explicitly managed token rotation) are that tokens cannot be manually revoked or restricted to
+    # particular URLs.
     temporaryTokenConfig:
-        # Username of mapbox account which owns the token
+        # Username of mapbox account which owns the token. Not that setting to null disables this config
         username: null
         # Mapbox access token which has the tokens:write scope. Used for requesting new temporary tokens
         accessToken: null
@@ -76,3 +77,33 @@ mapboxConfig:
         # Client token refresh period. Should be less than the difference between renewSeconds and expiresSeconds so
         # that the client never attempts to use an expired token
         clientTokenRefreshSeconds: 300
+
+    # Configuration for key rotation mapbox API token management
+
+    # Note that this configuration type take precedence over the temporary token config if both are present and
+    # fully defined
+    # The disadvantage of explicitly rotation tokens is that the app must be running and fully functional in order for
+    # rotation to occur. Although temporary tokens cannot be manually revoked, or restricted to certain URLs, they
+    # will expire on their own even if the app isn't functioning.
+    rotatingTokenConfig:
+        # Username of mapbox account which owns the token
+        username: null
+        # Mapbox access token which has the tokens:write scope. Used for requesting new temporary tokens
+        accessToken: null
+        # Expire time for temporary tokens. Must not be greater than one hour and configuring too close to one hour
+        # risks rejection from the mapbox API server (due to request transit latency).
+        expiresSeconds: 86400
+        # Temporary token refresh period. Should be somewhat less than the expires seconds so that the old token
+        #  will be valid in between client refreshes.
+        renewSeconds: 172800
+        # Client token refresh period. Should be less than the difference between renewSeconds and expiresSeconds so
+        # that the client never attempts to use an expired token
+        clientTokenRefreshSeconds: 3600
+        # List of permitted referrer URLs. See mapbox API documentation for more details.
+        allowedUrls: ['http://localhost:4567']
+        # Pattern to use for naming tokens. If attempting to run ldprotest with multiple servers, this pattern must be
+        # unique  for each server. If pattern does not include %n, rotation numbers will be appened to the end of the
+        # string
+        tokenNamePattern: 'ldprotest-%n'
+        # frequency at which the server polls the mabbox API in order to rotate expired tokens
+        serverPollSeconds: 300

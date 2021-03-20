@@ -18,6 +18,7 @@
 package ldprotest.config;
 
 import java.io.InputStream;
+import java.util.List;
 import ldprotest.util.Result;
 import ldprotest.util.TcpPort;
 import org.yaml.snakeyaml.Yaml;
@@ -118,6 +119,25 @@ public class ConfigFile {
 
                 builder.setTemporaryTokenConfig(configObj, AppConfig.PRIORITY_CONFIG);
             }
+
+            if(config.rotatingTokenConfig != null) {
+                ConfigFileRotatingTokeConfig rotConf = config.rotatingTokenConfig;
+
+                RotatingTokenMapboxConfig configObj = new RotatingTokenMapboxConfig(
+                    defaultIfNull(rotConf.username, ""),
+                    defaultIfNull(rotConf.accessToken, ""),
+                    defaultIfNull(rotConf.expiresSeconds, RotatingTokenMapboxConfig.DEFAULT_EXPIRES),
+                    defaultIfNull(rotConf.renewSeconds, RotatingTokenMapboxConfig.DEFAULT_RENEW),
+                    defaultIfNull(
+                        rotConf.clientTokenRefreshSeconds, RotatingTokenMapboxConfig.DEFAULT_CLIENT_REFRESH
+                    ),
+                    defaultIfNull(rotConf.allowedUrls, List.of()),
+                    defaultIfNull(rotConf.tokenNamePattern, ""),
+                        defaultIfNull(rotConf.serverPollSeconds, RotatingTokenMapboxConfig.DEFAULT_SERVER_POLL)
+                );
+                builder.setRotatingTokenConfig(configObj, AppConfig.PRIORITY_CONFIG);
+            }
+
         }
 
         return Result.success(builder);
@@ -152,6 +172,7 @@ public class ConfigFile {
     private static final class MapboxConfig {
         public StaticMapboxConfig staticConfig;
         public ConfigFileTemporaryTokenConfig temporaryTokenConfig;
+        public ConfigFileRotatingTokeConfig rotatingTokenConfig;
     }
 
     private static final class StaticMapboxConfig {
@@ -164,5 +185,16 @@ public class ConfigFile {
         public Integer expiresSeconds;
         public Integer renewSeconds;
         public Integer clientTokenRefreshSeconds;
+    }
+
+    private static final class ConfigFileRotatingTokeConfig {
+        public String username;
+        public String accessToken;
+        public int expiresSeconds;
+        public int renewSeconds;
+        public int clientTokenRefreshSeconds;
+        public List<String> allowedUrls;
+        public String tokenNamePattern;
+        public int serverPollSeconds;
     }
 }

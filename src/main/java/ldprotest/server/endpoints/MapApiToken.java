@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import ldprotest.business.mapbox.MapboxTokenApi;
 import ldprotest.business.mapbox.MapboxTokenApi.ApiFailure;
 import ldprotest.business.mapbox.MapboxTokenApi.TemporaryTokenResponse;
+import ldprotest.business.mapbox.MapboxTokenRotator;
+import ldprotest.config.RotatingTokenMapboxConfig;
 import ldprotest.config.TemporaryTokenMapboxConfig;
 import ldprotest.main.Main;
 import ldprotest.serialization.JsonSerializable;
@@ -50,9 +52,17 @@ public final class MapApiToken {
 
         String staticMapApiToken = Main.args().staticMapApiToken;
         TemporaryTokenMapboxConfig temporaryTokenConfig = Main.args().temporaryTokenConfig;
+        RotatingTokenMapboxConfig rotConfig = Main.args().rotatingTokenConfig;
 
-        if(temporaryTokenConfig.isFullyDefined()) {
+        if(rotConfig.isFullyDefined()) {
+            MapboxTokenRotator rotator = new MapboxTokenRotator(rotConfig, staticMapApiToken);
+            rotator.register();
 
+            JsonEndpoint.get(PATH, (request, response) -> {
+                return new JsonDoc(rotator.get());
+            });
+        }
+        else if(temporaryTokenConfig.isFullyDefined()) {
             TemporaryTokenHolder holder = new TemporaryTokenHolder(temporaryTokenConfig, staticMapApiToken);
             holder.register();
 
@@ -60,7 +70,6 @@ public final class MapApiToken {
                 return new JsonDoc(holder.get());
             });
         } else {
-
             JsonEndpoint.get(PATH, (request, response) -> {
                 return new JsonDoc(Main.args().staticMapApiToken);
             });

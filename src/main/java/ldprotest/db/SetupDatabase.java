@@ -17,6 +17,7 @@
 */
 package ldprotest.db;
 
+import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import ldprotest.business.PrivateProtestData;
@@ -32,13 +33,15 @@ public final class SetupDatabase {
 
     private static final String DB_VERSION_INFO_COLLECTION = "LDPROTEST_DB_VERSION";
 
+    private static final int MONGO_NAMESPACE_EXISTS_ERROR_CODE = 48;
+
     private SetupDatabase() {
         /* do not construct */
     }
 
     public static DbVersionInfo setup(MongoDatabase db) {
 
-        db.createCollection(DB_VERSION_INFO_COLLECTION);
+        createCollections(db);
 
         MongoCollection<DbVersionInfo> collection = db.getCollection(DB_VERSION_INFO_COLLECTION, DbVersionInfo.class);
 
@@ -53,13 +56,27 @@ public final class SetupDatabase {
         return info;
     }
 
+    private static void createCollections(MongoDatabase db) {
+        createCollectionIfNotExists(db, DB_VERSION_INFO_COLLECTION);
+    }
+
     private static void setupIndexes() {
         UserAccount.setupDbIndex();
         UserSessions.setupDbIndex();
         PrivateProtestData.setupDbIndex();
     }
 
-     public static final class DbVersionInfo implements BsonSerializable {
+    private static void createCollectionIfNotExists(MongoDatabase db, String collectionName) {
+        try {
+            db.createCollection(collectionName);
+        } catch(MongoCommandException ex) {
+            if(ex.getErrorCode() != MONGO_NAMESPACE_EXISTS_ERROR_CODE) {
+                throw ex;
+            }
+        }
+    }
+
+    public static final class DbVersionInfo implements BsonSerializable {
 
         public final int majorVersion;
         public final int minorVersion;

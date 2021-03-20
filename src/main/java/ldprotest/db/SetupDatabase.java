@@ -37,6 +37,9 @@ public final class SetupDatabase {
     }
 
     public static DbVersionInfo setup(MongoDatabase db) {
+
+        db.createCollection(DB_VERSION_INFO_COLLECTION);
+
         MongoCollection<DbVersionInfo> collection = db.getCollection(DB_VERSION_INFO_COLLECTION, DbVersionInfo.class);
 
         setupIndexes();

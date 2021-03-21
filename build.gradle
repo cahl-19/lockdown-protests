@@ -42,7 +42,7 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     implementation 'ch.qos.logback:logback-core:1.2.3'
     implementation 'com.sparkjava:spark-template-handlebars:2.7.1'
-    implementation 'com.github.jknack:handlebars:4.0.6'
+    implementation 'com.github.jknack:handlebars:4.2.0'
     implementation 'org.mongodb:mongo-java-driver:3.12.8'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'info.picocli:picocli:4.6.1'

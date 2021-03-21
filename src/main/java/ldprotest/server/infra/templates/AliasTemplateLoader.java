@@ -22,10 +22,13 @@ import com.github.jknack.handlebars.io.TemplateLoader;
 import com.github.jknack.handlebars.io.TemplateSource;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AliasTemplateLoader implements TemplateLoader {
+
+    private static final Charset CHARSET = Charset.forName("UTF-8");
 
     private final Map<String, String> aliasMap;
     private final TemplateLoader delegate;
@@ -70,6 +73,16 @@ public class AliasTemplateLoader implements TemplateLoader {
     @Override
     public void setSuffix(String suffix) {
         delegate.setSuffix(suffix);
+    }
+
+    @Override
+    public Charset getCharset() {
+        return CHARSET;
+    }
+
+    @Override
+    public void setCharset(Charset c) {
+        /* do nothing */
     }
 
     public void setAlias(String alias, String resolved) {

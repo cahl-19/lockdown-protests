@@ -69,7 +69,6 @@ public final class SecurityFilter {
         }
 
         if(elements.stream().skip(1).anyMatch((elem) -> elem.isEmpty())) {
-            LOGGER.info("path {}", path);
             throw new SecurityConfigException("Empty path element not alllowed");
         }
 

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import ldprotest.main.Main;
 import ldprotest.server.auth.UserSessions.SessionCreationError;
 import ldprotest.server.auth.webtoken.UserTokenSubject;
 import ldprotest.server.auth.webtoken.UserTokens;
@@ -112,6 +113,10 @@ public final class SecurityFilter {
     }
 
     public static void start() {
+
+        boolean usingHttps = Main.args().usingHttps;
+        int hstsMaxAge = Main.args().hstsMaxAge;
+
         before((request, response) -> {
             FilterData data = getFilterDataOrHalt(request.pathInfo());
 
@@ -136,6 +141,8 @@ public final class SecurityFilter {
             request.attribute(HTTP_VERB_ATTRIBUTE, method);
             auth.setAttributes(request);
             auth.setCookies(response);
+
+            setSecureHeaders(response, usingHttps, hstsMaxAge);
         });
     }
 
@@ -342,6 +349,12 @@ public final class SecurityFilter {
 
     private static String prefix(String path) {
         return path.substring(0, path.lastIndexOf("/"));
+    }
+
+    private static void setSecureHeaders(Response response, boolean usingHttps, int hstsMaxAge) {
+        if(usingHttps && hstsMaxAge > 0) {
+            response.header("Strict-Transport-Security", "max-age=" + hstsMaxAge);
+        }
     }
 
     private static enum Wildness {

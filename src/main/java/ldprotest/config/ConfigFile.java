@@ -41,25 +41,34 @@ public class ConfigFile {
             return Result.failure(ex.getMessage());
         }
 
-        if(data.httpCacheMaxAge != null) {
-            if(data.httpCacheMaxAge >= 0) {
-                builder.setHttpCacheMaxAge(data.httpCacheMaxAge, AppConfig.PRIORITY_CONFIG);
-            } else {
-                return Result.failure("Invalid Age Value: " + data.httpCacheMaxAge);
+        if(data.webServerConfig != null) {
+            ServerConfig config = data.webServerConfig;
+
+            if(config.httpCacheMaxAge != null) {
+                if(config.httpCacheMaxAge >= 0) {
+                    builder.setHttpCacheMaxAge(config.httpCacheMaxAge, AppConfig.PRIORITY_CONFIG);
+                } else {
+                    return Result.failure("Invalid Age Value: " + config.httpCacheMaxAge);
+                }
+            }
+
+            if(config.serverPort != null) {
+                if(TcpPort.validate(config.serverPort)) {
+                    builder.setServerPort(config.serverPort, AppConfig.PRIORITY_CONFIG);
+                } else {
+                    return Result.failure("Invalid TCP port number: " + config.serverPort);
+                }
+            }
+
+            if(config.usingHttps != null) {
+                builder.setUsingHttps(config.usingHttps, AppConfig.PRIORITY_CONFIG);
+            }
+
+            if(config.hstsMaxAge != null) {
+                builder.setHstsMaxAge(config.hstsMaxAge, AppConfig.PRIORITY_CONFIG);
             }
         }
 
-        if(data.serverPort != null) {
-            if(TcpPort.validate(data.serverPort)) {
-                builder.setServerPort(data.serverPort, AppConfig.PRIORITY_CONFIG);
-            } else {
-                return Result.failure("Invalid TCP port number: " + data.serverPort);
-            }
-        }
-
-        if(data.usingHttps != null) {
-            builder.setUsingHttps(data.usingHttps, AppConfig.PRIORITY_CONFIG);
-        }
         if(data.mongoConnect != null) {
             builder.setMongoConnect(data.mongoConnect, AppConfig.PRIORITY_CONFIG);
         }
@@ -148,14 +157,19 @@ public class ConfigFile {
     }
 
     private static final class ConfigFileData {
-        public Integer serverPort;
-        public Boolean usingHttps;
-        public Long httpCacheMaxAge;
         public String mongoConnect;
+        public ServerConfig webServerConfig;
         public UserSessionConfig userSessionConfig;
         public KeyStoreConfig keyStoreConfig;
         public String logbackPath;
         public MapboxConfig mapboxConfig;
+    }
+
+    private static final class ServerConfig {
+        public Integer serverPort;
+        public Boolean usingHttps;
+        public Long httpCacheMaxAge;
+        public Integer hstsMaxAge;
     }
 
     private static final class UserSessionConfig {

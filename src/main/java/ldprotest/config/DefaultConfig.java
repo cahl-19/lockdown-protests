@@ -22,13 +22,13 @@ public final class DefaultConfig {
     private static final String DEFAULT_MONGO_CONNECT =
         "mongodb://ldprotest:ldprotest@localhost:27017/?serverSelectionTimeoutMS=3000";
 
+    static private final int DEFAULT_HSTS_MAX_AGE = 0;
     static private final long DEFAULT_HTTP_CACHE_MAX_AGE = 60;
     static private final int DEFAULT_SERVER_PORT = 4567;
     static private final int DEFAULT_SESSION_EXPIRES_SECONDS = 3600 * 24 * 7;
     static private final int DEFAULT_TOKEN_KEY_ROTATE_SECONDS =  3600 * 24 * 30;
     static private final int DEFAULT_TOKEN_KEY_DELETE_SECONDS = DEFAULT_TOKEN_KEY_ROTATE_SECONDS * 2;
     static private final int DEFAULT_TOKEN_EXPIRES_SECONDS = 15 * 60;
-
 
     private DefaultConfig() {
         /* do not construct */
@@ -38,6 +38,7 @@ public final class DefaultConfig {
 
         AppConfig.Builder builder = AppConfig.builder();
 
+        builder.setHstsMaxAge(DEFAULT_HSTS_MAX_AGE, AppConfig.PRIORITY_DEFAULT);
         builder.setRotatingTokenConfig(RotatingTokenMapboxConfig.UNSET_INSTANCE, AppConfig.PRIORITY_DEFAULT);
         builder.setTemporaryTokenConfig(TemporaryTokenMapboxConfig.UNSET_INSTANCE, AppConfig.PRIORITY_DEFAULT);
         builder.setLogbackPath("", AppConfig.PRIORITY_DEFAULT);

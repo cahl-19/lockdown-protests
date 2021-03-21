@@ -24,7 +24,8 @@ public enum HttpVerbTypes implements CodedEnum {
     POST(1),
     PUT(2),
     DELETE(3),
-    ANY(4);
+    OPTIONS(4),
+    ANY(5);
 
     public final int code;
 
@@ -51,6 +52,8 @@ public enum HttpVerbTypes implements CodedEnum {
             return PUT;
         } else if((method.equals("DELETE"))) {
             return DELETE;
+        } else if((method.equals("OPTIONS"))) {
+            return OPTIONS;
         } else {
             throw new IllegalArgumentException("Invalid method string: " + method);
         }

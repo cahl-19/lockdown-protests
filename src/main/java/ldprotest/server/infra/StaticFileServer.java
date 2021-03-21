@@ -39,6 +39,9 @@ public final class StaticFileServer {
 
     private static final Map<String, String> FILE_MAP = new HashMap<>();
     private static final Map<String, String> CONTENT_TYPE_MAP = new HashMap<>();
+    private static final List<String> REQUIRES_XFRAME_OPTIONS = Arrays.asList(
+        "htm", "html", "js"
+    );
 
     private static final LruCache<Integer, String, byte[]> FILE_CACHE = new LruCache<>(
         (val, size) -> size + val.length,
@@ -49,6 +52,7 @@ public final class StaticFileServer {
 
     static {
         CONTENT_TYPE_MAP.put("js", "text/javascript;charset=utf-8");
+        CONTENT_TYPE_MAP.put("htm", "text/html;charset=utf-8");
         CONTENT_TYPE_MAP.put("html", "text/html;charset=utf-8");
         CONTENT_TYPE_MAP.put("css", "text/css;charset=utf-8");
         CONTENT_TYPE_MAP.put("min.css", "text/css;charset=utf-8");
@@ -88,6 +92,10 @@ public final class StaticFileServer {
     private static void addRoute(String url, String resourcePath) {
         long timestamp = ServerTime.now().toEpochSecond();
 
+        String extension = PathUtils.extension(url);
+        String contentType = CONTENT_TYPE_MAP.get(extension);
+        boolean requiresXframeOpt = REQUIRES_XFRAME_OPTIONS.contains(extension);
+
         get(url, (req, resp) -> {
             if(!HttpCaching.needsRefresh(req, timestamp)) {
                 HttpCaching.setNotModifiedResponse(resp);
@@ -95,7 +103,6 @@ public final class StaticFileServer {
             }
 
             byte[] content = FILE_CACHE.get(resourcePath);
-            String contentType = CONTENT_TYPE_MAP.get(PathUtils.extension(url));
 
             if(content == null) {
                 content = readFile(resourcePath);
@@ -104,6 +111,10 @@ public final class StaticFileServer {
 
             if(contentType != null) {
                 resp.header("Content-Type", contentType);
+            }
+
+            if(requiresXframeOpt) {
+                resp.header("X-Frame-Options", "deny");
             }
 
             HttpCaching.setCacheHeaders(resp, timestamp, Main.args().httpCacheMaxAge);

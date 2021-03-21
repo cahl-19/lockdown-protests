@@ -118,6 +118,10 @@ public class ServeTemplate {
             long resourceTimestamp = ServerTime.now().toEpochSecond();
 
             get(url, (req, resp) -> {
+
+                resp.header("X-Frame-Options", "deny");
+                resp.header("Content-Type", "text/html;charset=utf-8");
+
                 if(HttpCaching.needsRefresh(req, resourceTimestamp)) {
                     HttpCaching.setCacheHeaders(resp, resourceTimestamp, Main.args().httpCacheMaxAge);
                     return TEMPLATE_CACHE.computeIfAbsent(url, () -> applyTemplate(template, model));

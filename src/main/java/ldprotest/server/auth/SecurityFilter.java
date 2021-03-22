@@ -120,7 +120,13 @@ public final class SecurityFilter {
         before((request, response) -> {
             FilterData data = getFilterDataOrHalt(request.pathInfo());
 
-            HttpVerbTypes method = HttpVerbTypes.fromString(request.requestMethod());
+            HttpVerbTypes method;
+            try {
+                method = HttpVerbTypes.fromString(request.requestMethod());
+            } catch(IllegalArgumentException ex) {
+                LOGGER.warn("Client sent unsupported HTTP verb: {}", request.requestMethod());
+                throw halt(HttpStatus.UNAUTHORIZED_401, "Unauthorized");
+            }
 
             Optional<String> cookieToken = optCookieValue(request.cookie(Login.LOGIN_COOKIE_NAME));
             Optional<String> bearerToken = extractBearer(request);

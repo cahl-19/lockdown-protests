@@ -102,9 +102,9 @@ public class Server {
 
         SecurityFilter.add("/" + WEBPACK_BUNDLES_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
 
-        SecurityFilter.add("/", SecConfig.ANONYMOUS_GET);
-        SecurityFilter.add("/map-test", SecConfig.ANONYMOUS_GET);
-        SecurityFilter.add("/login", SecConfig.ANONYMOUS_GET);
+        SecurityFilter.add("/", SecConfig.ANONYMOUS_GET_AND_HEAD);
+        SecurityFilter.add("/map-test", SecConfig.ANONYMOUS_GET_AND_HEAD);
+        SecurityFilter.add("/login", SecConfig.ANONYMOUS_GET_AND_HEAD);
     }
 
     private static void serveDynamicTestEndpoints() {

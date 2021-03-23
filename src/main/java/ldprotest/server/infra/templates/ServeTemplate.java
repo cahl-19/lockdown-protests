@@ -38,6 +38,7 @@ import ldprotest.util.TypeTools;
 import ldprotest.util.types.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static spark.Spark.head;
 
 public class ServeTemplate {
 
@@ -141,6 +142,20 @@ public class ServeTemplate {
             ModelAndView model = new ModelAndView(modelMap, this.bodyTemplatePath);
 
             long resourceTimestamp = ServerTime.now().toEpochSecond();
+
+            head(url, (req, resp) -> {
+
+                resp.header("X-Frame-Options", "deny");
+                resp.header("Content-Type", "text/html;charset=utf-8");
+
+                if(HttpCaching.needsRefresh(req, resourceTimestamp)) {
+                    String body = TEMPLATE_CACHE.computeIfAbsent(url, () -> applyTemplate(template, model));
+                    resp.header("Content-Length", body.length());
+                } else {
+                    HttpCaching.setNotModifiedResponse(resp);
+                }
+                return "";
+            });
 
             get(url, (req, resp) -> {
 

@@ -31,6 +31,13 @@ public class SecConfig {
         .add(UserRole.ADMIN, HttpVerbTypes.GET)
         .build();
 
+    public static final SecConfig ANONYMOUS_GET_AND_HEAD = SecConfig.builder()
+        .add(UserRole.UNAUTHENTICATED, HttpVerbTypes.GET, HttpVerbTypes.HEAD)
+        .add(UserRole.MODERATOR, HttpVerbTypes.GET, HttpVerbTypes.HEAD)
+        .add(UserRole.PLANNER, HttpVerbTypes.GET, HttpVerbTypes.HEAD)
+        .add(UserRole.ADMIN, HttpVerbTypes.GET, HttpVerbTypes.HEAD)
+        .build();
+
     private static final EnumSet<HttpVerbTypes> NO_PERMS = EnumSet.noneOf(HttpVerbTypes.class);
 
     private final Map<UserRole, EnumSet<HttpVerbTypes>> conf;

@@ -150,7 +150,7 @@ public class ServeTemplate {
 
                 if(HttpCaching.needsRefresh(req, resourceTimestamp)) {
                     String body = TEMPLATE_CACHE.computeIfAbsent(url, () -> applyTemplate(template, model));
-                    resp.header("Content-Length", body.length());
+                    resp.header("Content-Length", Integer.toString(body.length()));
                 } else {
                     HttpCaching.setNotModifiedResponse(resp);
                 }

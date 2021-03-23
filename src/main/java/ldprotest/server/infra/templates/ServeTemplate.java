@@ -30,6 +30,7 @@ import java.util.Map;
 import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
 import ldprotest.server.infra.HttpCaching;
+import ldprotest.server.infra.http.AcceptEncoding;
 import ldprotest.util.LruCache;
 
 import static spark.Spark.get;
@@ -147,6 +148,12 @@ public class ServeTemplate {
                 resp.header("Content-Type", "text/html;charset=utf-8");
 
                 if(HttpCaching.needsRefresh(req, resourceTimestamp)) {
+
+                    if(AcceptEncoding.decode(req.headers("Accept-Encoding")).gzip()) {
+                        /* note: the below makes spark automagically gzip the response */
+                        resp.header("Content-Encoding", "gzip");
+                    }
+
                     HttpCaching.setCacheHeaders(resp, resourceTimestamp, Main.args().httpCacheMaxAge);
                     return TEMPLATE_CACHE.computeIfAbsent(url, () -> applyTemplate(template, model));
                 } else {

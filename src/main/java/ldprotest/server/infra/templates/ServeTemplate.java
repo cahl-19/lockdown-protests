@@ -23,6 +23,7 @@ import spark.ModelAndView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import ldprotest.util.LruCache;
 
 import static spark.Spark.get;
 import ldprotest.util.TypeTools;
+import ldprotest.util.types.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +79,28 @@ public class ServeTemplate {
             this.modelMap.put("scripts", new ArrayList<String>());
             this.modelMap.put("inlineScript", new ArrayList<String>());
             this.modelMap.put("styleSheets", new ArrayList<String>());
+            this.modelMap.put("metaProperty", new ArrayList<Map<String, String>>());
+        }
+
+        public Page addMetaProperties(Collection<Pair<String, String>> properties) {
+            for(Pair<String, String> p: properties) {
+                addMetaProperty(p.first, p.second);
+            }
+            return this;
+        }
+
+        public Page addMetaProperty(String property, String content) {
+
+            Map<String, String> doc = new HashMap<>();
+            doc.put("property", property);
+            doc.put("content", content);
+
+            List<Map<String, String>> metaProps = TypeTools.<List<Map<String, String>>>assertingCast(
+                modelMap.get("metaProperty")
+            );
+            metaProps.add(doc);
+
+            return this;
         }
 
         public Page setAttribute(String attribute, String val) {

@@ -111,3 +111,15 @@ mapboxConfig:
         tokenNamePattern: 'ldprotest-%n'
         # frequency at which the server polls the mabbox API in order to rotate expired tokens
         serverPollSeconds: 300
+
+# Configure appearence of site and open graph tags.
+style:
+
+    ogType: 'website'
+    ogTitle: 'Lockdown Protest Planner'
+    ogDescription: 'A website for planning and geographic tracking of lockdown related protests and demonstrations'
+    ogUrl: null
+
+    # Image should be served either directly by your reverse proxy (i.e. nginx) or by some CDN
+    # There should be no reason to have ldprotest serve these files directly.
+    ogImage: null

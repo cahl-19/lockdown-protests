@@ -38,6 +38,7 @@ public final class DefaultConfig {
 
         AppConfig.Builder builder = AppConfig.builder();
 
+        builder.setStyleOptions(StyleCustomizationOptions.DEFAULT, AppConfig.PRIORITY_DEFAULT);
         builder.setHstsMaxAge(DEFAULT_HSTS_MAX_AGE, AppConfig.PRIORITY_DEFAULT);
         builder.setRotatingTokenConfig(RotatingTokenMapboxConfig.UNSET_INSTANCE, AppConfig.PRIORITY_DEFAULT);
         builder.setTemporaryTokenConfig(TemporaryTokenMapboxConfig.UNSET_INSTANCE, AppConfig.PRIORITY_DEFAULT);

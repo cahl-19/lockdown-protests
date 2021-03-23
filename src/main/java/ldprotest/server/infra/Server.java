@@ -94,7 +94,10 @@ public class Server {
         );
         ServeWebpack webpacker = new ServeWebpack(scriptBundles);
 
-        webpacker.page("index").addInlineScript(ClientConfig.generateJs()).serve("/");
+        webpacker.page("index")
+            .addInlineScript(ClientConfig.generateJs())
+            .addMetaProperties(Main.args().styleOptions.ogMetaProperties()).serve("/");
+
         webpacker.page("login").serve("/login");
 
         SecurityFilter.add("/" + WEBPACK_BUNDLES_PREFIX + "/**", SecConfig.ANONYMOUS_GET);

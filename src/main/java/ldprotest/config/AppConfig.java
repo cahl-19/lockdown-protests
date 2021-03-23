@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final StyleCustomizationOptions styleOptions;
     public final int hstsMaxAge;
     public final RotatingTokenMapboxConfig rotatingTokenConfig;
     public final TemporaryTokenMapboxConfig temporaryTokenConfig;
@@ -43,6 +44,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        StyleCustomizationOptions styleOptions,
         int hstsMaxAge,
         RotatingTokenMapboxConfig rotatingTokenConfig,
         TemporaryTokenMapboxConfig temporaryTokenConfig,
@@ -60,6 +62,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.styleOptions = styleOptions;
         this.hstsMaxAge = hstsMaxAge;
         this.rotatingTokenConfig = rotatingTokenConfig;
         this.temporaryTokenConfig  = temporaryTokenConfig;
@@ -83,6 +86,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<StyleCustomizationOptions> styleOptions;
         public final BuilderField<Integer> hstsMaxAge;
         public final BuilderField<RotatingTokenMapboxConfig> rotatingTokenConfig;
         public final BuilderField<TemporaryTokenMapboxConfig> temporaryTokenConfig;
@@ -101,6 +105,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            styleOptions = new BuilderField<>();
             hstsMaxAge = new BuilderField<>();
             rotatingTokenConfig = new BuilderField<>();
             temporaryTokenConfig = new BuilderField<>();
@@ -117,6 +122,11 @@ public class AppConfig {
             staticMapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setStyleOptions(StyleCustomizationOptions val, int priority) {
+            styleOptions.set(val, priority);
+            return this;
         }
 
         public Builder setHstsMaxAge(int val, int priority) {
@@ -201,6 +211,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                styleOptions.get(),
                 hstsMaxAge.get(),
                 rotatingTokenConfig.get(),
                 temporaryTokenConfig.get(),

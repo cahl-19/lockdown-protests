@@ -146,7 +146,21 @@ public class ConfigFile {
                 );
                 builder.setRotatingTokenConfig(configObj, AppConfig.PRIORITY_CONFIG);
             }
+        }
 
+
+        if(data.style != null) {
+            StyleCustomizationConfig config = data.style;
+
+            builder.setStyleOptions(
+                new StyleCustomizationOptions(
+                    config.ogTitle,
+                    config.ogType,
+                    config.ogDescription,
+                    config.ogUrl,
+                    config.ogImage
+                ), AppConfig.PRIORITY_CONFIG
+            );
         }
 
         return Result.success(builder);
@@ -163,6 +177,7 @@ public class ConfigFile {
         public KeyStoreConfig keyStoreConfig;
         public String logbackPath;
         public MapboxConfig mapboxConfig;
+        public StyleCustomizationConfig style;
     }
 
     private static final class ServerConfig {
@@ -210,5 +225,13 @@ public class ConfigFile {
         public List<String> allowedUrls;
         public String tokenNamePattern;
         public int serverPollSeconds;
+    }
+
+    private static final class StyleCustomizationConfig {
+        public String ogTitle;
+        public String ogType;
+        public String ogDescription;
+        public String ogUrl;
+        public String ogImage;
     }
 }

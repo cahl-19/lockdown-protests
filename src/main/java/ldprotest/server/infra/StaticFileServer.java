@@ -24,7 +24,6 @@ import ldprotest.util.ResourceWalker;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.util.*;
 import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
@@ -146,7 +145,7 @@ public final class StaticFileServer {
             }
         }
         catch (IOException e) {
-            LOGGER.error("Unable to open resource {].", p);
+            LOGGER.error("Unable to open resource {}.", p);
             return null;
         }
     }

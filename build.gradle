@@ -82,6 +82,19 @@ task copyNpmAssets {
     dependsOn copyLeafletAssets, copyBootstrapIcons, copyBootstrapIndividualIcons
 }
 
+task gzipWebPack {
+    doLast {
+        def webpackRoot = "${buildDir}/resources/main/webpack-bundles/"
+
+        fileTree(webpackRoot).include('*.js').filter { it.isFile() }.files.each {
+            File file -> exec {
+                workingDir "${projectDir}"
+                commandLine 'gzip', '-kf', file.path
+            }
+        }
+    }
+}
+
 
 node {
     nodeModulesDir = file("${buildDir}/node_modules")
@@ -96,7 +109,7 @@ sourceSets {
 }
 
 classes {
-    dependsOn copyVersionInfo
+    dependsOn copyVersionInfo, gzipWebPack
 }
 
 compileJava {

@@ -24,13 +24,18 @@ import ldprotest.util.ResourceWalker;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.regex.Pattern;
+import javax.servlet.ServletOutputStream;
 
 import static spark.Spark.get;
+import ldprotest.server.infra.http.AcceptEncoding;
 import ldprotest.util.PathUtils;
 import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
+import org.eclipse.jetty.http.HttpStatus;
+import spark.Response;
 
 public final class StaticFileServer {
 
@@ -70,6 +75,10 @@ public final class StaticFileServer {
     }
 
     public static List<String> serve(String prefix, String root, String pattern) throws IOException {
+        return serve(prefix, root, pattern, GzipMode.NO_GZIP);
+    }
+
+    public static List<String> serve(String prefix, String root, String pattern, GzipMode gzipMode) throws IOException {
         List<String> servedFiles = new ArrayList<>();
         Pattern p = Pattern.compile(pattern);
 
@@ -81,7 +90,7 @@ public final class StaticFileServer {
 
                     FILE_MAP.put(url, resourcePath);
                     servedFiles.add(resourcePath);
-                    addRoute(url, resourcePath);
+                    addRoute(url, resourcePath, gzipMode);
                 }
             }
         }
@@ -89,7 +98,7 @@ public final class StaticFileServer {
         return servedFiles;
     }
 
-    private static void addRoute(String url, String resourcePath) {
+    private static void addRoute(String url, String resourcePath, GzipMode gzipMode) {
         long timestamp = ServerTime.now().toEpochSecond();
 
         String extension = PathUtils.extension(url);
@@ -97,29 +106,32 @@ public final class StaticFileServer {
         boolean requiresXframeOpt = REQUIRES_XFRAME_OPTIONS.contains(extension);
 
         get(url, (req, resp) -> {
+
+            AcceptEncoding acceptEncoding = AcceptEncoding.decode(req.headers("Accept-Encoding"));
             if(!HttpCaching.needsRefresh(req, timestamp)) {
                 HttpCaching.setNotModifiedResponse(resp);
                 return "";
             }
 
-            byte[] content = FILE_CACHE.get(resourcePath);
-
-            if(content == null) {
-                content = readFile(resourcePath);
-                FILE_CACHE.insert(resourcePath, content);
-            }
-
-            if(contentType != null) {
-                resp.header("Content-Type", contentType);
-            }
-
+            resp.header("Content-Type", contentType);
             if(requiresXframeOpt) {
                 resp.header("X-Frame-Options", "deny");
             }
 
             HttpCaching.setCacheHeaders(resp, timestamp, Main.args().httpCacheMaxAge);
 
-            return content;
+            if(acceptEncoding.gzip() && !gzipMode.equals(GzipMode.NO_GZIP)) {
+                resp.header("Content-Encoding", "gzip");
+            }
+
+            if(acceptEncoding.gzip() && gzipMode.equals(GzipMode.PRE_GZIP)) {
+                String gzipResource = resourcePath + ".gz";
+                byte content[] = FILE_CACHE.computeIfAbsent(gzipResource, () -> readFile(gzipResource));
+                writeRawBinaryData(resp, content);
+                return new byte[0];
+            } else {
+                return FILE_CACHE.computeIfAbsent(resourcePath, () -> readFile(resourcePath));
+            }
         });
     }
 
@@ -145,5 +157,25 @@ public final class StaticFileServer {
 
     private static ClassLoader classLoader() {
         return Thread.currentThread().getContextClassLoader();
+    }
+
+    private static void writeRawBinaryData(Response resp, byte[] content) {
+
+        resp.status(HttpStatus.OK_200);
+        resp.raw().setContentLength(content.length);
+
+        try (ServletOutputStream stream = resp.raw().getOutputStream()) {
+            stream.write(content);
+            stream.flush();
+        }
+        catch(IOException e) {
+            resp.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
+        }
+    }
+
+    public enum GzipMode {
+        NO_GZIP,
+        PRE_GZIP,
+        DYNAMIC_GZIP
     }
 }

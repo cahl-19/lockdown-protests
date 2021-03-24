@@ -33,6 +33,7 @@ import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.TokenRefresh;
 import ldprotest.server.endpoints.WhoAmI;
 import ldprotest.server.endpoints.MapApiToken;
+import ldprotest.server.infra.StaticFileServer.GzipMode;
 import ldprotest.server.infra.templates.ServeWebpack;
 import spark.Spark;
 
@@ -78,10 +79,10 @@ public class Server {
 
     private static void serveAssets() throws IOException {
         StaticFileServer.serve(
-            CSS_PREFIX, CSS_PREFIX, ".*\\.css"
+            CSS_PREFIX, CSS_PREFIX, ".*\\.css", GzipMode.DYNAMIC_GZIP
         );
         StaticFileServer.serve(
-            ASSETS_PREFIX, ASSETS_PREFIX, "(.*\\.png|.*\\.jpg|.*\\.svg)"
+            ASSETS_PREFIX, ASSETS_PREFIX, "(.*\\.png|.*\\.jpg|.*\\.svg)", GzipMode.DYNAMIC_GZIP
         );
 
         SecurityFilter.add("/" + CSS_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
@@ -90,7 +91,7 @@ public class Server {
 
     private static void serveStaticPages() throws IOException {
         List<String> scriptBundles = StaticFileServer.serve(
-            WEBPACK_BUNDLES_PREFIX, WEBPACK_BUNDLES_PREFIX, "(.*\\.js|.*\\.map)"
+            WEBPACK_BUNDLES_PREFIX, WEBPACK_BUNDLES_PREFIX, "(.*\\.js|.*\\.map)", GzipMode.PRE_GZIP
         );
         ServeWebpack webpacker = new ServeWebpack(scriptBundles);
 

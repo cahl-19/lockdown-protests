@@ -123,3 +123,6 @@ style:
     # Image should be served either directly by your reverse proxy (i.e. nginx) or by some CDN
     # There should be no reason to have ldprotest serve these files directly.
     ogImage: null
+
+    # HTML title to use on the index (/) page
+    indexTitle: 'Find Lockdown Protests'

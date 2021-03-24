@@ -158,7 +158,8 @@ public class ConfigFile {
                     config.ogType,
                     config.ogDescription,
                     config.ogUrl,
-                    config.ogImage
+                    config.ogImage,
+                    config.indexTitle
                 ), AppConfig.PRIORITY_CONFIG
             );
         }
@@ -233,5 +234,6 @@ public class ConfigFile {
         public String ogDescription;
         public String ogUrl;
         public String ogImage;
+        public String indexTitle;
     }
 }

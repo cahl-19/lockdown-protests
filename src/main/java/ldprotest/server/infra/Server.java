@@ -95,7 +95,7 @@ public class Server {
         );
         ServeWebpack webpacker = new ServeWebpack(scriptBundles);
 
-        webpacker.page("index")
+        webpacker.page("index", Main.args().styleOptions.indexTitle)
             .addInlineScript(ClientConfig.generateJs())
             .addMetaProperties(Main.args().styleOptions.ogMetaProperties()).serve("/");
 

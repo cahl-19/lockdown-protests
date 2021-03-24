@@ -24,7 +24,7 @@ import ldprotest.util.types.Pair;
 public class StyleCustomizationOptions {
 
     public static final StyleCustomizationOptions DEFAULT = new StyleCustomizationOptions(
-        "", "", "", "", ""
+        "", "", "", "", "", ""
     );
 
     public final String ogTitle;
@@ -32,19 +32,22 @@ public class StyleCustomizationOptions {
     public final String ogDescription;
     public final String ogUrl;
     public final String ogImage;
+    public final String indexTitle;
 
     public StyleCustomizationOptions(
         String ogTitle,
         String ogType,
         String ogDescription,
         String ogUrl,
-        String ogImage
+        String ogImage,
+        String indexTitle
     ) {
         this.ogTitle = ogTitle;
         this.ogType = ogType;
         this.ogDescription = ogDescription;
         this.ogUrl = ogUrl;
         this.ogImage = ogImage;
+        this.indexTitle = indexTitle;
     }
 
     public List<Pair<String, String>> ogMetaProperties() {

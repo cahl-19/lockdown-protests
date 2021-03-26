@@ -160,7 +160,8 @@ public class ConfigFile {
                     defaultIfNull(config.ogUrl, ""),
                     defaultIfNull(config.ogImage, ""),
                     defaultIfNull(config.indexTitle, ""),
-                    defaultIfNull(config.bannerHtmlPath, "")
+                    defaultIfNull(config.bannerHtmlPath, ""),
+                    defaultIfNull(config.css, "")
                 ), AppConfig.PRIORITY_CONFIG
             );
         }
@@ -237,5 +238,6 @@ public class ConfigFile {
         public String ogImage;
         public String indexTitle;
         public String bannerHtmlPath;
+        public String css;
     }
 }

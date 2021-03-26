@@ -29,7 +29,7 @@ import ldprotest.util.types.Pair;
 public class StyleCustomizationOptions {
 
     public static final StyleCustomizationOptions DEFAULT = new StyleCustomizationOptions(
-        "", "", "", "", "", "", ""
+        "", "", "", "", "", "", "", ""
     );
 
     public final String ogTitle;
@@ -39,6 +39,7 @@ public class StyleCustomizationOptions {
     public final String ogImage;
     public final String indexTitle;
     public final String bannerHtmlPath;
+    public final String cssUrl;
 
     public StyleCustomizationOptions(
         String ogTitle,
@@ -47,7 +48,8 @@ public class StyleCustomizationOptions {
         String ogUrl,
         String ogImage,
         String indexTitle,
-        String bannerHtmlPath
+        String bannerHtmlPath,
+        String cssUrl
     ) {
         this.ogTitle = ogTitle;
         this.ogType = ogType;
@@ -56,10 +58,11 @@ public class StyleCustomizationOptions {
         this.ogImage = ogImage;
         this.indexTitle = indexTitle;
         this.bannerHtmlPath = bannerHtmlPath;
+        this.cssUrl = cssUrl;
     }
 
     public Result<BannerReadError, String> bannerHtml() {
-        
+
         if(bannerHtmlPath.isEmpty()) {
             return Result.failure(BannerReadError.NOT_DEFINED);
         }

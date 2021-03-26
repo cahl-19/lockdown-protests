@@ -108,6 +108,7 @@ public class Server {
 
         webpacker.page("index", Main.args().styleOptions.indexTitle)
             .setAttributeIf("banner", () -> bannerHtmlRes.result(), () -> bannerHtmlRes.isSuccess())
+            .addStyleSheetIf(Main.args().styleOptions.cssUrl, () -> !undefinedString(Main.args().styleOptions.cssUrl))
             .addInlineScript(ClientConfig.generateJs())
             .addMetaProperties(Main.args().styleOptions.ogMetaProperties()).serve("/");
 
@@ -120,5 +121,9 @@ public class Server {
 
     private static void serveDynamicTestEndpoints() {
         MapApiToken.register();
+    }
+
+    private static boolean undefinedString(String s) {
+        return s == null || s.isEmpty();
     }
 }

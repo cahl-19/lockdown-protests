@@ -12,9 +12,9 @@
     {{#each inlineScript as |script|}}<script>{{{script}}}</script>
     {{/each}}
     {{#> pageTemplateScripts }}{{/pageTemplateScripts}}
+    {{#> pageTemplateStyleSheets }}{{/pageTemplateStyleSheets}}
     {{#each styleSheets as |s|}}<link rel="stylesheet" href="{{s}}">
     {{/each}}
-    {{#> pageTemplateStyleSheets }}{{/pageTemplateStyleSheets}}
 </head>
 
 <body>

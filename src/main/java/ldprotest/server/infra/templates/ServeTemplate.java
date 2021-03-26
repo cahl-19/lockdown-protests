@@ -137,6 +137,14 @@ public class ServeTemplate {
             return this;
         }
 
+        public Page addStyleSheetIf(String url, Supplier<Boolean> conditional) {
+            if(conditional.get()) {
+                return addStyleSheet(url);
+            } else {
+                return this;
+            }
+        }
+
         public void serve(String url) throws IOException {
             AliasTemplateLoader templateLoader = new AliasTemplateLoader();
 

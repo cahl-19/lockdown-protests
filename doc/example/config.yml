@@ -131,3 +131,7 @@ style:
     # Path to file to use to define the topbar banner (please be **very** mindful of XSS).
     # File content should be formatted as an html snippet (ex. <h1>Welcome to LdProtest</h1>) and encoded as UTF-8.
     bannerHtmlPath: null
+    # URL to custom css file to include on each page. Note that the css file is included last and therefore has the
+    # ability to override any other linked css on the page.
+    # The style sheet must be served by a seperate web server, such as NGINX. 
+    css: null

@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
 import ldprotest.server.infra.HttpCaching;
@@ -108,6 +109,14 @@ public class ServeTemplate {
         public Page setAttribute(String attribute, String val) {
             modelMap.put(attribute, val);
             return this;
+        }
+
+        public Page setAttributeIf(String attribute, Supplier<String> val, Supplier<Boolean> conditional) {
+            if(conditional.get()) {
+                return setAttribute(attribute, val.get());
+            } else {
+                return this;
+            }
         }
 
         public Page addScript(String url) {

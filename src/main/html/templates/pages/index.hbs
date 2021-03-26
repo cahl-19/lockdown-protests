@@ -41,7 +41,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-10 text-center"><h1 class="h1">Lockdown Protest Planner</h1></div>
+                    <div class="col-10">
+                        {{#if banner}}
+                            {{{banner}}}
+                        {{else}}
+                            <div class="text-center"><h1 class="h1">Lockdown Protest Planner</h1></div>
+                        {{/if}}
+                    </div>
                     <div class="col-1">
                     </div>
                 </div>

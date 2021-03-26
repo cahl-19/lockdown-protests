@@ -115,6 +115,7 @@ mapboxConfig:
 # Configure appearence of site and open graph tags.
 style:
 
+    # Various Open Graph Protocol Meta Attributes
     ogType: 'website'
     ogTitle: 'Lockdown Protest Planner'
     ogDescription: 'A website for planning and geographic tracking of lockdown related protests and demonstrations'
@@ -126,3 +127,7 @@ style:
 
     # HTML title to use on the index (/) page
     indexTitle: 'Find Lockdown Protests'
+
+    # Path to file to use to define the topbar banner (please be **very** mindful of XSS).
+    # File content should be formatted as an html snippet (ex. <h1>Welcome to LdProtest</h1>) and encoded as UTF-8.
+    bannerHtmlPath: null

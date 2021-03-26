@@ -154,12 +154,13 @@ public class ConfigFile {
 
             builder.setStyleOptions(
                 new StyleCustomizationOptions(
-                    config.ogTitle,
-                    config.ogType,
-                    config.ogDescription,
-                    config.ogUrl,
-                    config.ogImage,
-                    config.indexTitle
+                    defaultIfNull(config.ogTitle, ""),
+                    defaultIfNull(config.ogType, ""),
+                    defaultIfNull(config.ogDescription, ""),
+                    defaultIfNull(config.ogUrl, ""),
+                    defaultIfNull(config.ogImage, ""),
+                    defaultIfNull(config.indexTitle, ""),
+                    defaultIfNull(config.bannerHtmlPath, "")
                 ), AppConfig.PRIORITY_CONFIG
             );
         }
@@ -235,5 +236,6 @@ public class ConfigFile {
         public String ogUrl;
         public String ogImage;
         public String indexTitle;
+        public String bannerHtmlPath;
     }
 }

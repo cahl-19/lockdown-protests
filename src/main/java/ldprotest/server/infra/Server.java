@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import ldprotest.config.StyleCustomizationOptions.BannerReadError;
 import ldprotest.main.Main;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
@@ -35,6 +36,7 @@ import ldprotest.server.endpoints.WhoAmI;
 import ldprotest.server.endpoints.MapApiToken;
 import ldprotest.server.infra.StaticFileServer.GzipMode;
 import ldprotest.server.infra.templates.ServeWebpack;
+import ldprotest.util.Result;
 import spark.Spark;
 
 public class Server {
@@ -93,16 +95,25 @@ public class Server {
         List<String> scriptBundles = StaticFileServer.serve(
             WEBPACK_BUNDLES_PREFIX, WEBPACK_BUNDLES_PREFIX, "(.*\\.js|.*\\.map)", GzipMode.PRE_GZIP
         );
+        Result<BannerReadError, String> bannerHtmlRes = Main.args().styleOptions.bannerHtml();
         ServeWebpack webpacker = new ServeWebpack(scriptBundles);
 
+        if(bannerHtmlRes.isFailure() && !bannerHtmlRes.failureReason().equals(BannerReadError.NOT_DEFINED)) {
+            LOGGER.error(
+                "Failed to open banner html file {}: {}",
+                Main.args().styleOptions.bannerHtmlPath,
+                bannerHtmlRes.failureReason().explanation
+            );
+        }
+
         webpacker.page("index", Main.args().styleOptions.indexTitle)
+            .setAttributeIf("banner", () -> bannerHtmlRes.result(), () -> bannerHtmlRes.isSuccess())
             .addInlineScript(ClientConfig.generateJs())
             .addMetaProperties(Main.args().styleOptions.ogMetaProperties()).serve("/");
 
         webpacker.page("login").serve("/login");
 
         SecurityFilter.add("/" + WEBPACK_BUNDLES_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
-
         SecurityFilter.add("/", SecConfig.ANONYMOUS_GET_AND_HEAD);
         SecurityFilter.add("/login", SecConfig.ANONYMOUS_GET_AND_HEAD);
     }

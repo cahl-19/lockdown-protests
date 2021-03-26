@@ -225,6 +225,9 @@ task makeDebFiles {
         def logback_path = (
             "${escaped_single_quote}${deployPrefix}/etc/ldprotest/logback.xml${escaped_single_quote}"
         ).replace("/", "\\/")
+        def banner_path = (
+            "${escaped_single_quote}${deployPrefix}/var/lib/ldprotest/site/banner.html${escaped_single_quote}"
+        ).replace("/", "\\/")
 
         def runscript = new File("${projectDir}/build/deb-install", "ldprotest")
         def createUser = new File("${projectDir}/build/deb-install", "make-user")
@@ -286,12 +289,17 @@ task makeDebFiles {
                 EX_CONFIG="${deployPrefix}/usr/share/doc/examples/config.yml"
                 EX_LOGBACK="${deployPrefix}/usr/share/doc/examples/logback.xml"
 
-                mkdir -p ${deployPrefix}/var/log/ldprotest
-                chown -R ldprotest.ldprotest ${deployPrefix}/var/log/ldprotest
+                mkdir -p "${deployPrefix}/var/log/ldprotest"
+                mkdir -p "${deployPrefix}/var/lib/ldprotest/site"
+
+                cp -n "${deployPrefix}/usr/share/doc/examples/banner.html" "${deployPrefix}/var/lib/ldprotest/site"
+
+                chown -R ldprotest.ldprotest "${deployPrefix}/var/log/ldprotest"
 
                 if cmp -s "\${CONFIG}" "\${EX_CONFIG}"; then
                     sed -i -r 's/^(\\s*fsKeyStorePath: )(.*)/\\1${keystore}/g' "\${CONFIG}"
                     sed -i -r 's/^(\\s*logbackPath: )(.*)/\\1${logback_path}/g' "\${CONFIG}"
+                    sed -i -r 's/^(\\s*bannerHtmlPath: )(.*)/\\1${banner_path}/g' "\${CONFIG}"
                 fi
 
                 if cmp -s "\${LOGBACK}" "\${EX_LOGBACK}"; then
@@ -311,7 +319,7 @@ task makeDebFiles {
         )
         postUninst.text = unindent(
             """
-                chown -R root.root ${deployPrefix}/var/log/ldprotest
+                chown -R root.root ${deployPrefix}/var/log/ldprotest || true
 
                 rm -rf ${deployPrefix}/var/lib/ldprotest/
                 deluser ldprotest 1>/dev/null 2>/dev/null || true
@@ -363,6 +371,9 @@ task deployDeb(type: Deb) {
         into 'usr/share/doc/examples'
     }
     from("${projectDir}/doc/example/logback.xml") {
+        into 'usr/share/doc/examples'
+    }
+    from("${projectDir}/doc/example/banner.html") {
         into 'usr/share/doc/examples'
     }
 

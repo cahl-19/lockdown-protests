@@ -319,10 +319,12 @@ task makeDebFiles {
         )
         postUninst.text = unindent(
             """
-                chown -R root.root ${deployPrefix}/var/log/ldprotest || true
+                if [ "\${1}" != "upgrade" ]; then
+                    chown -R root.root ${deployPrefix}/var/log/ldprotest || true
 
-                rm -rf ${deployPrefix}/var/lib/ldprotest/
-                deluser ldprotest 1>/dev/null 2>/dev/null || true
+                    rm -rf ${deployPrefix}/var/lib/ldprotest/
+                    deluser ldprotest 1>/dev/null 2>/dev/null || true
+                fi 
             """
         )
 

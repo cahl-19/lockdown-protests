@@ -133,5 +133,17 @@ style:
     bannerHtmlPath: null
     # URL to custom css file to include on each page. Note that the css file is included last and therefore has the
     # ability to override any other linked css on the page.
-    # The style sheet must be served by a seperate web server, such as NGINX. 
+    # The style sheet must be served by a seperate web server, such as NGINX.
     css: null
+
+# App feature switches and config options
+features:
+
+    # If true, hides the side-bar (on desktop) and menu button (on modile) are hidden from unauthenticated users
+    # An "about" button is added so that users can still view app info and contributing options.
+
+    # Users with credentials can still login via the /login page.
+
+    # This does not mean that a dedicated individual cannot attempt to login, however, unless a sophisticated
+    # firewall configuration is employed to block access to login pages and api endpoints based on IP address.
+    disablePublicLogin: false

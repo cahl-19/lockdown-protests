@@ -29,6 +29,7 @@ public final class DefaultConfig {
     static private final int DEFAULT_TOKEN_KEY_ROTATE_SECONDS =  3600 * 24 * 30;
     static private final int DEFAULT_TOKEN_KEY_DELETE_SECONDS = DEFAULT_TOKEN_KEY_ROTATE_SECONDS * 2;
     static private final int DEFAULT_TOKEN_EXPIRES_SECONDS = 15 * 60;
+    static private final boolean DEFAULT_DISABLE_PUBLIC_LOGIN = false;
 
     private DefaultConfig() {
         /* do not construct */
@@ -38,6 +39,7 @@ public final class DefaultConfig {
 
         AppConfig.Builder builder = AppConfig.builder();
 
+        builder.setDisablePublicLogin(DEFAULT_DISABLE_PUBLIC_LOGIN, AppConfig.PRIORITY_DEFAULT);
         builder.setStyleOptions(StyleCustomizationOptions.DEFAULT, AppConfig.PRIORITY_DEFAULT);
         builder.setHstsMaxAge(DEFAULT_HSTS_MAX_AGE, AppConfig.PRIORITY_DEFAULT);
         builder.setRotatingTokenConfig(RotatingTokenMapboxConfig.UNSET_INSTANCE, AppConfig.PRIORITY_DEFAULT);

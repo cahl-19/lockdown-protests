@@ -92,6 +92,11 @@ public class CmdLineArgs {
             builder.setLogbackPath(path, AppConfig.PRIORITY_OVERRIDE);
         }
 
+        @Option(names = {"--disable-public-login"}, description = "Disables login side bar and buttons on main page")
+        void disablePublicLogin(boolean val) {
+            builder.setDisablePublicLogin(val, AppConfig.PRIORITY_OVERRIDE);
+        }
+
         @Override
         public Integer call() throws Exception {
             return 0;

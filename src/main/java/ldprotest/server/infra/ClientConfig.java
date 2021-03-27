@@ -43,7 +43,10 @@ public final class ClientConfig {
 
         StringBuilder sb = new StringBuilder();
 
-        String json = JsonSerialization.GSON.toJson(new JsonConfigObject(clientMapboxRenew));
+        String json = JsonSerialization.GSON.toJson(new JsonConfigObject(
+            clientMapboxRenew,
+            Main.args().disablePublicLogin
+        ));
 
         sb.append("const CLIENT_CONFIG = ");
         sb.append(json);
@@ -55,9 +58,11 @@ public final class ClientConfig {
     private static final class JsonConfigObject implements JsonSerializable {
 
         public final int MAP_API_TOKEN_REFRESH_SECONDS;
+        public final boolean DISABLE_PUBLIC_LOGIN;
 
-        public JsonConfigObject(int clientMapboxRenew) {
+        public JsonConfigObject(int clientMapboxRenew, boolean disablePublicLogin) {
             MAP_API_TOKEN_REFRESH_SECONDS = clientMapboxRenew;
+            DISABLE_PUBLIC_LOGIN = disablePublicLogin;
         }
     }
 }

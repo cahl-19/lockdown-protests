@@ -106,6 +106,11 @@ public class ServeTemplate {
             return this;
         }
 
+        public Page setAttribute(String attribute, boolean val) {
+            modelMap.put(attribute, val);
+            return this;
+        }
+
         public Page setAttribute(String attribute, String val) {
             modelMap.put(attribute, val);
             return this;

@@ -166,6 +166,14 @@ public class ConfigFile {
             );
         }
 
+        if(data.features != null) {
+            FeatureConfig config = data.features;
+
+            if(config.disablePublicLogin != null) {
+                builder.setDisablePublicLogin(config.disablePublicLogin, AppConfig.PRIORITY_CONFIG);
+            }
+        }
+
         return Result.success(builder);
     }
 
@@ -181,6 +189,7 @@ public class ConfigFile {
         public String logbackPath;
         public MapboxConfig mapboxConfig;
         public StyleCustomizationConfig style;
+        public FeatureConfig features;
     }
 
     private static final class ServerConfig {
@@ -239,5 +248,9 @@ public class ConfigFile {
         public String indexTitle;
         public String bannerHtmlPath;
         public String css;
+    }
+
+    public static final class FeatureConfig {
+        public Boolean disablePublicLogin;
     }
 }

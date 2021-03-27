@@ -11,9 +11,12 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-1">
-                        <div class="menu-area d-block d-md-none">
+                        <div class="menu-area-left d-block d-md-none {{#if disablePublicLogin}}hidden{{/if}}">
                             <button
-                                type="button" class="btn btn-light" id="menu-button" data-toggle="dropdown"
+                                type="button"
+                                class="btn btn-light"
+                                id="menu-button"
+                                data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false"
                             >
                                 <svg viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -22,7 +25,7 @@
                                     <rect y="92" width="100" height="8"></rect>
                                 </svg>
                             </button>
-                              <div class="dropdown-menu" aria-labelledby="menu-button">
+                            <div class="dropdown-menu" aria-labelledby="menu-button">
                                 <a class="dropdown-item dropdown-item-unauth hidden" id="login-menu-item" href="#">
                                     Login
                                 </a>
@@ -49,6 +52,16 @@
                         {{/if}}
                     </div>
                     <div class="col-1">
+                        {{#if disablePublicLogin}}
+                        <div class="menu-area-right">
+                            <button type="button" class="btn btn-light muted" id="info-button">
+                                <img
+                                    class="bootstrap-icon-button-image" src="/assets/bootstrap/icons/info-circle.svg"
+                                    alt="i"
+                                />
+                            </button>
+                        </div>
+                        {{/if}}
                     </div>
                 </div>
             </div>
@@ -56,7 +69,7 @@
         <div class="content-area">
             <div class="containuer-fluid">
                 <div class="row">
-                    <div class="d-none d-md-block col-md-2 sidebar">
+                    <div class="col-md-2 sidebar d-none d-md-block {{#if disablePublicLogin}}hidden{{/if}}">
 
                         <div class="login-card text-center sidebar-unauth hidden" id="login-card">
                             <table class="layout-table"><tbody><tr>
@@ -83,7 +96,7 @@
                                 data-toggle="tooltip" data-placement="top" title="Contribute"
                             >
                                 <img
-                                    class="sidebar-control-button-image" src="/assets/bootstrap/icons/lightbulb.svg"
+                                    class="bootstrap-icon-button-image" src="/assets/bootstrap/icons/lightbulb.svg"
                                     alt="c"
                                 />
                             </button>
@@ -92,7 +105,7 @@
                                 data-toggle="tooltip" data-placement="top" title="Logout"
                             >
                                 <img
-                                    class="sidebar-control-button-image" src="/assets/bootstrap/icons/person-x.svg"
+                                    class="bootstrap-icon-button-image" src="/assets/bootstrap/icons/person-x.svg"
                                     alt="l"
                                 />
                             </button>
@@ -115,7 +128,7 @@
                             >
                         </div>
                     </div>
-                    <div class="h-100 col-sm-12 col-md-10 map-outer-div"><div id="map-div"></div></div>
+                    <div class="h-100 col-sm-12 col-md map-outer-div"><div id="map-div"></div></div>
                 </div>
             </div>
         </div>

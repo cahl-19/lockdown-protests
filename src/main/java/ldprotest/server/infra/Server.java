@@ -107,6 +107,7 @@ public class Server {
         }
 
         webpacker.page("index", Main.args().styleOptions.indexTitle)
+            .setAttribute("disablePublicLogin", Main.args().disablePublicLogin)
             .setAttributeIf("banner", () -> bannerHtmlRes.result(), () -> bannerHtmlRes.isSuccess())
             .addStyleSheetIf(Main.args().styleOptions.cssUrl, () -> !undefinedString(Main.args().styleOptions.cssUrl))
             .addInlineScript(ClientConfig.generateJs())

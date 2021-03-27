@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final boolean disablePublicLogin;
     public final StyleCustomizationOptions styleOptions;
     public final int hstsMaxAge;
     public final RotatingTokenMapboxConfig rotatingTokenConfig;
@@ -44,6 +45,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        boolean disablePublicLogin,
         StyleCustomizationOptions styleOptions,
         int hstsMaxAge,
         RotatingTokenMapboxConfig rotatingTokenConfig,
@@ -62,6 +64,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.disablePublicLogin = disablePublicLogin;
         this.styleOptions = styleOptions;
         this.hstsMaxAge = hstsMaxAge;
         this.rotatingTokenConfig = rotatingTokenConfig;
@@ -86,6 +89,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<Boolean> disablePublicLogin;
         public final BuilderField<StyleCustomizationOptions> styleOptions;
         public final BuilderField<Integer> hstsMaxAge;
         public final BuilderField<RotatingTokenMapboxConfig> rotatingTokenConfig;
@@ -105,6 +109,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            disablePublicLogin = new BuilderField<>();
             styleOptions = new BuilderField<>();
             hstsMaxAge = new BuilderField<>();
             rotatingTokenConfig = new BuilderField<>();
@@ -122,6 +127,11 @@ public class AppConfig {
             staticMapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setDisablePublicLogin(boolean val, int priority) {
+            disablePublicLogin.set(val, priority);
+            return this;
         }
 
         public Builder setStyleOptions(StyleCustomizationOptions val, int priority) {
@@ -211,6 +221,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                disablePublicLogin.get(),
                 styleOptions.get(),
                 hstsMaxAge.get(),
                 rotatingTokenConfig.get(),

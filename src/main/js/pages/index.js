@@ -282,8 +282,11 @@ function setup_sidebar() {
         $('.sidebar-unauth').removeClass('hidden');
     } else {
         $('.sidebar-auth').removeClass('hidden');
-
         $('#contribute-button').tooltip();
+
+        if(CLIENT_CONFIG.DISABLE_PUBLIC_LOGIN) {
+            $('.sidebar').removeClass('hidden');
+        }
     }
 }
 
@@ -295,6 +298,14 @@ function setup_menu() {
 
         let pin_drop_menu_item = $('#drop-pin-menu-item');
         pin_drop_menu_item.on('click', () => $('#pin-drop-modal').modal('show'));
+
+        if(CLIENT_CONFIG.DISABLE_PUBLIC_LOGIN) {
+            $('.menu-area-left').removeClass('hidden');
+        }
+    }
+
+    if(CLIENT_CONFIG.DISABLE_PUBLIC_LOGIN) {
+        $('#info-button').on('click', () => $('#contributing-modal').modal('show'));
     }
 }
 
@@ -328,7 +339,7 @@ function setup_login() {
         $('#login-modal').modal('show');
     });
 
-        submit_login.on('click', (ev) => {
+    submit_login.on('click', (ev) => {
         ev.preventDefault();
 
         let stop_spin = spinner.spin(submit_login, ' Loading');

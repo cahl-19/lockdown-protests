@@ -324,7 +324,7 @@ task makeDebFiles {
 
                     rm -rf ${deployPrefix}/var/lib/ldprotest/
                     deluser ldprotest 1>/dev/null 2>/dev/null || true
-                fi 
+                fi
             """
         )
 
@@ -376,6 +376,9 @@ task deployDeb(type: Deb) {
         into 'usr/share/doc/examples'
     }
     from("${projectDir}/doc/example/banner.html") {
+        into 'usr/share/doc/examples'
+    }
+    from("${projectDir}/doc/example/nginx-vhost-config") {
         into 'usr/share/doc/examples'
     }
 

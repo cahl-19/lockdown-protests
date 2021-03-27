@@ -1,0 +1,19 @@
+# Example Basic Nginx Virtual Host Config
+
+# Serves custom static files directly, and proxies all other requests
+# to ldprotest http server.
+
+server {
+    server_name example.com 35.164.175.235;
+
+    root /var/www/data;
+    index favicon.ico;
+
+    location / {
+        try_files $uri @ldprotest;
+    }
+
+    location @ldprotest {
+        proxy_pass http://127.0.0.1:4567;
+    }
+}

@@ -36,7 +36,7 @@ public final class AcceptEncoding {
     public static AcceptEncoding decode(String header) {
         List<String> encodings = new ArrayList<>();
 
-        if(header.isEmpty()) {
+        if(header == null || header.isEmpty()) {
             return new AcceptEncoding(encodings);
         }
 

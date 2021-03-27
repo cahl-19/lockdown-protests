@@ -381,6 +381,9 @@ task deployDeb(type: Deb) {
     from("${projectDir}/doc/example/nginx-vhost-config") {
         into 'usr/share/doc/examples'
     }
+    from("${projectDir}/doc/example/robots.txt") {
+        into 'usr/share/doc/examples'
+    }
 
     from(jar.outputs.files) {
         into 'lib/ldprotest/'

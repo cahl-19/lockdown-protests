@@ -90,6 +90,8 @@ public final class Login {
 
             cookieAtr.setCookie(response);
 
+            LOGGER.info("User {} - login successful", loginData.username);
+
             return new Token(headerToken);
         });
     }

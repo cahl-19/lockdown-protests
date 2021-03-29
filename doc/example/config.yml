@@ -136,6 +136,11 @@ style:
     # The style sheet must be served by a seperate web server, such as NGINX.
     css: null
 
+    # Path to file to define custom html content of the information modal.
+    informationBodyHtmlPath: null
+    # Path to file to define the information modal's title as html.
+    informationTitleHtmlPath: null
+
 # App feature switches and config options
 features:
 

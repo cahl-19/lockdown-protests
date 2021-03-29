@@ -161,7 +161,9 @@ public class ConfigFile {
                     defaultIfNull(config.ogImage, ""),
                     defaultIfNull(config.indexTitle, ""),
                     defaultIfNull(config.bannerHtmlPath, ""),
-                    defaultIfNull(config.css, "")
+                    defaultIfNull(config.css, ""),
+                    defaultIfNull(config.informationBodyHtmlPath, ""),
+                    defaultIfNull(config.informationTitleHtmlPath, "")
                 ), AppConfig.PRIORITY_CONFIG
             );
         }
@@ -248,6 +250,8 @@ public class ConfigFile {
         public String indexTitle;
         public String bannerHtmlPath;
         public String css;
+        public String informationBodyHtmlPath;
+        public String informationTitleHtmlPath;
     }
 
     public static final class FeatureConfig {

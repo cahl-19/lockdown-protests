@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
-import ldprotest.config.StyleCustomizationOptions.BannerReadError;
+import ldprotest.config.StyleCustomizationOptions.FileReadError;
 import ldprotest.main.Main;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
@@ -95,29 +95,52 @@ public class Server {
         List<String> scriptBundles = StaticFileServer.serve(
             WEBPACK_BUNDLES_PREFIX, WEBPACK_BUNDLES_PREFIX, "(.*\\.js|.*\\.map)", GzipMode.PRE_GZIP
         );
-        Result<BannerReadError, String> bannerHtmlRes = Main.args().styleOptions.bannerHtml();
         ServeWebpack webpacker = new ServeWebpack(scriptBundles);
 
-        if(bannerHtmlRes.isFailure() && !bannerHtmlRes.failureReason().equals(BannerReadError.NOT_DEFINED)) {
-            LOGGER.error(
-                "Failed to open banner html file {}: {}",
-                Main.args().styleOptions.bannerHtmlPath,
-                bannerHtmlRes.failureReason().explanation
-            );
-        }
-
-        webpacker.page("index", Main.args().styleOptions.indexTitle)
-            .setAttribute("disablePublicLogin", Main.args().disablePublicLogin)
-            .setAttributeIf("banner", () -> bannerHtmlRes.result(), () -> bannerHtmlRes.isSuccess())
-            .addStyleSheetIf(Main.args().styleOptions.cssUrl, () -> !undefinedString(Main.args().styleOptions.cssUrl))
-            .addInlineScript(ClientConfig.generateJs())
-            .addMetaProperties(Main.args().styleOptions.ogMetaProperties()).serve("/");
-
+        serveIndex(webpacker);
         webpacker.page("login").serve("/login");
 
         SecurityFilter.add("/" + WEBPACK_BUNDLES_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
         SecurityFilter.add("/", SecConfig.ANONYMOUS_GET_AND_HEAD);
         SecurityFilter.add("/login", SecConfig.ANONYMOUS_GET_AND_HEAD);
+    }
+
+    private static void serveIndex(ServeWebpack webpacker) throws IOException {
+
+        Result<FileReadError, String> banner = Main.args().styleOptions.bannerHtml();
+        Result<FileReadError, String> infoBody = Main.args().styleOptions.informationBodyHtml();
+        Result<FileReadError, String> infoTitle = Main.args().styleOptions.informationTitleHtml();
+
+        if(banner.isFailure() && !banner.failureReason().equals(FileReadError.NOT_DEFINED)) {
+            LOGGER.error(
+                "Failed to open banner html file {}: {}",
+                Main.args().styleOptions.bannerHtmlPath,
+                banner.failureReason().explanation
+            );
+        }
+        if(infoBody.isFailure() && !infoBody.failureReason().equals(FileReadError.NOT_DEFINED)) {
+            LOGGER.error(
+                "Failed to open information body html file {}: {}",
+                Main.args().styleOptions.informationBodyHtmlPath,
+                banner.failureReason().explanation
+            );
+        }
+        if(infoTitle.isFailure() && !infoTitle.failureReason().equals(FileReadError.NOT_DEFINED)) {
+            LOGGER.error(
+                "Failed to open information title html file {}: {}",
+                Main.args().styleOptions.informationTitleHtmlPath,
+                banner.failureReason().explanation
+            );
+        }
+
+        webpacker.page("index", Main.args().styleOptions.indexTitle)
+            .setAttribute("disablePublicLogin", Main.args().disablePublicLogin)
+            .setAttributeIf("banner", () -> banner.result(), () -> banner.isSuccess())
+            .setAttributeIf("informationModalBody", () -> infoBody.result(), () -> infoBody.isSuccess())
+            .setAttributeIf("informationModalTitle", () -> infoTitle.result(), () -> infoTitle.isSuccess())
+            .addStyleSheetIf(Main.args().styleOptions.cssUrl, () -> !undefinedString(Main.args().styleOptions.cssUrl))
+            .addInlineScript(ClientConfig.generateJs())
+            .addMetaProperties(Main.args().styleOptions.ogMetaProperties()).serve("/");
     }
 
     private static void serveDynamicTestEndpoints() {

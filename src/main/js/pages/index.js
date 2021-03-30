@@ -368,7 +368,7 @@ function setup_logout() {
     $('.logout-link').on('click', (ev) => {
         ev.preventDefault();
         confirm.display($('#confirm-popup'), 'Logout?').then(
-            () => api.logout(() => window.location.reload(true), window.location.reload(true))
+            () => api.logout(() => window.location.reload(true), () => window.location.reload(true))
         );
     });
 }

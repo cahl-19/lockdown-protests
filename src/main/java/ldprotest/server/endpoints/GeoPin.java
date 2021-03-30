@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ldprotest.business.PrivateProtestData;
 import ldprotest.business.PublicProtestData;
+import ldprotest.db.MongoErrorCode;
 import ldprotest.geo.Coordinate;
 import ldprotest.geo.GeoRectangle;
 import ldprotest.serialization.JsonSerializable;
@@ -132,8 +133,13 @@ public class GeoPin {
             try {
                 return searchProtests(new GeoRectangle(swResult.result(), neResult.result()));
             } catch(MongoException ex) {
-                LOGGER.error("Database error when querying protests.", ex);
-                return JsonEndpoint.responseFromError(JsonError.internalError(), response);
+                if(ex.getCode() == MongoErrorCode.QUERY_OPTIONS_IN_ERROR.code) {
+                    LOGGER.warn("Client queried for invalid region: sw={} ne={}", swResult.result(), neResult.result());
+                    return new Protests(List.of());
+                } else {
+                    LOGGER.error("Database error when querying protests.", ex);
+                    return JsonEndpoint.responseFromError(JsonError.internalError(), response);
+                }
             }
         });
     }

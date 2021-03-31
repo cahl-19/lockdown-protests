@@ -80,7 +80,7 @@ function normalize_bounds(bounds) {
     };
 }
 
-function clamp_lattitude(lat) {
+function clamp_latitude(lat) {
     if(lat > 90.0) {
         return 90.0;
     } else if(lat < -90.0) {
@@ -118,9 +118,9 @@ function buffer_bounds(bounds) {
     let ns_adj = span_ns * PROTEST_LOAD_ZONE_BUFFER_FACTOR / 2;
 
     return {
-        'north': clamp_lattitude(bounds.north + ns_adj),
+        'north': clamp_latitude(bounds.north + ns_adj),
         'west': bounds.west - ew_adj,
-        'south': clamp_lattitude(bounds.south - ns_adj),
+        'south': clamp_latitude(bounds.south - ns_adj),
         'east': bounds.east + ew_adj
     };s
 }
@@ -218,14 +218,18 @@ function config_map(map_div, initial_api_token, config) {
         'last_protest_update': Number.NEGATIVE_INFINITY,
         'markers': []
     };
+
+    let initial_latitude = config.geoIpLocation !== undefined ? config.geoIpLocation.latitude : 51.505;
+    let initial_longitude = config.geoIpLocation !== undefined ? config.geoIpLocation.longitude : -0.09;
+
     let map = L.map(
         map_div.attr('id'),
         {
             tap: false
         }
-    ).setView([51.505, -0.09], 13);
+    ).setView([initial_latitude, initial_longitude], 13);
 
-    map.on('locationerror', ()=> map.setView([51.505, -0.09], 13));
+    map.on('locationerror', ()=> map.setView([initial_latitude, initial_longitude], 10));
     map.locate({setView: true, maxZoom: 29});
 
 
@@ -298,11 +302,12 @@ export let protest_map = {
 
         return new Promise((success, fail) => {
             api.call(
-                '/api/map-api-token',
+                '/api/map-config',
                 'GET',
                 {},
                 (data) => {
                     if(data.token) {
+                        config.geoIpLocation = data.geoIpLocation;
                         success(config_map(map_div, data.token, config));
                     } else {
                         error_map(map_div, `No API token defined.`);

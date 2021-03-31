@@ -29,11 +29,11 @@ import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.endpoints.GeoPin;
 import ldprotest.server.endpoints.Login;
 import ldprotest.server.endpoints.Logout;
+import ldprotest.server.endpoints.MapConfig;
 import ldprotest.server.endpoints.Protests;
 import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.TokenRefresh;
 import ldprotest.server.endpoints.WhoAmI;
-import ldprotest.server.endpoints.MapApiToken;
 import ldprotest.server.infra.StaticFileServer.GzipMode;
 import ldprotest.server.infra.templates.ServeWebpack;
 import ldprotest.util.Result;
@@ -75,8 +75,7 @@ public class Server {
         TokenRefresh.register();
         GeoPin.register();
         Protests.register();
-
-        serveDynamicTestEndpoints();
+        MapConfig.register();
     }
 
     private static void serveAssets() throws IOException {
@@ -141,10 +140,6 @@ public class Server {
             .addStyleSheetIf(Main.args().styleOptions.cssUrl, () -> !undefinedString(Main.args().styleOptions.cssUrl))
             .addInlineScript(ClientConfig.generateJs())
             .addMetaProperties(Main.args().styleOptions.ogMetaProperties()).serve("/");
-    }
-
-    private static void serveDynamicTestEndpoints() {
-        MapApiToken.register();
     }
 
     private static boolean undefinedString(String s) {

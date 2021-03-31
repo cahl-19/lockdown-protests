@@ -30,6 +30,7 @@ public final class DefaultConfig {
     static private final int DEFAULT_TOKEN_KEY_DELETE_SECONDS = DEFAULT_TOKEN_KEY_ROTATE_SECONDS * 2;
     static private final int DEFAULT_TOKEN_EXPIRES_SECONDS = 15 * 60;
     static private final boolean DEFAULT_DISABLE_PUBLIC_LOGIN = false;
+    static private final boolean DEFAULT_DISABLE_GEO_IP_LOOKUP = true;
 
     private DefaultConfig() {
         /* do not construct */
@@ -39,6 +40,7 @@ public final class DefaultConfig {
 
         AppConfig.Builder builder = AppConfig.builder();
 
+        builder.setDisableGeoIpLookup(DEFAULT_DISABLE_GEO_IP_LOOKUP, AppConfig.PRIORITY_DEFAULT);
         builder.setDisablePublicLogin(DEFAULT_DISABLE_PUBLIC_LOGIN, AppConfig.PRIORITY_DEFAULT);
         builder.setStyleOptions(StyleCustomizationOptions.DEFAULT, AppConfig.PRIORITY_DEFAULT);
         builder.setHstsMaxAge(DEFAULT_HSTS_MAX_AGE, AppConfig.PRIORITY_DEFAULT);

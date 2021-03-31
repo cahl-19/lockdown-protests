@@ -93,10 +93,10 @@ public final class CmdLineReadIpLocationCsv {
 
                 long lowRangeIp = Long.parseLong(columns[options.lowRangeIndex]);
                 long highRangeIp = Long.parseLong(columns[options.highRangeIndex]);
-                double lattitude = Double.parseDouble(columns[options.latIndex]);
+                double latitude = Double.parseDouble(columns[options.latIndex]);
                 double longitude = Double.parseDouble(columns[options.longIndex]);
 
-                rows.add(new GeoIpTableRow(lowRangeIp, highRangeIp, lattitude, longitude));
+                rows.add(new GeoIpTableRow(lowRangeIp, highRangeIp, latitude, longitude));
                 line += 1;
             }
         } catch(IOException ex) {
@@ -179,8 +179,8 @@ public final class CmdLineReadIpLocationCsv {
         public int longIndex = 7;
 
         @CommandLine.Option(
-            names={"--lattitude-index"},
-            description="Column index (zero based) of the csv column containing the lattitude value. Default is 6."
+            names={"--latitude-index"},
+            description="Column index (zero based) of the csv column containing the latttude value. Default is 6."
         )
         public int latIndex = 6;
 

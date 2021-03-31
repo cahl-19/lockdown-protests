@@ -152,3 +152,13 @@ features:
     # This does not mean that a dedicated individual cannot attempt to login, however, unless a sophisticated
     # firewall configuration is employed to block access to login pages and api endpoints based on IP address.
     disablePublicLogin: false
+
+    # If true disables lookup of approximate geo location from IP address on initial page load.
+
+    # geo IP lookup singificanttly improves UX for clients who disable (or decline when asked to enable)) location
+    # services yet still expect mapping apps to start at their approximate location (probably quite common for this
+    # app's target uer-base).
+
+    #  Should be set to true if performance of the geo lookup is a concern or to avoid a pointless database query
+    # in the case that no geo IP data has been loaded using the import-ip-location-csv command.
+    disableGeoIpLookup: true

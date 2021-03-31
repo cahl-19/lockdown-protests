@@ -17,14 +17,18 @@
 */
 package ldprotest.server.endpoints;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import ldprotest.business.mapbox.MapboxTokenApi;
 import ldprotest.business.mapbox.MapboxTokenApi.ApiFailure;
 import ldprotest.business.mapbox.MapboxTokenApi.TemporaryTokenResponse;
 import ldprotest.business.mapbox.MapboxTokenRotator;
 import ldprotest.config.RotatingTokenMapboxConfig;
 import ldprotest.config.TemporaryTokenMapboxConfig;
+import ldprotest.geo.Coordinate;
+import ldprotest.geo.geoip.GeoIpLookup;
 import ldprotest.main.Main;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
@@ -36,20 +40,45 @@ import ldprotest.util.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class MapApiToken {
+public final class MapConfig {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(MapApiToken.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(MapConfig.class);
 
-    private static final String PATH = "/api/map-api-token";
+    private static final String TOKEN_PATH = "/api/map-api-token";
+    private static final String INITIAL_CONFIG_PATH = "/api/map-config";
 
-    private MapApiToken() {
+    private MapConfig() {
         /* do not construct */
     }
 
     public static void register() {
 
-        SecurityFilter.add(PATH, SecConfig.ANONYMOUS_GET);
+        boolean geoIpEnabled = !Main.args().disableGeoIpLookup;
 
+        SecurityFilter.add(TOKEN_PATH, SecConfig.ANONYMOUS_GET);
+        SecurityFilter.add(INITIAL_CONFIG_PATH, SecConfig.ANONYMOUS_GET);
+
+        Supplier<String> tokenSupplier = createTokenSupplier();
+
+        JsonEndpoint.get(TOKEN_PATH, (request, response) -> {
+            return new TokenDoc(tokenSupplier.get());
+        });
+        JsonEndpoint.get(INITIAL_CONFIG_PATH, (request, response) -> {
+            if(geoIpEnabled) {
+                Result<GeoIpLookup.GeoIpLookupError, Coordinate> result = GeoIpLookup.lookup(request.ip());
+                if(result.isSuccess()) {
+                    return new ConfigDoc(tokenSupplier.get(), new Coordinate(
+                        result.result().latitude, result.result().longitude)
+                    );
+                }
+
+            }
+
+            return new ConfigDoc(tokenSupplier.get());
+        });
+    }
+
+    private static final Supplier<String> createTokenSupplier() {
         String staticMapApiToken = Main.args().staticMapApiToken;
         TemporaryTokenMapboxConfig temporaryTokenConfig = Main.args().temporaryTokenConfig;
         RotatingTokenMapboxConfig rotConfig = Main.args().rotatingTokenConfig;
@@ -57,22 +86,14 @@ public final class MapApiToken {
         if(rotConfig.isFullyDefined()) {
             MapboxTokenRotator rotator = new MapboxTokenRotator(rotConfig, staticMapApiToken);
             rotator.register();
+            return () -> rotator.get();
 
-            JsonEndpoint.get(PATH, (request, response) -> {
-                return new JsonDoc(rotator.get());
-            });
-        }
-        else if(temporaryTokenConfig.isFullyDefined()) {
+        } else if(temporaryTokenConfig.isFullyDefined()) {
             TemporaryTokenHolder holder = new TemporaryTokenHolder(temporaryTokenConfig, staticMapApiToken);
             holder.register();
-
-            JsonEndpoint.get(PATH, (request, response) -> {
-                return new JsonDoc(holder.get());
-            });
+            return () -> holder.get();
         } else {
-            JsonEndpoint.get(PATH, (request, response) -> {
-                return new JsonDoc(Main.args().staticMapApiToken);
-            });
+            return () -> Main.args().staticMapApiToken;
         }
     }
 
@@ -125,16 +146,38 @@ public final class MapApiToken {
         }
     }
 
-    private static class JsonDoc implements JsonSerializable {
+    private static class TokenDoc implements JsonSerializable {
         public final String token;
 
         @ReflectiveConstructor
-        private JsonDoc() {
+        private TokenDoc() {
             token = "";
         }
 
-        public JsonDoc(String token) {
+        public TokenDoc(String token) {
             this.token = token;
+        }
+    }
+
+    private static class ConfigDoc implements JsonSerializable {
+
+        public final String token;
+        public final Optional<Coordinate> geoIpLocation;
+
+        @ReflectiveConstructor
+        private ConfigDoc() {
+            token = "";
+            geoIpLocation = null;
+        }
+
+        public ConfigDoc(String token, Coordinate geoIpLocation) {
+            this.token = token;
+            this.geoIpLocation = Optional.of(geoIpLocation);
+        }
+
+        public ConfigDoc(String token) {
+            this.token = token;
+            this.geoIpLocation = Optional.empty();
         }
     }
 }

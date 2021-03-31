@@ -174,6 +174,9 @@ public class ConfigFile {
             if(config.disablePublicLogin != null) {
                 builder.setDisablePublicLogin(config.disablePublicLogin, AppConfig.PRIORITY_CONFIG);
             }
+            if(config.disableGeoIpLookup != null) {
+                builder.setDisableGeoIpLookup(config.disableGeoIpLookup, AppConfig.PRIORITY_CONFIG);
+            }
         }
 
         return Result.success(builder);
@@ -256,5 +259,6 @@ public class ConfigFile {
 
     public static final class FeatureConfig {
         public Boolean disablePublicLogin;
+        public Boolean  disableGeoIpLookup;
     }
 }

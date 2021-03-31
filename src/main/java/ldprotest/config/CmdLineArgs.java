@@ -97,6 +97,11 @@ public class CmdLineArgs {
             builder.setDisablePublicLogin(val, AppConfig.PRIORITY_OVERRIDE);
         }
 
+        @Option(names = {"--enable-geo-ip"}, description = "Enables geo ip lookups")
+        void enableGeoIp(boolean val) {
+            builder.setDisableGeoIpLookup(!val, AppConfig.PRIORITY_OVERRIDE);
+        }
+
         @Override
         public Integer call() throws Exception {
             return 0;

@@ -512,7 +512,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         );
         map.put(
             Double.TYPE, (reader, field, object) -> {
-                field.setDouble(object, (short)reader.readInt32());
+                field.setDouble(object, (short)reader.readDouble());
             }
         );
         map.put(

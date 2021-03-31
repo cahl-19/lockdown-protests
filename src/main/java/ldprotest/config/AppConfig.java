@@ -25,6 +25,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final boolean disableGeoIpLookup;
     public final boolean disablePublicLogin;
     public final StyleCustomizationOptions styleOptions;
     public final int hstsMaxAge;
@@ -45,6 +46,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        boolean disableGeoIpLookup,
         boolean disablePublicLogin,
         StyleCustomizationOptions styleOptions,
         int hstsMaxAge,
@@ -64,6 +66,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.disableGeoIpLookup = disableGeoIpLookup;
         this.disablePublicLogin = disablePublicLogin;
         this.styleOptions = styleOptions;
         this.hstsMaxAge = hstsMaxAge;
@@ -89,6 +92,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<Boolean> disableGeoIpLookup;
         public final BuilderField<Boolean> disablePublicLogin;
         public final BuilderField<StyleCustomizationOptions> styleOptions;
         public final BuilderField<Integer> hstsMaxAge;
@@ -109,6 +113,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            disableGeoIpLookup = new BuilderField<>();
             disablePublicLogin = new BuilderField<>();
             styleOptions = new BuilderField<>();
             hstsMaxAge = new BuilderField<>();
@@ -127,6 +132,11 @@ public class AppConfig {
             staticMapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setDisableGeoIpLookup(boolean val, int priority) {
+            disableGeoIpLookup.set(val, priority);
+            return this;
         }
 
         public Builder setDisablePublicLogin(boolean val, int priority) {
@@ -221,6 +231,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                disableGeoIpLookup.get(),
                 disablePublicLogin.get(),
                 styleOptions.get(),
                 hstsMaxAge.get(),

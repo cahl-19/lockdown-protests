@@ -30,11 +30,17 @@ import ldprotest.geo.Coordinate;
 import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.util.Result;
+import ldprotest.util.types.Ipv4Address;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class GeoIpLookup {
+
+    private static final double DEFAULT_LATITUDE  = 51.505;
+    private static final double DEFAULT_LONGITUDE = -0.09;
+
+    private static final Coordinate DEFAULT_COORDINATE = new Coordinate(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
 
     private final static Logger LOGGER = LoggerFactory.getLogger(GeoIpLookup.class);
 
@@ -44,17 +50,29 @@ public final class GeoIpLookup {
         /* do not construct */
     }
 
+    public static Result<GeoIpLookupError, Coordinate> lookup(String ipAddress) {
+        return lookup(new Ipv4Address(ipAddress).numeric());
+    }
+
     public static Result<GeoIpLookupError, Coordinate> lookup(long ipAddress) {
 
         try {
             GeoIpTableRow row = collection()
-                .find(Filters.and(Filters.gte("ipLow", ipAddress), Filters.lte("ipHigh", ipAddress)))
+                .find(
+                    Filters.and(
+                        Filters.lte("ipLow", ipAddress),
+                        Filters.gte("ipHigh", ipAddress)
+                    )
+                )
                 .first();
-
             if(row == null) {
                 return Result.failure(GeoIpLookupError.NOT_FOUND);
             } else {
-                return Result.success(new Coordinate(row.lattitude, row.longitude));
+                if(row.latitude == 0.0 && row.longitude == 0.0) {
+                    return Result.success(DEFAULT_COORDINATE);
+                } else {
+                    return Result.success(new Coordinate(row.latitude, row.longitude));
+                }
             }
         } catch(MongoException ex) {
             LOGGER.warn("Database error searcing for geo ip");
@@ -66,8 +84,8 @@ public final class GeoIpLookup {
         collection().insertMany(rows);
     }
 
-    public static void write(long ipLow, long ipHigh, double lattitude, double longitude) {
-        GeoIpTableRow row = new GeoIpTableRow(ipLow, ipHigh, lattitude, longitude);
+    public static void write(long ipLow, long ipHigh, double latitude, double longitude) {
+        GeoIpTableRow row = new GeoIpTableRow(ipLow, ipHigh, latitude, longitude);
         collection().insertOne(row);
     }
 
@@ -103,21 +121,21 @@ public final class GeoIpLookup {
         public final long ipHigh;
 
         public final double longitude;
-        public final double lattitude;
+        public final double latitude;
 
         @ReflectiveConstructor
         private GeoIpTableRow() {
             ipLow = -1;
             ipHigh = -1;
             longitude = -1.0;
-            lattitude = -1.0;
+            latitude = -1.0;
         }
 
-        public GeoIpTableRow(long ipLow, long ipHigh, double lattitude, double longitude) {
+        public GeoIpTableRow(long ipLow, long ipHigh, double latitude, double longitude) {
             this.ipLow = ipLow;
             this.ipHigh = ipHigh;
             this.longitude = longitude;
-            this.lattitude = lattitude;
+            this.latitude = latitude;
         }
     }
 }

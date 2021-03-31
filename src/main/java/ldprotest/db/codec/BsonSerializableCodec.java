@@ -309,7 +309,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         map.put(Long.TYPE, (writer, field, object) -> writer.writeInt64(field.getName(), field.getLong(object)));
 
         map.put(Float.TYPE, (writer, field, object) -> writer.writeDouble(field.getName(), field.getFloat(object)));
-        map.put(Double.TYPE, (writer, field, object) -> writer.writeDouble(field.getName(), field.getInt(object)));
+        map.put(Double.TYPE, (writer, field, object) -> writer.writeDouble(field.getName(), field.getDouble(object)));
 
         map.put(
             Boolean.TYPE, (writer, field, object) -> writer.writeBoolean(field.getName(), field.getBoolean(object))

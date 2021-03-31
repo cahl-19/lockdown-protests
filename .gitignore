@@ -5,3 +5,4 @@ src/main/js/node_modules/
 yarn.lock
 scripts/run-server
 scripts/make-user
+scripts/import-ip-location-csv

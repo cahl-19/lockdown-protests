@@ -21,6 +21,7 @@ import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import ldprotest.business.PrivateProtestData;
+import ldprotest.geo.geoip.GeoIpLookup;
 import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.server.auth.UserAccount;
@@ -64,6 +65,7 @@ public final class SetupDatabase {
         UserAccount.setupDbIndex();
         UserSessions.setupDbIndex();
         PrivateProtestData.setupDbIndex();
+        GeoIpLookup.setupDbIndex();
     }
 
     private static void createCollectionIfNotExists(MongoDatabase db, String collectionName) {

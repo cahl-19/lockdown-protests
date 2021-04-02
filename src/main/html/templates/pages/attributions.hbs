@@ -1,0 +1,23 @@
+{{#*inline "pageTemplateStyleSheets"}}
+  <link rel="stylesheet" href="css/pages/attributions.css">
+{{/inline}}
+
+{{#*inline "body"}}
+    <div class="container d-flex h-100">
+        <div class="row justify-content-center align-self-center col-sm-12">
+            <div class="col-sm-12 align-self-center content">
+                <div class="text-center"><h1>Attributions</h1></div>
+                <ul>
+                    {{#if attributions}}
+                    {{#each attributions as |attribution|}}
+                        <li>{{{attribution}}}</li>
+                    {{/each}}
+                    {{else}}
+                    There's nothing here...
+                    {{/if}}
+                </ul>
+                <a href="/">back to home</a>
+            </div>
+        </div>
+    </div>
+{{/inline}}

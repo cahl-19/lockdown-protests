@@ -17,6 +17,7 @@
 */
 package ldprotest.config;
 
+import java.util.List;
 import java.util.Optional;
 
 public class AppConfig {
@@ -25,6 +26,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final List<String> attributions;
     public final boolean disableGeoIpLookup;
     public final boolean disablePublicLogin;
     public final StyleCustomizationOptions styleOptions;
@@ -46,6 +48,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        List<String> attributions,
         boolean disableGeoIpLookup,
         boolean disablePublicLogin,
         StyleCustomizationOptions styleOptions,
@@ -66,6 +69,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.attributions = List.copyOf(attributions);
         this.disableGeoIpLookup = disableGeoIpLookup;
         this.disablePublicLogin = disablePublicLogin;
         this.styleOptions = styleOptions;
@@ -92,6 +96,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<List<String>> attributions;
         public final BuilderField<Boolean> disableGeoIpLookup;
         public final BuilderField<Boolean> disablePublicLogin;
         public final BuilderField<StyleCustomizationOptions> styleOptions;
@@ -113,6 +118,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            attributions = new BuilderField<>();
             disableGeoIpLookup = new BuilderField<>();
             disablePublicLogin = new BuilderField<>();
             styleOptions = new BuilderField<>();
@@ -132,6 +138,11 @@ public class AppConfig {
             staticMapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setAttributions(List<String> val, int priority) {
+            attributions.set(List.copyOf(val), priority);
+            return this;
         }
 
         public Builder setDisableGeoIpLookup(boolean val, int priority) {
@@ -231,6 +242,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                attributions.get(),
                 disableGeoIpLookup.get(),
                 disablePublicLogin.get(),
                 styleOptions.get(),

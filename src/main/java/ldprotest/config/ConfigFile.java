@@ -177,6 +177,9 @@ public class ConfigFile {
             if(config.disableGeoIpLookup != null) {
                 builder.setDisableGeoIpLookup(config.disableGeoIpLookup, AppConfig.PRIORITY_CONFIG);
             }
+            if(config.attributions != null) {
+                builder.setAttributions(config.attributions, AppConfig.PRIORITY_CONFIG);
+            }
         }
 
         return Result.success(builder);
@@ -260,5 +263,6 @@ public class ConfigFile {
     public static final class FeatureConfig {
         public Boolean disablePublicLogin;
         public Boolean  disableGeoIpLookup;
+        public List<String> attributions;
     }
 }

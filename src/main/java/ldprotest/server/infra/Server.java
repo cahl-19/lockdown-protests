@@ -97,11 +97,16 @@ public class Server {
         ServeWebpack webpacker = new ServeWebpack(scriptBundles);
 
         serveIndex(webpacker);
+
         webpacker.page("login").serve("/login");
+        webpacker.page("attributions")
+            .setAttribute("attributions", Main.args().attributions)
+            .serve("/attributions");
 
         SecurityFilter.add("/" + WEBPACK_BUNDLES_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
         SecurityFilter.add("/", SecConfig.ANONYMOUS_GET_AND_HEAD);
         SecurityFilter.add("/login", SecConfig.ANONYMOUS_GET_AND_HEAD);
+        SecurityFilter.add("/attributions", SecConfig.ANONYMOUS_GET_AND_HEAD);
     }
 
     private static void serveIndex(ServeWebpack webpacker) throws IOException {

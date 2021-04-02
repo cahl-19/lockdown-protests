@@ -162,3 +162,11 @@ features:
     #  Should be set to true if performance of the geo lookup is a concern or to avoid a pointless database query
     # in the case that no geo IP data has been loaded using the import-ip-location-csv command.
     disableGeoIpLookup: true
+
+    # Required attributions for APIs and software
+
+    # The IP2Locatin API attribuution is required if the free IP2Location database was imported for GEO IP lookup.
+    attributions: [
+            "This site or product includes IP2Location LITE data available from \
+            <a href='http://www.ip2location.com'>http://www.ip2location.com.</a>"
+        ]

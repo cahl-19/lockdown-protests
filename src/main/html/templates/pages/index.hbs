@@ -219,7 +219,7 @@
             {{#if informationModalTitle}}
             {{{informationModalTitle}}}
             {{else}}
-            <h3 class="modal-title">Contributing</h3>
+            <h3 class="modal-title">About</h3>
             {{/if}}
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
@@ -229,11 +229,20 @@
                 {{#if informationModalBody}}
                 {{{informationModalBody}}}
                 {{else}}
+                <strong>Contributing:</strong>
+                <p class='text-indent'>
                 This is a free and open source project. You can support us by leaving your comments, suggestions,
                 bug reports or, if you are a software developer or web designer, your code contributions, on our
                 github page at
                 <a href="https://github.com/cahl-19/lockdown-protests">https://github.com/cahl-19/lockdown-protests</a>
+                </p>
                 {{/if}}
+                <div class="text-right">
+                    <small class="text-muted">
+                        This project was made using third-party APIs and software
+                        (see <a href="/attributions">attributions</a>).
+                    </small>
+                </div>
           </div>
         </div>
       </div>

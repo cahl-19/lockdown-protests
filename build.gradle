@@ -239,6 +239,7 @@ task makeDebFiles {
             "${escaped_single_quote}${deployPrefix}/var/lib/ldprotest/site/banner.html${escaped_single_quote}"
         ).replace("/", "\\/")
 
+        def importIpLocation = new File("${projectDir}/build/deb-install", "import-ip-location-csv")
         def runscript = new File("${projectDir}/build/deb-install", "ldprotest")
         def createUser = new File("${projectDir}/build/deb-install", "make-user")
         def service = new File("${projectDir}/build/deb-install", "ldprotest.service")
@@ -250,6 +251,13 @@ task makeDebFiles {
         def jvmArgs = applicationDefaultJvmArgs.join(" ")
         def cp = "${deployPrefix}/lib/ldprotest/*"
 
+        importIpLocation.text = unindent(
+            """#!/bin/bash
+                JAVA="\$(find /usr/lib/jvm/  -maxdepth 1 -name "java-11-openjdk*" | head -n1)/bin/java"
+                exec "\${JAVA}\" -Dlogging.appender.STDOUT.level=ERROR \\
+                    ${jvmArgs} -cp '${cp}' ldprotest.server.auth.CmdLineReadIpLocationCsv "\${@}"
+            """
+        )
         createUser.text = unindent(
             """#!/bin/bash
                 JAVA="\$(find /usr/lib/jvm/  -maxdepth 1 -name "java-11-openjdk*" | head -n1)/bin/java"
@@ -338,6 +346,7 @@ task makeDebFiles {
             """
         )
 
+        importIpLocation.setExecutable(true, false)
         runscript.setExecutable(true, false)
         createUser.setExecutable(true, false)
     }
@@ -409,6 +418,9 @@ task deployDeb(type: Deb) {
         into 'bin/'
     }
     from("${projectDir}/build/deb-install/make-user") {
+        into 'bin/'
+    }
+    from("${projectDir}/build/deb-install/import-ip-location-csv") {
         into 'bin/'
     }
 

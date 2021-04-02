@@ -67,6 +67,9 @@ public class ConfigFile {
             if(config.hstsMaxAge != null) {
                 builder.setHstsMaxAge(config.hstsMaxAge, AppConfig.PRIORITY_CONFIG);
             }
+            if(config.usingReverseProxy != null) {
+                builder.setUsingReverseProxy(config.usingReverseProxy, AppConfig.PRIORITY_CONFIG);
+            }
         }
 
         if(data.mongoConnect != null) {
@@ -205,6 +208,7 @@ public class ConfigFile {
         public Boolean usingHttps;
         public Long httpCacheMaxAge;
         public Integer hstsMaxAge;
+        public Boolean usingReverseProxy;
     }
 
     private static final class UserSessionConfig {

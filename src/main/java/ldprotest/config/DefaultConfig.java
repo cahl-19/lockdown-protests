@@ -40,6 +40,7 @@ public final class DefaultConfig {
             "<a href='http://www.ip2location.com'>http://www.ip2location.com.</a>"
         )
     );
+    static private final boolean DEFAULT_USING_REVERSE_PROXY = true;
 
     private DefaultConfig() {
         /* do not construct */
@@ -49,6 +50,7 @@ public final class DefaultConfig {
 
         AppConfig.Builder builder = AppConfig.builder();
 
+        builder.setUsingReverseProxy(DEFAULT_USING_REVERSE_PROXY, AppConfig.PRIORITY_DEFAULT);
         builder.setAttributions(DEFAULT_ATTRIBUTIONS, AppConfig.PRIORITY_DEFAULT);
         builder.setDisableGeoIpLookup(DEFAULT_DISABLE_GEO_IP_LOOKUP, AppConfig.PRIORITY_DEFAULT);
         builder.setDisablePublicLogin(DEFAULT_DISABLE_PUBLIC_LOGIN, AppConfig.PRIORITY_DEFAULT);

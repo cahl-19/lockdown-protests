@@ -35,6 +35,7 @@ import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.infra.JsonEndpoint;
+import ldprotest.server.infra.http.ClientIp;
 import ldprotest.tasks.PeriodicTaskManager;
 import ldprotest.util.Result;
 import org.slf4j.Logger;
@@ -65,7 +66,7 @@ public final class MapConfig {
         });
         JsonEndpoint.get(INITIAL_CONFIG_PATH, (request, response) -> {
             if(geoIpEnabled) {
-                Result<GeoIpLookup.GeoIpLookupError, Coordinate> result = GeoIpLookup.lookup(request.ip());
+                Result<GeoIpLookup.GeoIpLookupError, Coordinate> result = GeoIpLookup.lookup(ClientIp.get(request));
                 if(result.isSuccess()) {
                     return new ConfigDoc(tokenSupplier.get(), new Coordinate(
                         result.result().latitude, result.result().longitude)

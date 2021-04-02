@@ -25,6 +25,10 @@ webServerConfig:
     # values)
     httpCacheMaxAge: 60
 
+    # Set to true if using a reverse proxy such as nginx. If true, ldprotest will expect to see the client IP address
+    # passed in as the 'X-Real-IP' header
+    usingReverseProxy: true
+
 userSessionConfig:
     # Seconds until a user session expires
     sessionExpiresSeconds: 604800

@@ -26,6 +26,7 @@ public class AppConfig {
     public static final int PRIORITY_CONFIG = 1;
     public static final int PRIORITY_OVERRIDE = 2;
 
+    public final boolean usingReverseProxy;
     public final List<String> attributions;
     public final boolean disableGeoIpLookup;
     public final boolean disablePublicLogin;
@@ -48,6 +49,7 @@ public class AppConfig {
     public final boolean usingHttps;
 
     private AppConfig(
+        boolean usingReverseProxy,
         List<String> attributions,
         boolean disableGeoIpLookup,
         boolean disablePublicLogin,
@@ -69,6 +71,7 @@ public class AppConfig {
         boolean helpRequested,
         boolean usingHttps
     ) {
+        this.usingReverseProxy = usingReverseProxy;
         this.attributions = List.copyOf(attributions);
         this.disableGeoIpLookup = disableGeoIpLookup;
         this.disablePublicLogin = disablePublicLogin;
@@ -96,6 +99,7 @@ public class AppConfig {
     }
 
     public static final class Builder {
+        public final BuilderField<Boolean> usingReverseProxy;
         public final BuilderField<List<String>> attributions;
         public final BuilderField<Boolean> disableGeoIpLookup;
         public final BuilderField<Boolean> disablePublicLogin;
@@ -118,6 +122,7 @@ public class AppConfig {
         public final BuilderField<Boolean> usingHttps;
 
         private Builder() {
+            usingReverseProxy = new BuilderField<>();
             attributions = new BuilderField<>();
             disableGeoIpLookup = new BuilderField<>();
             disablePublicLogin = new BuilderField<>();
@@ -138,6 +143,11 @@ public class AppConfig {
             staticMapApiToken = new BuilderField<>();
             helpRequested = new BuilderField<>();
             usingHttps = new BuilderField<>();
+        }
+
+        public Builder setUsingReverseProxy(boolean val, int priority) {
+            usingReverseProxy.set(val, priority);
+            return this;
         }
 
         public Builder setAttributions(List<String> val, int priority) {
@@ -242,6 +252,7 @@ public class AppConfig {
 
         public AppConfig build() {
             return new AppConfig(
+                usingReverseProxy.get(),
                 attributions.get(),
                 disableGeoIpLookup.get(),
                 disablePublicLogin.get(),

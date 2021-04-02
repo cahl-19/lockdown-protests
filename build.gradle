@@ -255,7 +255,7 @@ task makeDebFiles {
             """#!/bin/bash
                 JAVA="\$(find /usr/lib/jvm/  -maxdepth 1 -name "java-11-openjdk*" | head -n1)/bin/java"
                 exec "\${JAVA}\" -Dlogging.appender.STDOUT.level=ERROR \\
-                    ${jvmArgs} -cp '${cp}' ldprotest.server.auth.CmdLineReadIpLocationCsv "\${@}"
+                    ${jvmArgs} -cp '${cp}' ldprotest.geo.geoip.CmdLineReadIpLocationCsv "\${@}"
             """
         )
         createUser.text = unindent(

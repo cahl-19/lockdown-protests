@@ -122,7 +122,7 @@ function buffer_bounds(bounds) {
         'west': bounds.west - ew_adj,
         'south': clamp_latitude(bounds.south - ns_adj),
         'east': bounds.east + ew_adj
-    };s
+    };
 }
 
 function update_api_token(map_div, title_layer) {

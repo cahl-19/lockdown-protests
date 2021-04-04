@@ -35,6 +35,7 @@ import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
 import org.eclipse.jetty.http.HttpStatus;
 import spark.Response;
+import static spark.Spark.head;
 
 public final class StaticFileServer {
 
@@ -103,6 +104,18 @@ public final class StaticFileServer {
         String extension = PathUtils.extension(url);
         String contentType = CONTENT_TYPE_MAP.get(extension);
         boolean requiresXframeOpt = REQUIRES_XFRAME_OPTIONS.contains(extension);
+
+        head(url, (req, resp) -> {
+            resp.header("Content-Type", contentType);
+            if(requiresXframeOpt) {
+                resp.header("X-Frame-Options", "deny");
+            }
+            byte[] content = FILE_CACHE.computeIfAbsent(resourcePath, () -> readFile(resourcePath));
+
+            resp.header("Content-Length", content.length);
+
+            return "";
+        });
 
         get(url, (req, resp) -> {
 

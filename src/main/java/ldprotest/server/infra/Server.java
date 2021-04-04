@@ -86,8 +86,8 @@ public class Server {
             ASSETS_PREFIX, ASSETS_PREFIX, "(.*\\.png|.*\\.jpg|.*\\.svg)", GzipMode.DYNAMIC_GZIP
         );
 
-        SecurityFilter.add("/" + CSS_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
-        SecurityFilter.add("/" + ASSETS_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
+        SecurityFilter.add("/" + CSS_PREFIX + "/**", SecConfig.ANONYMOUS_GET_AND_HEAD);
+        SecurityFilter.add("/" + ASSETS_PREFIX + "/**", SecConfig.ANONYMOUS_GET_AND_HEAD);
     }
 
     private static void serveStaticPages() throws IOException {
@@ -103,7 +103,7 @@ public class Server {
             .setAttribute("attributions", Main.args().attributions)
             .serve("/attributions");
 
-        SecurityFilter.add("/" + WEBPACK_BUNDLES_PREFIX + "/**", SecConfig.ANONYMOUS_GET);
+        SecurityFilter.add("/" + WEBPACK_BUNDLES_PREFIX + "/**", SecConfig.ANONYMOUS_GET_AND_HEAD);
         SecurityFilter.add("/", SecConfig.ANONYMOUS_GET_AND_HEAD);
         SecurityFilter.add("/login", SecConfig.ANONYMOUS_GET_AND_HEAD);
         SecurityFilter.add("/attributions", SecConfig.ANONYMOUS_GET_AND_HEAD);

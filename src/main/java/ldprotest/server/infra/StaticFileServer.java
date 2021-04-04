@@ -111,7 +111,7 @@ public final class StaticFileServer {
                 resp.header("X-Frame-Options", "deny");
             }
             byte[] content = FILE_CACHE.computeIfAbsent(resourcePath, () -> readFile(resourcePath));
-            resp.header("Content-Length", content.length);
+            resp.header("Content-Length", Integer.toString(content.length));
 
             return "";
         });
@@ -124,6 +124,8 @@ public final class StaticFileServer {
                 return "";
             }
 
+            boolean useGzip = acceptEncoding.gzip() && !gzipMode.equals(GzipMode.NO_GZIP);
+
             resp.header("Content-Type", contentType);
             if(requiresXframeOpt) {
                 resp.header("X-Frame-Options", "deny");
@@ -131,7 +133,7 @@ public final class StaticFileServer {
 
             HttpCaching.setCacheHeaders(resp, timestamp, Main.args().httpCacheMaxAge);
 
-            if(acceptEncoding.gzip() && !gzipMode.equals(GzipMode.NO_GZIP)) {
+            if(useGzip) {
                 resp.header("Content-Encoding", "gzip");
             }
 
@@ -142,8 +144,9 @@ public final class StaticFileServer {
                 return new byte[0];
             } else {
                 byte[] content = FILE_CACHE.computeIfAbsent(resourcePath, () -> readFile(resourcePath));
-                resp.header("Content-Length", content.length);
-                
+                if(!useGzip) {
+                    resp.header("Content-Length", Integer.toString(content.length));
+                }
                 return content;
             }
         });

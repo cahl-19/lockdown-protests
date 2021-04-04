@@ -294,12 +294,13 @@ body, html {
     padding-bottom: 1px;
     border-style: solid;
     border-width: thin;
-    font-size: 1.1em;
+    font-size: 16px;
 }
 
 input[type=text].search-input:focus {
     background-color: rgba(255, 255, 255, 0.5);
     width: 210px;
+    font-size: 16px;
 }
 
 .search-icon {
@@ -314,25 +315,47 @@ input[type=text].search-input:focus {
 
 .search-results-container {
     background-color: rgba(255, 255, 255, 0.90);
-    width: 600px;
     border-style: solid;
     border-width: thin;
 }
 
-.search-spinner-background {
-    height: 300px;
-    width: 600px;
-}
+@media only screen and (max-width: 768px) {
+    .search-results-container {
+        width: 300px;
+    }
 
-.search-spinner {
-    height: 180px;
-    width: 180px;
-    margin-left: 210px;
-    margin-top: 60px;
+    .search-spinner-background {
+        height: 200px;
+        width: 300px;
+    }
+
+    .search-spinner {
+        height: 120px;
+        width: 120px;
+        margin-left: 90px;
+        margin-top: 40px;
+    }
+}
+@media only screen and (min-width: 768px) {
+    .search-results-container {
+        width: 600px;
+    }
+
+    .search-spinner-background {
+        height: 300px;
+        width: 600px;
+    }
+
+    .search-spinner {
+        height: 180px;
+        width: 180px;
+        margin-left: 210px;
+        margin-top: 60px;
+    }
 }
 
 .search-result {
-    font-size: large;
+    font-size: 1.3em;
     padding-top: 5px;
     padding-bottom: 5px;
     border-style: groove;

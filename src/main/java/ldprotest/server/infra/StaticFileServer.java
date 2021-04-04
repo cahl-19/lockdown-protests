@@ -111,7 +111,6 @@ public final class StaticFileServer {
                 resp.header("X-Frame-Options", "deny");
             }
             byte[] content = FILE_CACHE.computeIfAbsent(resourcePath, () -> readFile(resourcePath));
-
             resp.header("Content-Length", content.length);
 
             return "";
@@ -142,7 +141,10 @@ public final class StaticFileServer {
                 writeRawBinaryData(resp, content);
                 return new byte[0];
             } else {
-                return FILE_CACHE.computeIfAbsent(resourcePath, () -> readFile(resourcePath));
+                byte[] content = FILE_CACHE.computeIfAbsent(resourcePath, () -> readFile(resourcePath));
+                resp.header("Content-Length", content.length);
+                
+                return content;
             }
         });
     }

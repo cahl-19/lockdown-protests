@@ -23,6 +23,7 @@ import L from 'leaflet';
 import api from 'api';
 import sanitize from 'sanitize';
 import protest_object from 'protest-object';
+import geocode from 'geocode';
 /***********************************************************************************************************************
 *                                                      CONSTANTS                                                       *
 ***********************************************************************************************************************/
@@ -35,7 +36,6 @@ const POPUP_MAX_WIDTH_PIXELS = 500;
 function popup_max_width_pixels() {
     return Math.min(0.8 * $(window).width(), POPUP_MAX_WIDTH_PIXELS)
 }
-
 
 function error_map(map_div, error_message) {
     map_div.html(`<p>Error initializing map: ${error_message}</p>`);
@@ -125,7 +125,7 @@ function buffer_bounds(bounds) {
     };
 }
 
-function update_api_token(map_div, title_layer) {
+function update_api_token(map_div, title_layer, search) {
     api.call(
         '/api/map-api-token',
         'GET',
@@ -135,6 +135,7 @@ function update_api_token(map_div, title_layer) {
                 title_layer.setUrl(
                     `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${data.token}`
                 );
+                search.change_token(data.token);
             } else {
                 error_map(map_div, `Unable to fetch API token for map redraw.`);
                 fail();
@@ -236,7 +237,6 @@ function config_map(map_div, initial_api_token, config) {
     let url = `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${initial_api_token}`;
 
     L.Icon.Default.imagePath = 'assets/leaflet/';
-
     map.setMinZoom(4);
 
     let title_layer = L.tileLayer(url, {
@@ -251,6 +251,11 @@ function config_map(map_div, initial_api_token, config) {
         accessToken: 'your.mapbox.access.token',
         }
     ).addTo(map);
+
+    let search = geocode.search(
+        map_div, map, {'token': initial_api_token, 'display_error': config.display_error}
+    );
+    search.start();
 
     update_protests(map, state);
 
@@ -267,7 +272,7 @@ function config_map(map_div, initial_api_token, config) {
 
     if(CLIENT_CONFIG.MAP_API_TOKEN_REFRESH_SECONDS) {
         window.setInterval(
-            () => update_api_token(map_div, title_layer), CLIENT_CONFIG.MAP_API_TOKEN_REFRESH_SECONDS * 1000
+            () => update_api_token(map_div, title_layer, search), CLIENT_CONFIG.MAP_API_TOKEN_REFRESH_SECONDS * 1000
         );
     }
 

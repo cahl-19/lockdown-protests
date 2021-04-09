@@ -179,6 +179,7 @@ class search {
                 result_display.text(r.place_name);
 
                 result_display.on('click', () => {
+                    this.__close_results();
                     this.map.flyTo([r.center[1], r.center[0]], DEFAULT_LOCATION_ZOOM);
                 });
 

@@ -111,7 +111,7 @@ class search {
         let close_button = $(
                 '<button class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
         );
-        let header = $('<div class="search-results-header">');
+        let header = $('<div class="search-results-header"><strong>Search Results:</strong></div>');
 
         close_button.on('click', () => this.__close_results());
 

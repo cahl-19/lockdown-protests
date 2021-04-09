@@ -1,0 +1,60 @@
+{{#*inline "pageTemplateStyleSheets"}}
+  <link rel="stylesheet" href="css/pages/users.css">
+  <link rel="stylesheet" href="css/modules/error-popup.css">
+{{/inline}}
+
+{{#*inline "body"}}
+    <div class="container d-flex h-100">
+        <div class="row justify-content-center align-self-center col-sm-12">
+            <div class="col-sm-11 col-md-8 align-self-center content">
+
+                <div class="text-center"><h1>User: <span id="user-title"></span></h1></div>
+
+                <fieldset class="user-info-zone">
+                    <legend class="group-legend">User Info</legend>
+                    <table class="info-table">
+                        <tr>
+                            <td><strong>Username:</strong></td>
+                            <td id="user-info-username" class="user-info-text">
+                            <div class="spinner-border info-spinner" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email</strong></td>
+                            <td id="user-info-email" class="user-info-text">
+                            <div class="spinner-border info-spinner" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Role</strong></td>
+                            <td id="user-info-role" class="user-info-text">
+                            <div class="spinner-border info-spinner" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            </td>
+                        </tr>
+                    </table>
+                </fieldset>
+
+                <fieldset class="user-controls">
+                    <legend class="group-legend">Controls</legend>
+                    <button type="button" class="btn btn-danger" id="delete-user">Delete User</button>
+                </fieldset>
+                <a href="/">back to home</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-popup" id="error-popup">
+        <div class="error-popup-content">
+            <div class="error-message"></div>
+            <div class="text-right">
+                <button type="button" class="btn btn-danger close-error-popup">Close</button>
+            </div>
+        </div>
+    </div>
+{{/inline}}

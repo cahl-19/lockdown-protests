@@ -1,0 +1,36 @@
+.user-info-text {
+    display: inline;
+    margin-left: 40px;
+}
+
+.container {
+    max-width: 90%;
+}
+
+.user-info-zone {
+    border-style: solid;
+    border-width: thin;
+    margin-bottom: 2em;
+    padding: 20px;
+}
+
+.user-controls {
+    border-style: solid;
+    border-width: thin;
+    padding: 20px;
+}
+
+.info-spinner {
+    height: 1em;
+    width: 1em;
+}
+
+.group-legend {
+    width: auto;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.info-table {
+    border: none;
+}

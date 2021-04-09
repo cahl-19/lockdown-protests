@@ -29,6 +29,7 @@ public class JsonError implements JsonSerializable {
     private static final JsonError CONTENT_TYPE_ERROR = new JsonError(ServerErrorCode.CONTENT_TYPE_ERROR);
     private static final JsonError LOGIN_FAILURE = new JsonError(ServerErrorCode.LOGIN_FAILURE);
     private static final JsonError UNAUTHORIZED_FAILURE = new JsonError(ServerErrorCode.UNAUTHORIZED_FAILURE);
+    private static final JsonError NO_SUCH_RESOURCE = new JsonError(ServerErrorCode.NO_SUCH_RESOURCE);
 
 
     public final int code;
@@ -54,6 +55,10 @@ public class JsonError implements JsonSerializable {
         this.code = 0;
         this.description = "";
         this.details = Optional.empty();
+    }
+
+    public static JsonError noSuchResource() {
+        return NO_SUCH_RESOURCE;
     }
 
     public static JsonError invalidParams(String explanation) {
@@ -91,7 +96,8 @@ public class JsonError implements JsonSerializable {
         LOGIN_FAILURE(3, "Invalid user or password"),
         UNAUTHORIZED_FAILURE(4, "Unauthorized or auth expired"),
         INVALID_REQUEST_BODY(5, "Body of request has invalid data"),
-        INVALID_REQUEST_PARAMS(6, "Invalid query parameters");
+        INVALID_REQUEST_PARAMS(6, "Invalid query parameters"),
+        NO_SUCH_RESOURCE(7, "Resource does not exist");
 
         private final int code;
         private final String description;

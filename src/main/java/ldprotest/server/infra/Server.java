@@ -24,8 +24,10 @@ import java.io.IOException;
 import java.util.List;
 import ldprotest.config.StyleCustomizationOptions.FileReadError;
 import ldprotest.main.Main;
+import ldprotest.server.auth.HttpVerbTypes;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
+import ldprotest.server.auth.UserRole;
 import ldprotest.server.endpoints.GeoPin;
 import ldprotest.server.endpoints.Login;
 import ldprotest.server.endpoints.Logout;
@@ -33,6 +35,7 @@ import ldprotest.server.endpoints.MapConfig;
 import ldprotest.server.endpoints.Protests;
 import ldprotest.server.endpoints.ServerVersion;
 import ldprotest.server.endpoints.TokenRefresh;
+import ldprotest.server.endpoints.User;
 import ldprotest.server.endpoints.WhoAmI;
 import ldprotest.server.infra.StaticFileServer.GzipMode;
 import ldprotest.server.infra.templates.ServeWebpack;
@@ -76,6 +79,7 @@ public class Server {
         GeoPin.register();
         Protests.register();
         MapConfig.register();
+        User.register();
     }
 
     private static void serveAssets() throws IOException {
@@ -98,6 +102,7 @@ public class Server {
 
         serveIndex(webpacker);
 
+        webpacker.page("user").serve("/user");
         webpacker.page("login").serve("/login");
         webpacker.page("attributions")
             .setAttribute("attributions", Main.args().attributions)
@@ -107,6 +112,13 @@ public class Server {
         SecurityFilter.add("/", SecConfig.ANONYMOUS_GET_AND_HEAD);
         SecurityFilter.add("/login", SecConfig.ANONYMOUS_GET_AND_HEAD);
         SecurityFilter.add("/attributions", SecConfig.ANONYMOUS_GET_AND_HEAD);
+        SecurityFilter.add(
+            "/user",
+            SecConfig.builder()
+                .add(UserRole.MODERATOR, HttpVerbTypes.GET)
+                .add(UserRole.ADMIN, HttpVerbTypes.GET)
+                .build()
+        );
     }
 
     private static void serveIndex(ServeWebpack webpacker) throws IOException {

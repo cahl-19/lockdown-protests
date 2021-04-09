@@ -160,6 +160,23 @@ public final class UserAccount {
         return ErrorCode.success();
     }
 
+    public static Result<UserLookupError, UserInfo> lookupByUsername(String username) {
+        MongoCollection<UserCredentialInfo> collection = collection();
+
+        try {
+            UserCredentialInfo allInfo = collection.find(Filters.eq("info.publicUsername", username)).first();
+
+            if(allInfo == null) {
+                return Result.failure(UserLookupError.INVALID_USER);
+            } else {
+                return Result.success(allInfo.info);
+            }
+        } catch(MongoException ex) {
+            LOGGER.error("Database error when looking up user", ex);
+            return Result.failure(UserLookupError.DATABASE_ERROR);
+        }
+    }
+
     public static ErrorCode<UserLookupError> lock(UserInfo info) {
         return setLock(info, true);
     }
@@ -173,7 +190,9 @@ public final class UserAccount {
 
         try {
             UpdateResult result = collection.updateOne(
-                Filters.and(Filters.eq("info.email", info.email), Filters.eq("info.publicUsername")),
+                Filters.and(
+                    Filters.eq("info.email", info.email), Filters.eq("info.publicUsername", info.publicUsername)
+                ),
                 Updates.set("locked", lockValue)
             );
 

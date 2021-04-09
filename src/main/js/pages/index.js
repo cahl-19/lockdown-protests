@@ -62,7 +62,17 @@ function can_edit_protest(protest) {
 }
 
 function render_popup(protest) {
-    let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(protest.date);
+    let dt = new Intl.DateTimeFormat(
+        [],
+        {
+            'year': 'numeric',
+            'month': 'numeric',
+            'day': 'numeric',
+            'hour': 'numeric',
+            'minute': 'numeric',
+            'second': 'numeric'
+        }
+    ).format(protest.date);
 
     let content = $('<div>');
 

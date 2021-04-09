@@ -115,7 +115,14 @@ export let protest_form = {
         dress_code.attr('maxlength', 128);
 
         window.setInterval(() => {
-            let dt = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' }).format(Date.now());
+            let dt = new Intl.DateTimeFormat([], {
+                'year': 'numeric',
+                'month': 'numeric',
+                'day': 'numeric',
+                'hour': 'numeric',
+                'minute': 'numeric',
+                'second': 'numeric'
+            }).format(Date.now());
             user_current_time.text(dt);
         }, 1000);
 

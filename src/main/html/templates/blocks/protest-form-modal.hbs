@@ -9,7 +9,7 @@
       </div>
       <div class="modal-body">
         <div class="protest-location">
-            <small>Protest Located At: <span id='{{id_prefix}}-display-location'></span></small>
+            <small>Event Located At: <span id='{{id_prefix}}-display-location'></span></small>
         </div>
         <form class="needs-validation" id='{{id_prefix}}-form' autocomplete="off" novalidate>
 
@@ -21,16 +21,27 @@
               <label for="{{id_prefix}}-input-title">Title</label>
               <input
                   type="text" class="form-control" id="{{id_prefix}}-input-title"
-                  aria-describedby="{{id_prefix}}-title-help" placeholder="Enter Protest Title" required
+                  aria-describedby="{{id_prefix}}-title-help" placeholder="Enter Event Title" required
               >
               <small id='{{id_prefix}}-title-help' class="form-text text-muted">
                   Max 256 characters.
               </small>
             </div>
-            <div class="form-group has-validation">
+            <div class='form-group'>
+                <div>Are you Registering...</div>
+                <div class='event-type-row'>
+                    <div class='protest-type-label'>An event?</div>
+                    <label class="switch">
+                        <input type="checkbox" id="{{id_prefix}}-input-location-type">
+                        <span class="slider"></span>
+                    </label>
+                    <div class='protest-type-label'> Or an organization?</div>
+                </div>
+            </div>
+            <div class="form-group has-validation" id='{{id_prefix}}-date-form-group'>
                 <label for="{{id_prefix}}-input-date">Date:</label>
-                <input type="date" id="{{id_prefix}}-input-date" required>
-                <input type="time" id="{{id_prefix}}-input-time" value="15:00" required>
+                <input type="date" id="{{id_prefix}}-input-date">
+                <input type="time" id="{{id_prefix}}-input-time" value="15:00">
                 <div><small class="form-text text-muted">
                     It is currently <span id="{{id_prefix}}-user-current-time"></span>
                 </small></div>
@@ -38,15 +49,18 @@
                     Date & Time are Required.
                 </div>
             </div>
-            <div class="form-group has-validation">
+            <div class="form-group has-validation" id='{{id_prefix}}-recurs-form-group'>
                 <div>
                     <label for="{{id_prefix}}-enable-recurs">Recurring?</label>
                     <input type="checkbox" id="{{id_prefix}}-enable-recurs">
                 </div>
-                <label for="{{id_prefix}}-input-recurs-period">Recurs Every:</label>
-                <input type="number" id="{{id_prefix}}-input-recurs-period" min="0" value="1" disabled><span> Days</span>
+                <div id='{{id_prefix}}-recurs-input-row' class='hidden'>
+                    <label for="{{id_prefix}}-input-recurs-period">Recurs Every:</label>
+                    <input type="number" id="{{id_prefix}}-input-recurs-period" min="0" value="1" disabled>
+                    <span> Days</span>
+                </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" id='{{id_prefix}}-dress-code-form-group'>
               <label for="{{id_prefix}}-input-dress-code">Dress Code (Optional)</label>
               <input
                   type="text" class="form-control" id="{{id_prefix}}-input-dress-code"
@@ -76,11 +90,11 @@
                   rows="4" aria-describedby="{{id_prefix}}-protest-description-help" required
               ></textarea>
               <small id='{{id_prefix}}-protest-description-help' class="form-text text-muted">
-                  Keep it legal, linking  to external sites is allowed and <em>encouraged</em>. Less than 768
-                  characters.
+                  Keep it legal,  Less than 768 characters.
                   <br/><br/>
-                  Required: describe the meeting spot (or address), type of protest (rally, march, sit-in etc.) and
-                  contact info (but don't dox yourself unless you understand the risks).
+                  Required: If registering an event describe the meeting spot (or address), type of protest
+                  (rally, march, sit-in etc.) and contact info (if it's not on the homepage). If registering an
+                  organization, describe why and how the organization is operating in protest of lockdown measures.
               </small>
             </div>
         </form>

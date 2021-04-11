@@ -48,7 +48,7 @@ public class PrivateProtestData implements BsonSerializable {
     public final Optional<String> dressCode;
     public final Optional<String> homePage;
 
-    public final ZonedDateTime date;
+    public final Optional<ZonedDateTime> date;
     public final Optional<Integer> recursEveryDays;
 
     public final UUID protestId;
@@ -74,7 +74,7 @@ public class PrivateProtestData implements BsonSerializable {
         UUID ownerId,
         String title,
         String description,
-        ZonedDateTime date,
+        Optional<ZonedDateTime> date,
         Optional<String> dressCode,
         UUID protestId,
         Optional<String> homePage,

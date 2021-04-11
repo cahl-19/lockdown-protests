@@ -62,7 +62,7 @@ export let protest_form = {
     'close_form': function(id_prefix) {
         $(`#${id_prefix}-form-modal`).modal('hide');
     },
-    'open_form': function(id_prefix, populate) {
+    'open_form': function(id_prefix, populate, is_event = true) {
         let modal = $(`#${id_prefix}-form-modal`);
 
         function set_if_defined(elem, value) {
@@ -90,6 +90,13 @@ export let protest_form = {
         if(populate.recursEveryDays !== undefined && populate.recursEveryDays > 0) {
             $(`#${id_prefix}-enable-recurs`).prop('checked', true);
             $(`#${id_prefix}-input-recurs-period`).removeAttr('disabled');
+            $(`#${id_prefix}-recurs-input-row`).removeClass('hidden');
+        }
+
+        if(!is_event) {
+            $(`#${id_prefix}-recurs-form-group`).addClass('hidden');
+            $(`#${id_prefix}-date-form-group`).addClass('hidden');
+            $(`#${id_prefix}-input-location-type`).prop('checked', true);
         }
 
         modal.modal('show');
@@ -113,6 +120,11 @@ export let protest_form = {
         let longitude = $(`#${id_prefix}-input-longitude`);
         let enable_recurs = $(`#${id_prefix}-enable-recurs`);
         let recurrence_period = $(`#${id_prefix}-input-recurs-period`);
+        let location_type = $(`#${id_prefix}-input-location-type`);
+        let recurs_input_row = $(`#${id_prefix}-recurs-input-row`);
+        let recurs_form_group = $(`#${id_prefix}-recurs-form-group`);
+        let date_form_group = $(`#${id_prefix}-date-form-group`);
+        let dress_code_form_group = $(`#${id_prefix}-dress-code-form-group`);
 
         title.attr('maxlength', 256);
         title.attr('minlength', 4);
@@ -134,18 +146,39 @@ export let protest_form = {
             user_current_time.text(dt);
         }, 1000);
 
+        location_type.on('change', (ev) => {
+            ev.preventDefault();
+
+            if(location_type[0].checked) {
+                recurs_form_group.addClass('hidden');
+                date_form_group.addClass('hidden');
+                dress_code_form_group.addClass('hidden');
+            } else {
+                recurs_form_group.removeClass('hidden');
+                date_form_group.removeClass('hidden');
+                dress_code_form_group.removeClass('hidden');
+            }
+        });
+
         enable_recurs.on('change', (ev) => {
             ev.preventDefault();
             if(enable_recurs[0].checked) {
                 recurrence_period.removeAttr('disabled');
+                recurs_input_row.removeClass('hidden');
             } else {
                 recurrence_period.attr('disabled', true);
+                recurs_input_row.addClass('hidden');
             }
         });
 
         function validate_date() {
 
             let dt = date_from_inputs(date, time);
+
+            if(location_type[0].checked) {
+                date[0].setCustomValidity('');
+                return;
+            }
 
             if(dt === undefined) {
                 let msg = 'Date & time are required';
@@ -166,7 +199,7 @@ export let protest_form = {
         };
 
         function protest_data() {
-            return {
+            let data = {
                 'location': {
                     'latitude': input_value(latitude),
                     'longitude': input_value(longitude)
@@ -174,12 +207,15 @@ export let protest_form = {
                 'owner': api.whoami(),
                 'title': input_value(title),
                 'description': input_value(description),
-                'dressCode': input_value(dress_code),
-                'date': date_from_inputs(date, time).getTime(),
                 'protestId': input_value(protest_id),
                 'homePage': input_value(home_page),
                 'recursEveryDays': enable_recurs[0].checked ? recurrence_period.val() : 0
             };
+            if(!location_type[0].checked) {
+                data['date'] = date_from_inputs(date, time).getTime();
+                data['dressCode'] = input_value(dress_code);
+            }
+            return data;
         }
 
         date.on('input', validate_date);

@@ -80,11 +80,19 @@ function render_popup(protest) {
 
     content.addClass('protest-popup-content');
 
-    content.append(
-        $('<p>')
-            .append($('<strong class="protest-popup-title">').text(protest.htmlDecodedTitle()))
-            .append($('<span>').text(` - by ${protest.owner}`))
-    );
+    if(protest.date === undefined) {
+        content.append(
+            $('<p>')
+                .append($('<strong class="protest-popup-title">').text(protest.htmlDecodedTitle()))
+        );
+    } else {
+        content.append(
+            $('<p>')
+                .append($('<strong class="protest-popup-title">').text(protest.htmlDecodedTitle()))
+                .append($('<span>').text(` - by ${protest.owner}`))
+        );
+    }
+
     if(protest.recursEveryDays) {
         let dt = date_formatter.format(protest.next_occurrence());
         content.append(
@@ -94,7 +102,7 @@ function render_popup(protest) {
                 .append($('<br>'))
                 .append($('<small class="text-muted">').text(`Recurs every ${protest.recursEveryDays} days.`))
         );
-    } else {
+    } else if(protest.date !== undefined) {
         let dt = date_formatter.format(protest.date);
         content.append(
             $('<p>')
@@ -102,7 +110,8 @@ function render_popup(protest) {
                 .append($('<span>').text(dt))
         );
     }
-    if(protest.dressCode) {
+
+    if(protest.date !== undefined && protest.dressCode) {
         content.append(
             $('<p>')
                 .append($('<strong>Dress Code: </strong>'))
@@ -128,7 +137,7 @@ function render_popup(protest) {
 
         edit_link.on(
             'click', () => protest_form.open_form(
-                PROTEST_EDIT_FORM_PREFIX, protest
+                PROTEST_EDIT_FORM_PREFIX, protest, protest.date !== undefined
             )
         );
 

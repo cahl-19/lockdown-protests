@@ -17,8 +17,6 @@
 */
 package ldprotest.business;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,7 +48,7 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
     public final Optional<String> dressCode;
     public final Optional<String> homePage;
 
-    public final ZonedDateTime date;
+    public final Optional<ZonedDateTime> date;
 
     public final int recursEveryDays;
 
@@ -75,7 +73,7 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
         Optional<String> owner,
         String title,
         String description,
-        ZonedDateTime date,
+        Optional<ZonedDateTime> date,
         Optional<String> dressCode,
         Optional<UUID> protestId,
         Optional<String> homePage,

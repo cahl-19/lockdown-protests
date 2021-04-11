@@ -234,8 +234,14 @@ function load_protests(map, bounds, state) {
                     protest.location.longitude, map
                 );
 
-                let mark = L.marker([lat, lng]).addTo(map);
-                mark.bindPopup(() => state.config.render_popup(new protest_object.Protest(protest)), {
+                let protest_obj = new protest_object.Protest(protest);
+                let icon = state.config.choose_marker_icon(protest_obj);
+
+                let mark = icon === undefined ?
+                    L.marker([lat, lng]).addTo(map) :
+                    L.marker([lat, lng], {'icon': L.icon(icon)}).addTo(map);
+
+                mark.bindPopup(() => state.config.render_popup(protest_obj), {
                     'maxWidth' : popup_max_width_pixels()
                 });
 

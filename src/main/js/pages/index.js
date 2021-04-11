@@ -61,6 +61,22 @@ function can_edit_protest(protest) {
     );
 }
 
+function choose_marker_icon(protest) {
+    if(protest.date === undefined) {
+        return {
+            iconUrl: '/assets/marker-icon-green.png',
+            shadowUrl: '/assets/leaflet/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            tooltipAnchor: [16, -28],
+            shadowSize: [41, 41]
+        };
+    } else {
+        return undefined;
+    }
+}
+
 function render_popup(protest) {
     let date_formatter = new Intl.DateTimeFormat(
         [],
@@ -466,6 +482,7 @@ function setup_auth_page() {
     protest_map.init_map(
         $('#map-div'), {
             'render_popup': (protest) => render_popup(protest),
+            'choose_marker_icon': choose_marker_icon,
             'display_error': (status, error) => popup_ajax_error(status, error).then(() => window.location.reload(true))
         }
     ).then((map) => {

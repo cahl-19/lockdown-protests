@@ -24,15 +24,52 @@ import api from 'api';
 import sanitize from 'sanitize';
 import protest_object from 'protest-object';
 import geocode from 'geocode';
+import util from 'ldp-util';
 /***********************************************************************************************************************
 *                                                      CONSTANTS                                                       *
 ***********************************************************************************************************************/
 const PROTEST_LOAD_ZONE_BUFFER_FACTOR = 1.25;
 const PROTEST_REFRESH_PERIOD = 60000;
 const POPUP_MAX_WIDTH_PIXELS = 500;
+
+const DEFAULT_INITIAL_ZOOM = 13;
+const INITIAL_ZOOM_IF_LOCATION_DISABLED = 10;
+
+const DEFAULT_INITIAL_LATITUDE = 51.505;
+const DEFAULT_INITIAL_LONGITUDE = -0.09;
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
+function initial_view_port(config) {
+    let params = new URLSearchParams(window.location.search);
+
+    let i_lat = util.strict_parse_float(params.get('ilat'));
+    let i_long = util.strict_parse_float(params.get('ilong'));
+
+    let i_zoom = util.default_if_undefined(util.strict_parse_int(params.get('izoom')), DEFAULT_INITIAL_ZOOM);
+
+    if(i_lat !== undefined && i_long !== undefined) {
+        return {
+            'latitude': i_lat,
+            'longitude': i_long,
+            'zoom': i_zoom
+        };
+    } else if(config.geoIpLocation !== undefined) {
+        let geo_ip = config.geoIpLocation;
+        return {
+            'latitude': util.default_if_undefined(geo_ip.latitude, DEFAULT_INITIAL_LATITUDE),
+            'longitude': util.default_if_undefined(geo_ip.latitude, DEFAULT_INITIAL_LONGITUDE),
+            'zoom': i_zoom
+        };
+    } else {
+        return {
+            'latitude': DEFAULT_INITIAL_LATITUDE,
+            'longitude': DEFAULT_INITIAL_LONGITUDE,
+            'zoom': i_zoom
+        };
+    }
+}
+
 function popup_max_width_pixels() {
     return Math.min(0.8 * $(window).width(), POPUP_MAX_WIDTH_PIXELS)
 }
@@ -220,19 +257,21 @@ function config_map(map_div, initial_api_token, config) {
         'markers': []
     };
 
-    let initial_latitude = config.geoIpLocation !== undefined ? config.geoIpLocation.latitude : 51.505;
-    let initial_longitude = config.geoIpLocation !== undefined ? config.geoIpLocation.longitude : -0.09;
+    let init_vp = initial_view_port(config);
+
+    let initial_latitude = init_vp.latitude;
+    let initial_longitude = init_vp.longitude;
+    let initial_zoom = init_vp.zoom;
 
     let map = L.map(
         map_div.attr('id'),
         {
             tap: false
         }
-    ).setView([initial_latitude, initial_longitude], 13);
+    ).setView([initial_latitude, initial_longitude], initial_zoom);
 
-    map.on('locationerror', ()=> map.setView([initial_latitude, initial_longitude], 10));
+    map.on('locationerror', ()=> map.setView([initial_latitude, initial_longitude], INITIAL_ZOOM_IF_LOCATION_DISABLED));
     map.locate({setView: true, maxZoom: 29});
-
 
     let url = `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${initial_api_token}`;
 

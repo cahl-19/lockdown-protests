@@ -58,7 +58,7 @@ function initial_view_port(config) {
         let geo_ip = config.geoIpLocation;
         return {
             'latitude': util.default_if_undefined(geo_ip.latitude, DEFAULT_INITIAL_LATITUDE),
-            'longitude': util.default_if_undefined(geo_ip.latitude, DEFAULT_INITIAL_LONGITUDE),
+            'longitude': util.default_if_undefined(geo_ip.longitude, DEFAULT_INITIAL_LONGITUDE),
             'zoom': i_zoom
         };
     } else {

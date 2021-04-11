@@ -44,6 +44,7 @@ export let protest_obj = {
             this.location = fields.location;
             this.protestId = fields.protestId;
             this.homePage = fields.homePage;
+            this.recursEveryDays = fields.recursEveryDays < 0 ? 0 : fields.recursEveryDays;
         }
         htmlDecodedTitle() {
            return this.title ? sanitize.decode_api_html(this.title) : this.title;
@@ -66,7 +67,8 @@ export let protest_obj = {
                 'date': this.date.getTime(),
                 'location': this.location,
                 'protestId': this.protestId,
-                'homePage': this.homePage
+                'homePage': this.homePage,
+                'recursEveryDays': this.recursEveryDays
             }
         }
         plainUnencodedDocument() {
@@ -78,7 +80,8 @@ export let protest_obj = {
                 'date': this.date.getTime(),
                 'location': this.location,
                 'protestId': this.protestId,
-                'homePage': this.homePage
+                'homePage': this.homePage,
+                'recursEveryDays': this.recursEveryDays
             }
         }
         date_input_val() {
@@ -98,6 +101,20 @@ export let protest_obj = {
             }
 
             return `${zero_pad(date.getHours(), 2)}:${zero_pad(date.getMinutes(), 2)}`;
+        }
+        next_occurrence() {
+            let reference_time = Date.now() + (3 * 3600 * 1000);
+            let base_date = this.date.getTime();
+            let occurence_period = this.recursEveryDays * 24 * 3600 * 1000;
+
+            if(this.recursEveryDays <= 0 || base_date > reference_time) {
+                return base_date;
+            } else {
+                let occurences = Math.ceil(
+                        (reference_time - base_date) / (occurence_period)
+                );
+                return new Date(occurences * occurence_period + base_date);
+            }
         }
     }
 };

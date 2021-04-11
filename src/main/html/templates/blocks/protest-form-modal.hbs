@@ -38,6 +38,14 @@
                     Date & Time are Required.
                 </div>
             </div>
+            <div class="form-group has-validation">
+                <div>
+                    <label for="{{id_prefix}}-enable-recurs">Recurring?</label>
+                    <input type="checkbox" id="{{id_prefix}}-enable-recurs">
+                </div>
+                <label for="{{id_prefix}}-input-recurs-period">Recurs Every:</label>
+                <input type="number" id="{{id_prefix}}-input-recurs-period" min="0" value="1" disabled><span> Days</span>
+            </div>
             <div class="form-group">
               <label for="{{id_prefix}}-input-dress-code">Dress Code (Optional)</label>
               <input

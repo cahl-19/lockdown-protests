@@ -345,3 +345,7 @@ input[type=text].search-input:focus {
     cursor: default;
     font-weight: 450;
 }
+
+.protest-popup-title {
+    font-size: 1.1em;
+}

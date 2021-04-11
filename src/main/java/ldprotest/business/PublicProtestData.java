@@ -52,6 +52,8 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
 
     public final ZonedDateTime date;
 
+    public final int recursEveryDays;
+
     public final Optional<UUID> protestId;
 
     @ReflectiveConstructor
@@ -65,6 +67,7 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
         date = null;
         protestId = null;
         homePage = null;
+        recursEveryDays = 0;
     }
 
     private PublicProtestData(
@@ -75,7 +78,8 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
         ZonedDateTime date,
         Optional<String> dressCode,
         Optional<UUID> protestId,
-        Optional<String> homePage
+        Optional<String> homePage,
+        int recursEveryDays
     ) {
         this.location = location;
         this.owner = owner;
@@ -85,6 +89,7 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
         this.date = date;
         this.protestId = protestId;
         this.homePage = homePage;
+        this.recursEveryDays = recursEveryDays;
     }
 
     public PublicProtestData(
@@ -98,7 +103,8 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
             data.date,
             data.dressCode,
             Optional.of(data.protestId),
-            data.homePage
+            data.homePage,
+            data.recursEveryDays.orElse(0)
         );
     }
 
@@ -134,7 +140,8 @@ public class PublicProtestData implements JsonSerializable, Validatable, Sanitiz
             date,
             dressCode.isEmpty() ? dressCode : Optional.of(Sanitize.encodeHtml(dressCode.get())),
             protestId,
-            homePage.isEmpty() ? homePage : Sanitize.encodeUrl(homePage.get()).toOpt()
+            homePage.isEmpty() ? homePage : Sanitize.encodeUrl(homePage.get()).toOpt(),
+            recursEveryDays
         );
     }
 }

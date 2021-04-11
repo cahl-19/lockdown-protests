@@ -49,6 +49,7 @@ public class PrivateProtestData implements BsonSerializable {
     public final Optional<String> homePage;
 
     public final ZonedDateTime date;
+    public final Optional<Integer> recursEveryDays;
 
     public final UUID protestId;
 
@@ -64,6 +65,7 @@ public class PrivateProtestData implements BsonSerializable {
         date = null;
         protestId = null;
         homePage = null;
+        recursEveryDays = null;
     }
 
     private PrivateProtestData(
@@ -75,7 +77,8 @@ public class PrivateProtestData implements BsonSerializable {
         ZonedDateTime date,
         Optional<String> dressCode,
         UUID protestId,
-        Optional<String> homePage
+        Optional<String> homePage,
+        Optional<Integer> recursEveryDays
     ) {
         this.location = location;
         this.owner = owner;
@@ -86,6 +89,7 @@ public class PrivateProtestData implements BsonSerializable {
         this.date = date;
         this.protestId = protestId;
         this.homePage = homePage;
+        this.recursEveryDays = recursEveryDays;
     }
 
     public static PrivateProtestData generate(PublicProtestData data, UUID userId) {
@@ -98,7 +102,8 @@ public class PrivateProtestData implements BsonSerializable {
             data.date,
             data.dressCode,
             UUID.randomUUID(),
-            data.homePage
+            data.homePage,
+            Optional.of(data.recursEveryDays)
         );
     }
 
@@ -112,7 +117,8 @@ public class PrivateProtestData implements BsonSerializable {
             data.date,
             data.dressCode,
             protestId,
-            data.homePage
+            data.homePage,
+            Optional.of(data.recursEveryDays)
         );
     }
 
@@ -140,7 +146,12 @@ public class PrivateProtestData implements BsonSerializable {
         long now = ServerTime.nowMillis();
         BsonDateTime threshold = new BsonDateTime(now - ageMillis);
 
-        return collection().deleteMany(Filters.lt("date", threshold)).getDeletedCount();
+        return collection().deleteMany(
+            Filters.and(
+                Filters.lt("date", threshold),
+                Filters.or(Filters.exists("recursEveryDays", false), Filters.lte("recursEveryDays", 0))
+            )
+        ).getDeletedCount();
     }
 
     public static boolean updateProtest(PrivateProtestData protest) {

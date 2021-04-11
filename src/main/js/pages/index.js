@@ -62,37 +62,46 @@ function can_edit_protest(protest) {
 }
 
 function render_popup(protest) {
-    let dt = new Intl.DateTimeFormat(
+    let date_formatter = new Intl.DateTimeFormat(
         [],
         {
             'year': 'numeric',
             'month': 'numeric',
             'day': 'numeric',
             'hour': 'numeric',
-            'minute': 'numeric',
-            'second': 'numeric'
+            'minute': 'numeric'
         }
-    ).format(protest.date);
+    );
 
     let content = $('<div>');
 
     /* Strange but for some reason necessary for popups to size correctly  */
     content.attr('width', protest_map.popup_max_width_pixels());
 
-    let title = $('<strong>').text(protest.htmlDecodedTitle());
-
     content.addClass('protest-popup-content');
 
     content.append(
         $('<p>')
-            .append($('<strong>').text(protest.htmlDecodedTitle()))
+            .append($('<strong class="protest-popup-title">').text(protest.htmlDecodedTitle()))
             .append($('<span>').text(` - by ${protest.owner}`))
     );
-    content.append(
-        $('<p>')
-            .append($('<strong>Sceduled for: </strong>'))
-            .append($('<span>').text(dt))
-    );
+    if(protest.recursEveryDays) {
+        let dt = date_formatter.format(protest.next_occurrence());
+        content.append(
+            $('<p>')
+                .append($('<strong>Next Occurs On: </strong>'))
+                .append($('<span>').text(dt))
+                .append($('<br>'))
+                .append($('<small class="text-muted">').text(`Recurs every ${protest.recursEveryDays} days.`))
+        );
+    } else {
+        let dt = date_formatter.format(protest.date);
+        content.append(
+            $('<p>')
+                .append($('<strong>Sceduled for: </strong>'))
+                .append($('<span>').text(dt))
+        );
+    }
     if(protest.dressCode) {
         content.append(
             $('<p>')

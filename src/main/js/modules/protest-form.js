@@ -80,11 +80,17 @@ export let protest_form = {
         set_if_defined($(`#${id_prefix}-input-protest-id`), populate.protestId);
         set_if_defined($(`#${id_prefix}-input-description`), populate.htmlDecodedDescription());
         set_if_defined($(`#${id_prefix}-input-home-page`), populate.homePage);
+        set_if_defined($(`#${id_prefix}-input-recurs-period`), populate.recursEveryDays);
 
         $(`#${id_prefix}-display-location`).text(
             `Lat: ${populate.location.latitude.toFixed(3)}, ` +
             `Long: ${populate.location.longitude.toFixed(3)}`
         );
+
+        if(populate.recursEveryDays !== undefined && populate.recursEveryDays > 0) {
+            $(`#${id_prefix}-enable-recurs`).prop('checked', true);
+            $(`#${id_prefix}-input-recurs-period`).removeAttr('disabled');
+        }
 
         modal.modal('show');
     },
@@ -105,6 +111,8 @@ export let protest_form = {
         let home_page = $(`#${id_prefix}-input-home-page`);
         let latitude = $(`#${id_prefix}-input-latitude`);
         let longitude = $(`#${id_prefix}-input-longitude`);
+        let enable_recurs = $(`#${id_prefix}-enable-recurs`);
+        let recurrence_period = $(`#${id_prefix}-input-recurs-period`);
 
         title.attr('maxlength', 256);
         title.attr('minlength', 4);
@@ -126,6 +134,15 @@ export let protest_form = {
             user_current_time.text(dt);
         }, 1000);
 
+        enable_recurs.on('change', (ev) => {
+            ev.preventDefault();
+            if(enable_recurs[0].checked) {
+                recurrence_period.removeAttr('disabled');
+            } else {
+                recurrence_period.attr('disabled', true);
+            }
+        });
+
         function validate_date() {
 
             let dt = date_from_inputs(date, time);
@@ -139,7 +156,7 @@ export let protest_form = {
 
             let now = new Date(Date.now());
 
-            if(dt.getTime() < now.getTime()) {
+            if(!enable_recurs[0].checked && dt.getTime() < now.getTime()) {
                 let msg = 'Must be set in future.';
                 dt_validity_feedback.text(msg);
                 date[0].setCustomValidity(msg);
@@ -160,7 +177,8 @@ export let protest_form = {
                 'dressCode': input_value(dress_code),
                 'date': date_from_inputs(date, time).getTime(),
                 'protestId': input_value(protest_id),
-                'homePage': input_value(home_page)
+                'homePage': input_value(home_page),
+                'recursEveryDays': enable_recurs[0].checked ? recurrence_period.val() : 0
             };
         }
 

@@ -20,6 +20,7 @@
 *                                                       IMPORTS                                                        *
 ***********************************************************************************************************************/
 import $ from 'jquery';
+import protest_map from 'protest-map';
 /***********************************************************************************************************************
 *                                                      CONSTANTS                                                       *
 ***********************************************************************************************************************/
@@ -79,7 +80,14 @@ class search {
 
         this.__close_results();
 
-        let url = `${GEOCODE_BASE_URL}/${encodeURIComponent(search_string)}.json?access_token=${this.api_token}`;
+        let center = this.map.getCenter();
+        let lng_center = protest_map.normalize_longitude(center.lng);
+        let lat_center = center.lat;
+
+        let url = (
+            `${GEOCODE_BASE_URL}/${encodeURIComponent(search_string)}.json?` +
+            `access_token=${this.api_token}&proximity=${lng_center},${lat_center}`
+        );
 
         this.dynamic.state = SEARCH_STATE.LOADING;
         this.__display_spinner();

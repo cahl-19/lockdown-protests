@@ -31,7 +31,7 @@ const SEARCH_STATE = {
 
 const DEFAULT_ICON_SRC = '/assets/bootstrap/icons/search.svg';
 const GEOCODE_BASE_URL = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
-const DEFAULT_LOCATION_ZOOM = 12;
+const DEFAULT_LOCATION_ZOOM = 15;
 /***********************************************************************************************************************
 *                                                         CODE                                                         *
 ***********************************************************************************************************************/
@@ -148,12 +148,18 @@ class search {
 
     __parse_response(results) {
         return results.features.map((f) => {
-            return {
+            let ret =  {
               'place_name': f.place_name,
-              'bbox': f.bbox,
               'center': f.center,
               'relevance': f.relevance
             };
+            if(f.bbox !== undefined) {
+               ret.bbox = [
+                   [f.bbox[0], f.bbox[1]],
+                   [f.bbox[2], f.bbox[3]]
+               ];
+            }
+            return ret;
         });
     }
 
@@ -179,8 +185,10 @@ class search {
                 result_display.text(r.place_name);
 
                 result_display.on('click', () => {
+
+                    let zoom = r.bbox ? this.map.getBoundsZoom(r.bbox) : DEFAULT_LOCATION_ZOOM;
                     this.__close_results();
-                    this.map.flyTo([r.center[1], r.center[0]], DEFAULT_LOCATION_ZOOM);
+                    this.map.flyTo([r.center[1], r.center[0]], zoom);
                 });
 
                 results_container.append(result_display);

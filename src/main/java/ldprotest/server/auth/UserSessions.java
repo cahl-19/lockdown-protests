@@ -20,7 +20,6 @@ package ldprotest.server.auth;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
@@ -30,7 +29,9 @@ import ldprotest.db.IndexTools;
 import ldprotest.db.MainDatabase;
 import ldprotest.main.Main;
 import ldprotest.main.ServerTime;
-import ldprotest.server.auth.UserAccount.UserLookupError;
+import ldprotest.server.auth.UserAccount.UserAccountStatus;
+import ldprotest.server.auth.UserAccount.UserAccountStatusCode;
+import ldprotest.server.auth.UserAccount.UserLookupErrorCode;
 import ldprotest.util.DateTools;
 import ldprotest.util.ErrorCode;
 import ldprotest.util.Result;
@@ -54,10 +55,14 @@ public class UserSessions {
         MongoCollection<UserSessionInfo> collection = collection();
         UserSessionInfo session = UserSessionInfo.generateSession(info);
 
-        ErrorCode<UserLookupError> status = UserAccount.status(info);
+        Result<UserLookupErrorCode, UserAccountStatus> result = UserAccount.status(info);
 
-        if(status.failed()) {
-            return Result.failure(SessionCreationErrorFromUserLookupError(status.reason()));
+        if(result.isFailure()) {
+            return Result.failure(SessionCreationErrorFromUserLookupError(result.failureReason()));
+        }
+
+        if(result.result().code.equals(UserAccountStatusCode.ACCOUNT_LOCKED)) {
+            return Result.failure(SessionCreationError.ACCOUNT_LOCKED);
         }
 
         try {
@@ -73,21 +78,25 @@ public class UserSessions {
     public static Result<SessionCreationError, UserSessionInfo> refreshSession(UserSessionInfo sessionInfo) {
         ZonedDateTime now = ServerTime.now();
         MongoCollection<UserSessionInfo> collection = collection();
-        ErrorCode<UserLookupError> status = UserAccount.status(sessionInfo.email);
+        Result<UserLookupErrorCode, UserAccountStatus> result = UserAccount.status(sessionInfo.email);
 
-        if(status.failed()) {
-            return Result.failure(SessionCreationErrorFromUserLookupError(status.reason()));
+        if(result.isFailure()) {
+            return Result.failure(SessionCreationErrorFromUserLookupError(result.failureReason()));
         }
         if(sessionInfo.expired()) {
             return Result.failure(SessionCreationError.EXPIRED);
         }
+        if(result.result().code.equals(UserAccountStatusCode.ACCOUNT_LOCKED)) {
+            return Result.failure(SessionCreationError.ACCOUNT_LOCKED);
+        }
+
         try {
-            UpdateResult result = collection.updateOne(
+            UpdateResult updateResult = collection.updateOne(
                 Filters.eq("sessionId", sessionInfo.sessionId),
                 Updates.set("createdAt", DateTools.millisSinceEpoch(now))
             );
 
-            if(result.wasAcknowledged()) {
+            if(updateResult.wasAcknowledged()) {
                 return Result.success(sessionInfo.withNewCreationDate(now));
             } else {
                 return Result.failure(SessionCreationError.NO_SUCH_ACOUNT);
@@ -149,12 +158,10 @@ public class UserSessions {
         }
     }
 
-    private static SessionCreationError SessionCreationErrorFromUserLookupError(UserLookupError from) {
+    private static SessionCreationError SessionCreationErrorFromUserLookupError(UserLookupErrorCode from) {
             switch(from) {
                 case INVALID_USER:
                     return SessionCreationError.NO_SUCH_ACOUNT;
-                case ACCOUNT_LOCKED:
-                    return SessionCreationError.ACCOUNT_LOCKED;
                 case DATABASE_ERROR:
                     return SessionCreationError.DATABASE_ERROR;
                 default:

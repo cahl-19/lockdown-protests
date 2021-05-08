@@ -28,13 +28,19 @@ import com.mongodb.client.result.UpdateResult;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import ldprotest.db.IndexTools;
 import ldprotest.db.MainDatabase;
+import ldprotest.db.codec.BsonSerializableCodec;
+import ldprotest.main.ServerTime;
 import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
+import ldprotest.server.auth.AuthFailureLockout.AuthFailureResult;
+import ldprotest.server.auth.AuthFailureLockout.RecordFailureError;
 import ldprotest.util.ErrorCode;
 import ldprotest.util.Result;
 import org.bson.conversions.Bson;
@@ -83,7 +89,8 @@ public final class UserAccount {
             hash,
             salt,
             DEFAULT_ALGO,
-            DEFAULT_ITERATIONS
+            DEFAULT_ITERATIONS,
+            Optional.empty()
         );
 
         try {
@@ -105,7 +112,7 @@ public final class UserAccount {
         }
     }
 
-    public static Result<UserLookupError, UserInfo> authenticate(String email, String secret) {
+    public static Result<UserAuthenticationFailure, UserInfo> authenticate(String email, String secret) {
 
         MongoCollection<UserCredentialInfo> collection = collection();
         UserCredentialInfo creds;
@@ -114,31 +121,36 @@ public final class UserAccount {
             creds = collection.find(Filters.eq("info.email", email)).first();
         } catch(MongoException ex) {
             LOGGER.error("Database error looking up user", ex);
-            return Result.failure(UserLookupError.DATABASE_ERROR);
+            return Result.failure(new UserAuthenticationFailure(UserLookupErrorCode.DATABASE_ERROR));
         }
 
         if(creds == null) {
-            return Result.failure(UserLookupError.INVALID_USER);
+            return Result.failure(new UserAuthenticationFailure(UserLookupErrorCode.INVALID_USER));
         }
 
         if(creds.locked) {
-            return Result.failure(UserLookupError.ACCOUNT_LOCKED);
+            return Result.failure(new UserAuthenticationFailure(UserAuthErrorCode.ACCOUNT_LOCKED));
+        } else if(creds.temporarilyLoginLocked()) {
+            return Result.failure(new UserAuthenticationFailure(creds.loginLockedUntil.get()));
         }
 
         byte[] hash = hashPassword(secret, creds.salt, creds.algo, creds.iterations);
 
         if(secureCompare(hash, creds.hashedSecret)) {
+            clearFailure(creds);
+
             return Result.success(creds.info);
         } else {
-            return Result.failure(UserLookupError.INVALID_CREDENTIALS);
+            recordFailure(creds);
+            return Result.failure(new UserAuthenticationFailure(UserAuthErrorCode.INVALID_CREDENTIALS));
         }
     }
 
-    public static ErrorCode<UserLookupError> status(UserInfo info) {
+    public static Result<UserLookupErrorCode, UserAccountStatus> status(UserInfo info) {
         return status(info.email);
     }
 
-    public static ErrorCode<UserLookupError> status(String email) {
+    public static Result<UserLookupErrorCode, UserAccountStatus> status(String email) {
         MongoCollection<UserCredentialInfo> collection = collection();
         UserCredentialInfo creds;
 
@@ -146,46 +158,40 @@ public final class UserAccount {
             creds = collection.find(Filters.eq("info.email", email)).first();
         } catch(MongoException ex) {
             LOGGER.error("Database error looking up user", ex);
-            return ErrorCode.error(UserLookupError.DATABASE_ERROR);
+            return Result.failure(UserLookupErrorCode.DATABASE_ERROR);
         }
 
         if(creds == null) {
-            return ErrorCode.error(UserLookupError.INVALID_USER);
+            return Result.failure(UserLookupErrorCode.INVALID_USER);
         }
 
         if(creds.locked) {
-            return ErrorCode.error(UserLookupError.ACCOUNT_LOCKED);
+            return Result.success(new UserAccountStatus(UserAccountStatusCode.ACCOUNT_LOCKED));
+        } else if(creds.temporarilyLoginLocked()) {
+            return Result.success(new UserAccountStatus(creds.loginLockedUntil.get()));
+        } else {
+            return Result.success(new UserAccountStatus(UserAccountStatusCode.ACCUNT_OKAY));
         }
-
-        return ErrorCode.success();
     }
 
-    public static Result<UserLookupError, UserInfo> lookupByUsername(String username) {
+    public static Result<UserLookupErrorCode, UserInfo> lookupByUsername(String username) {
         MongoCollection<UserCredentialInfo> collection = collection();
 
         try {
             UserCredentialInfo allInfo = collection.find(Filters.eq("info.publicUsername", username)).first();
 
             if(allInfo == null) {
-                return Result.failure(UserLookupError.INVALID_USER);
+                return Result.failure(UserLookupErrorCode.INVALID_USER);
             } else {
                 return Result.success(allInfo.info);
             }
         } catch(MongoException ex) {
             LOGGER.error("Database error when looking up user", ex);
-            return Result.failure(UserLookupError.DATABASE_ERROR);
+            return Result.failure(UserLookupErrorCode.DATABASE_ERROR);
         }
     }
 
-    public static ErrorCode<UserLookupError> lock(UserInfo info) {
-        return setLock(info, true);
-    }
-
-    public static ErrorCode<UserLookupError> unlock(UserInfo info) {
-        return setLock(info, false);
-    }
-
-    private static ErrorCode<UserLookupError> setLock(UserInfo info, boolean lockValue) {
+    public static ErrorCode<UserLookupErrorCode> lockUntil(UserInfo info, ZonedDateTime until) {
         MongoCollection<UserCredentialInfo> collection = collection();
 
         try {
@@ -193,19 +199,87 @@ public final class UserAccount {
                 Filters.and(
                     Filters.eq("info.email", info.email), Filters.eq("info.publicUsername", info.publicUsername)
                 ),
-                Updates.set("locked", lockValue)
+                Updates.set("loginLockedUntil", BsonSerializableCodec.bsonZonedDateTime(until))
             );
 
             if(result.wasAcknowledged()) {
                 return ErrorCode.success();
             } else {
-                return ErrorCode.error(UserLookupError.INVALID_USER);
+                LOGGER.warn("attempted to lock nonexistent user");
+                return ErrorCode.error(UserLookupErrorCode.INVALID_USER);
             }
 
         } catch(MongoException ex) {
             LOGGER.error("Database error when locking user", ex);
-            return ErrorCode.error(UserLookupError.DATABASE_ERROR);
+            return ErrorCode.error(UserLookupErrorCode.DATABASE_ERROR);
         }
+    }
+
+    public static ErrorCode<UserLookupErrorCode> lock(UserInfo info) {
+        return setLock(info, true);
+    }
+
+    public static ErrorCode<UserLookupErrorCode> unlock(UserInfo info) {
+        return setLock(info, false);
+    }
+
+    private static ErrorCode<UserLookupErrorCode> setLock(
+        UserInfo info, boolean lockValue
+    ) {
+        MongoCollection<UserCredentialInfo> collection = collection();
+
+        try {
+            UpdateResult result;
+            if(lockValue) {
+                result = collection.updateOne(
+                    Filters.and(
+                        Filters.eq("info.email", info.email), Filters.eq("info.publicUsername", info.publicUsername)
+                    ),
+                    Updates.set("locked", lockValue)
+                );
+            } else {
+                result = collection.updateOne(
+                    Filters.and(
+                        Filters.eq("info.email", info.email), Filters.eq("info.publicUsername", info.publicUsername)
+                    ),
+                    Updates.combine(Updates.set("locked", lockValue), Updates.unset("loginLockedUntil"))
+                );
+            }
+
+            if(result.wasAcknowledged()) {
+                return ErrorCode.success();
+            } else {
+                LOGGER.warn("attempted to lock nonexistent user");
+                return ErrorCode.error(UserLookupErrorCode.INVALID_USER);
+            }
+        } catch(MongoException ex) {
+            LOGGER.error("Database error when locking user", ex);
+            return ErrorCode.error(UserLookupErrorCode.DATABASE_ERROR);
+        }
+    }
+
+    private static void recordFailure(UserCredentialInfo creds) {
+
+        if(creds.info.userRole.equals(UserRole.ADMIN)) {
+            /* Admin accounts cannot be locked due to excessive failures */
+            return;
+        }
+
+        Result<RecordFailureError, AuthFailureResult> result = AuthFailureLockout.recordFailure(
+            creds.info.globalUniqueId
+        );
+
+        if(result.isSuccess()) {
+            AuthFailureResult authFail = result.result();
+
+            if(authFail.mustLock()) {
+                lockUntil(creds.info, authFail.lockUntil.get());
+            }
+        }
+    }
+
+    private static void clearFailure(UserCredentialInfo creds) {
+        AuthFailureLockout.clearFailures(creds.info.globalUniqueId);
     }
 
     private static MongoCollection<UserCredentialInfo> collection() {
@@ -288,6 +362,7 @@ public final class UserAccount {
         public final int iterations;
 
         public final boolean locked;
+        public final Optional<ZonedDateTime> loginLockedUntil;
 
        @ReflectiveConstructor
         private UserCredentialInfo() {
@@ -297,28 +372,118 @@ public final class UserAccount {
             algo = null;
             iterations = 0;
             locked = true;
+            loginLockedUntil = null;
         }
 
-        public UserCredentialInfo(UserInfo info, byte[] hashedSecret, byte[] salt, String algo, int iterations) {
+        public UserCredentialInfo(
+            UserInfo info,
+            byte[] hashedSecret,
+            byte[] salt,
+            String algo,
+            int iterations,
+            Optional<ZonedDateTime> lockUntil
+        ) {
             this.info = info;
             this.hashedSecret = hashedSecret;
             this.salt = salt;
             this.algo = algo;
             this.iterations = iterations;
             this.locked = false;
+            this.loginLockedUntil = lockUntil;
+        }
+
+        public boolean temporarilyLoginLocked() {
+            if(loginLockedUntil.isPresent()){
+                return loginLockedUntil.get().isAfter(ServerTime.now());
+            } else {
+                return false;
+            }
         }
     }
 
-    public static enum UserLookupError {
-        DATABASE_ERROR("Low level database error"),
-        INVALID_USER("User does not exist"),
-        INVALID_CREDENTIALS("Incorrect password"),
-        ACCOUNT_LOCKED("Account is locked for logon");
+    public static enum UserAuthErrorCode {
+        UNDEFINED_FAILURE("Failure of an undefined nature"),
+        INVALID_CREDENTIALS("Invalid password"),
+        ACCOUNT_LOCKED("Account is locked for logon or sesssion refresh"),
+        ACCOUNT_LOCKED_TEMPORARILY("Account is locked for login, due to excessive login failures");
 
         public final String description;
 
-        UserLookupError(String descrption) {
+        UserAuthErrorCode(String descrption) {
             this.description = descrption;
+        }
+    }
+
+    public static enum UserAccountStatusCode {
+
+        ACCUNT_OKAY("User exists and account is in a normal state"),
+        ACCOUNT_LOCKED("Account is locked for logon or sesssion refresh"),
+        ACCOUNT_LOCKED_TEMPORARILY("Account is locked for login, due to excessive login failures");
+
+        public final String description;
+
+        UserAccountStatusCode(String descrption) {
+            this.description = descrption;
+        }
+    }
+
+    public static enum UserLookupErrorCode {
+        DATABASE_ERROR("Low level database error"),
+        INVALID_USER("User does not exist");
+
+        public final String description;
+
+        UserLookupErrorCode(String descrption) {
+            this.description = descrption;
+        }
+    }
+
+    public static final class UserAuthenticationFailure {
+        public final ErrorCode<UserLookupErrorCode> lookupError;
+        public final ErrorCode<UserAuthErrorCode> authError;
+
+        private final Optional<ZonedDateTime> lockUntil;
+
+        private UserAuthenticationFailure(UserLookupErrorCode lookupError) {
+            this.lookupError = ErrorCode.error(lookupError);
+            this.authError = ErrorCode.error(UserAuthErrorCode.UNDEFINED_FAILURE);
+            this.lockUntil = Optional.empty();
+        }
+
+        private UserAuthenticationFailure(UserAuthErrorCode authError) {
+            this.lookupError = ErrorCode.success();
+            this.authError = ErrorCode.error(authError);
+            this.lockUntil = Optional.empty();
+        }
+
+        private UserAuthenticationFailure(ZonedDateTime lockedUntil) {
+            this.lookupError = ErrorCode.success();
+            this.authError = ErrorCode.error(UserAuthErrorCode.ACCOUNT_LOCKED_TEMPORARILY);
+            this.lockUntil = Optional.of(lockedUntil);
+        }
+
+        public ZonedDateTime lockedUntil() {
+            return lockUntil.get();
+        }
+    }
+
+    public static final class UserAccountStatus {
+
+        public final UserAccountStatusCode code;
+        private final Optional<ZonedDateTime> lockUntil;
+
+        private UserAccountStatus(UserAccountStatusCode code) {
+            this.code = code;
+            this.lockUntil = Optional.empty();
+        }
+
+        private UserAccountStatus(ZonedDateTime lockUntil) {
+            this.code = UserAccountStatusCode.ACCOUNT_LOCKED_TEMPORARILY;
+            this.lockUntil = Optional.of(lockUntil);
+        }
+
+        public ZonedDateTime lockedUntil() {
+            return lockUntil.get();
         }
     }
 

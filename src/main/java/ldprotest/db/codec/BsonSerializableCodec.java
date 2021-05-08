@@ -50,6 +50,7 @@ import ldprotest.geo.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ldprotest.util.PrintTools;
+import org.bson.BsonDateTime;
 
 public class BsonSerializableCodec <T> implements Codec<T> {
 
@@ -113,6 +114,15 @@ public class BsonSerializableCodec <T> implements Codec<T> {
         }
     }
 
+    public static BsonDateTime bsonZonedDateTime(ZonedDateTime dt) {
+        long millis = encodeZonedDateTime(dt);
+        return new BsonDateTime(millis);
+    }
+
+    private static long encodeZonedDateTime(ZonedDateTime dt) {
+        return 1000 * dt.toEpochSecond() + dt.getNano() / 1000;
+    }
+
     @Override
     public Class<T> getEncoderClass() {
         return clazz;
@@ -153,9 +163,18 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
         reader.readEndDocument();
 
-        unsetFields.removeIf((f) -> Optional.class.isAssignableFrom(f.getType()));
+        boolean nonOptionalFieldsUnset = false;
 
-        if(!unsetFields.isEmpty()) {
+        for(Field f: unsetFields) {
+            if(Optional.class.isAssignableFrom(f.getType())) {
+                f.set(decoded, Optional.empty());
+            } else {
+                nonOptionalFieldsUnset = true;
+            }
+        }
+        
+        if(nonOptionalFieldsUnset) {
+            unsetFields.removeIf((f) -> Optional.class.isAssignableFrom(f.getType()));
             throw new BsonSerializationException(
                 "Required fields not set: %s" + PrintTools.listPrint(unsetFields)
             );
@@ -342,8 +361,7 @@ public class BsonSerializableCodec <T> implements Codec<T> {
 
         map.put(ZonedDateTime.class, (writer, object) -> {
             ZonedDateTime dt = (ZonedDateTime)object;
-            long millisSinceEpoch = 1000 * dt.toEpochSecond() + dt.getNano() / 1000;
-            writer.writeDateTime(millisSinceEpoch);
+            writer.writeDateTime(encodeZonedDateTime(dt));
         });
 
         map.put(Coordinate.class, (writer, object) -> {

@@ -17,6 +17,7 @@
 */
 package ldprotest.server.infra;
 
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import ldprotest.serialization.JsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
@@ -55,6 +56,14 @@ public class JsonError implements JsonSerializable {
         this.code = 0;
         this.description = "";
         this.details = Optional.empty();
+    }
+
+    public static JsonError accountLocked(ZonedDateTime until) {
+        return new JsonError(ServerErrorCode.ACCOUNT_LOCKED, new AccountLockedDetails(until));
+    }
+
+    public static JsonError accountLocked() {
+        return new JsonError(ServerErrorCode.ACCOUNT_LOCKED, new AccountLockedDetails());
     }
 
     public static JsonError noSuchResource() {
@@ -97,7 +106,8 @@ public class JsonError implements JsonSerializable {
         UNAUTHORIZED_FAILURE(4, "Unauthorized or auth expired"),
         INVALID_REQUEST_BODY(5, "Body of request has invalid data"),
         INVALID_REQUEST_PARAMS(6, "Invalid query parameters"),
-        NO_SUCH_RESOURCE(7, "Resource does not exist");
+        NO_SUCH_RESOURCE(7, "Resource does not exist"),
+        ACCOUNT_LOCKED(8, "Account has been locked temporarily or permanently");
 
         private final int code;
         private final String description;
@@ -119,10 +129,25 @@ public class JsonError implements JsonSerializable {
     }
 
     public static class Explanation implements JsonSerializable {
-        public static String explanation;
+        public final String explanation;
 
         public Explanation(String explanation) {
             this.explanation = explanation;
+        }
+    }
+
+    public static class AccountLockedDetails implements JsonSerializable {
+        public final boolean permanent;
+        public final Optional<ZonedDateTime> lockUntil;
+
+        public AccountLockedDetails() {
+            this.permanent = true;
+            this.lockUntil = Optional.empty();
+        }
+
+        public AccountLockedDetails(ZonedDateTime until) {
+            this.lockUntil = Optional.of(until);
+            this.permanent = false;
         }
     }
 }

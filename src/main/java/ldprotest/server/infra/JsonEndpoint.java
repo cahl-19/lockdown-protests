@@ -52,7 +52,8 @@ public final class JsonEndpoint {
             JsonError.ServerErrorCode.UNAUTHORIZED_FAILURE.code(), HttpStatus.UNAUTHORIZED_401,
             JsonError.ServerErrorCode.INVALID_REQUEST_BODY.code(), HttpStatus.BAD_REQUEST_400,
             JsonError.ServerErrorCode.INVALID_REQUEST_PARAMS.code(), HttpStatus.BAD_REQUEST_400,
-            JsonError.ServerErrorCode.NO_SUCH_RESOURCE.code(), HttpStatus.NOT_FOUND_404
+            JsonError.ServerErrorCode.NO_SUCH_RESOURCE.code(), HttpStatus.NOT_FOUND_404,
+            JsonError.ServerErrorCode.ACCOUNT_LOCKED.code(), HttpStatus.UNAUTHORIZED_401
         ));
 
     public static void get(String url, JsonGetRoute route) {

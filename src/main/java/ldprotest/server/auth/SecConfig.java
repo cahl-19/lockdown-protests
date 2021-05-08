@@ -26,6 +26,7 @@ public class SecConfig {
 
     public static final SecConfig ANONYMOUS_GET = SecConfig.builder()
         .add(UserRole.UNAUTHENTICATED, HttpVerbTypes.GET)
+        .add(UserRole.USER, HttpVerbTypes.GET)
         .add(UserRole.MODERATOR, HttpVerbTypes.GET)
         .add(UserRole.PLANNER, HttpVerbTypes.GET)
         .add(UserRole.ADMIN, HttpVerbTypes.GET)
@@ -33,6 +34,7 @@ public class SecConfig {
 
     public static final SecConfig ANONYMOUS_GET_AND_HEAD = SecConfig.builder()
         .add(UserRole.UNAUTHENTICATED, HttpVerbTypes.GET, HttpVerbTypes.HEAD)
+        .add(UserRole.USER, HttpVerbTypes.GET)
         .add(UserRole.MODERATOR, HttpVerbTypes.GET, HttpVerbTypes.HEAD)
         .add(UserRole.PLANNER, HttpVerbTypes.GET, HttpVerbTypes.HEAD)
         .add(UserRole.ADMIN, HttpVerbTypes.GET, HttpVerbTypes.HEAD)

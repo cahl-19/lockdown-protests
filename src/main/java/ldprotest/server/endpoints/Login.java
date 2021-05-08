@@ -24,7 +24,7 @@ import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.auth.HttpVerbTypes;
 import ldprotest.server.auth.UserAccount;
-import ldprotest.server.auth.UserAccount.UserLookupError;
+import ldprotest.server.auth.UserAccount.UserAuthenticationFailure;
 import ldprotest.server.auth.UserInfo;
 import ldprotest.server.auth.UserRole;
 import ldprotest.server.auth.UserSessionInfo;
@@ -35,6 +35,7 @@ import ldprotest.server.auth.webtoken.UserTokens;
 import ldprotest.server.infra.CookieAttributes;
 import ldprotest.server.infra.JsonEndpoint;
 import ldprotest.server.infra.JsonError;
+import ldprotest.server.infra.http.ClientIp;
 import ldprotest.util.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,10 +72,35 @@ public final class Login {
         );
 
         JsonEndpoint.post(PATH, LoginJson.class, (loginData, request, response) -> {
-            Result<UserLookupError, UserInfo> result = UserAccount.authenticate(loginData.username, loginData.password);
+            Result<UserAuthenticationFailure, UserInfo> result = UserAccount.authenticate(
+                loginData.username, loginData.password
+            );
 
             if(result.isFailure()) {
-                return JsonEndpoint.responseFromError(JsonError.loginError(), response);
+                UserAuthenticationFailure authFailure = result.failureReason();
+
+                if(authFailure.lookupError.failed()) {
+                    LOGGER.warn("Failed to lookup user {} during login attempt", loginData.username);
+                    return JsonEndpoint.responseFromError(JsonError.loginError(), response);
+                } else {
+                    switch(authFailure.authError.reason()) {
+                        case ACCOUNT_LOCKED_TEMPORARILY:
+                            LOGGER.warn("Login attempt to temporarily locked account");
+                            return JsonEndpoint.responseFromError(
+                                JsonError.accountLocked(authFailure.lockedUntil()), response
+                            );
+                        case ACCOUNT_LOCKED:
+                            LOGGER.warn("Login attempt to locked account");
+                            return JsonEndpoint.responseFromError(JsonError.accountLocked(), response);
+                        case INVALID_CREDENTIALS:
+                        case UNDEFINED_FAILURE:
+                        default:
+                            LOGGER.warn(
+                                "Login Failure to user {} from address {}", loginData.username, ClientIp.get(request)
+                            );
+                            return JsonEndpoint.responseFromError(JsonError.loginError(), response);
+                    }
+                }
             }
 
             Result<SessionCreationError, UserSessionInfo> sessionResult = UserSessions.createSession(result.result());

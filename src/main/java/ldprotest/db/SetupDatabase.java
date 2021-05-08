@@ -26,6 +26,7 @@ import ldprotest.serialization.BsonSerializable;
 import ldprotest.serialization.ReflectiveConstructor;
 import ldprotest.server.auth.UserAccount;
 import ldprotest.server.auth.UserSessions;
+import ldprotest.server.auth.AuthFailureLockout;
 
 public final class SetupDatabase {
 
@@ -66,6 +67,7 @@ public final class SetupDatabase {
         UserSessions.setupDbIndex();
         PrivateProtestData.setupDbIndex();
         GeoIpLookup.setupDbIndex();
+        AuthFailureLockout.setupDbIndex();
     }
 
     private static void createCollectionIfNotExists(MongoDatabase db, String collectionName) {

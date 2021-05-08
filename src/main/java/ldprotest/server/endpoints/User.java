@@ -25,7 +25,7 @@ import ldprotest.server.auth.HttpVerbTypes;
 import ldprotest.server.auth.SecConfig;
 import ldprotest.server.auth.SecurityFilter;
 import ldprotest.server.auth.UserAccount;
-import ldprotest.server.auth.UserAccount.UserLookupError;
+import ldprotest.server.auth.UserAccount.UserLookupErrorCode;
 import ldprotest.server.auth.UserInfo;
 import ldprotest.server.auth.UserRole;
 import ldprotest.server.auth.UserSessionInfo;
@@ -104,10 +104,10 @@ public class User {
                 return JsonEndpoint.responseFromError(JsonError.unauthorizedError(), response);
             }
 
-            Result<UserLookupError, UserInfo> lookupResult = UserAccount.lookupByUsername(uname);
+            Result<UserLookupErrorCode, UserInfo> lookupResult = UserAccount.lookupByUsername(uname);
 
             if(lookupResult.isFailure()) {
-                if(lookupResult.failureReason().equals(UserLookupError.INVALID_USER)) {
+                if(lookupResult.failureReason().equals(UserLookupErrorCode.INVALID_USER)) {
                     return JsonEndpoint.responseFromError(JsonError.noSuchResource(), response);
                 } else {
                     return JsonEndpoint.responseFromError(JsonError.internalError(), response);

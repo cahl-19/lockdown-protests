@@ -51,6 +51,12 @@ dependencies {
     implementation 'org.yaml:snakeyaml:1.27'
     implementation 'com.opencsv:opencsv:4.0'
 
+    /* Force upgrade of jetty used by sparkjava (which isn't updated all that often) */
+    implementation 'org.eclipse.jetty:jetty-server:9.4.39.v20210325'
+    implementation 'org.eclipse.jetty:jetty-webapp:9.4.39.v20210325'
+    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.39.v20210325'
+    implementation 'org.eclipse.jetty:jetty-servlet:9.4.39.v20210325'
+
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
 }
 
